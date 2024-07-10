@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informasi IP</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kode+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <style>
+        body {
+            background: #212529;
+            font-family: "Kode Mono", monospace;
+            color: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            background: #343a40;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+        .form-control {
+            border-radius: 5px;
+            background: #495057;
+            color: #f8f9fa;
+            border: 1px solid #ced4da;
+        }
+        .form-control:focus {
+            background: #495057;
+            color: #f8f9fa;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            border-radius: 5px;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .swal2-popup {
+            background: #343a40;
+            color: #f8f9fa;
+        }
+        .swal2-title, .swal2-content {
+            color: #f8f9fa;
+        }
+        .swal2-styled.swal2-confirm {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .swal2-styled.swal2-confirm:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .footer i {
+            margin-right: 10px;
+        }
+        .footer a {
+            color: #f8f9fa;
+            text-decoration: none;
+        }
+        .swal2-content {
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4"><i class="fa fa-search"></i> Informasi IP</h1>
+        <div class="text-center mb-4">
+            <button class="btn btn-primary mb-2" onclick="getMyIP()"><i class="fa fa-user"></i> Informasi IP Saya</button><br>
+            <button class="btn btn-primary mb-2" onclick="showTargetIPForm()"><i class="fa fa-users"></i> Informasi IP Target</button>
+        </div>
+        <div id="targetIPForm" class="d-none">
+            <div class="form-group mb-3">
+                <label for="targetIP">Masukkan alamat IP:</label>
+                <input type="text" class="form-control" id="targetIP" placeholder="174.02.501.76">
+            </div>
+            <button class="btn btn-primary btn-block" onclick="getTargetIP()">Dapatkan Informasi IP</button>
+        </div>
+        <div id="result" class="bg-dark p-3 rounded mt-3"></div>
+        <div class="footer">
+            <p>Copyright ©2024 DexSkieee.</p>
+            <p>
+                <i class="fab fa-whatsapp"></i>083856124021 | 
+                <i class="fab fa-instagram"></i>@xyzushinnn
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function getMyIP() {
+            fetch('http://ip-api.com/json')
+                .then(response => response.json())
+                .then(data => {
+                    showIPInfo(data);
+                })
+                .catch(error => {
+                    document.getElementById('result').innerText = 'Error mengambil informasi IP.';
+                });
+        }
+
+        function showTargetIPForm() {
+            document.getElementById('targetIPForm').classList.remove('d-none');
+        }
+
+        function getTargetIP() {
+            const target = document.getElementById('targetIP').value;
+            if (target) {
+                fetch(`http://ip-api.com/json/${target}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        showIPInfo(data);
+                    })
+                    .catch(error => {
+                        document.getElementById('result').innerText = 'Error mengambil informasi IP.';
+                    });
+            }
+        }
+
+        function showIPInfo(data) {
+            const ipInfo = `
+Negara: ${data.country}<br>
+Kode Negara: ${data.countryCode}<br>
+Region: ${data.region}<br>
+Nama Region: ${data.regionName}<br>
+Kota: ${data.city}<br>
+Latitude: ${data.lat}<br>
+Longitude: ${data.lon}<br>
+Zona Waktu: ${data.timezone}<br>
+ISP: ${data.isp}<br>
+AS: ${data.as}<br>
+IP: ${data.query}
+            `;
+
+            Swal.fire({
+                title: 'Informasi IP',
+                html: ipInfo,
+                confirmButtonText: 'OK',
+                customClass: {
+                    content: 'text-left'
+                }
+            });
+        }
+    </script>
+</body>
+</html>
