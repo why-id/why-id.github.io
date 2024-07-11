@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GresiXploiter Chat</title>
+    <title>GresiXploit Chat</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Kode+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -30,43 +30,44 @@
         }
         @keyframes rainbowText {
             0% { color: white; }
-            15% { color: #007BFF; }
+            15% { color: #C0C0C0; }
             30% { color: white; }
-            45% { color: #007BFF; }
+            45% { color: #C0C0C0; }
             60% { color: white; }
-            75% { color: #007BFF; }
+            75% { color: #C0C0C0; }
             90% { color: white; }
         }
         .container {
             width: 100%;
-            max-width: 400px;
+            max-width: 100%; /* Ubah ini agar lebar maksimal container penuh layar */
             background-color: #343a40; /* Warna latar belakang kotak chat */
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            margin-top: 20px; /* Jarak atas */
+            margin: 20px; /* Ubah ini agar container lebih responsif */
         }
         .chat-box {
-            height: 70vh;
+            width: 100%; /* Tambahkan ini agar lebar chat-box penuh layar */
+            height: 60vh;
             overflow-y: auto;
             padding: 10px;
             margin-top: 20px;
         }
         .message {
             background-color: transparent; /* Kotak pesan transparan */
-            color: white; /* Warna teks putih */
+            color: #212529; /* Warna teks putih */
             padding: 10px;
             margin-bottom: 10px;
             border-radius: 5px;
-            max-width: 70%;
+            max-width: 100%;
             word-wrap: break-word;
             position: relative;
-            border: 1px solid #ffffff; /* Garis tepi putih */
+            border: 0.2px solid #ffffff; /* Garis tepi putih */
             display: flex;
             align-items: flex-start; /* Menjadikan konten mulai dari kiri atas */
         }
         .message.anonim {
-            background-color: transparent; /* Kotak pesan transparan */
+            background-color: #D3D3D3; /* Kotak pesan transparan */
         }
         .message-content {
             display: inline-block;
@@ -107,25 +108,24 @@
         button {
             padding: 10px 20px;
             border: none;
-            background-color: #007BFF; /* Warna latar belakang tombol biru */
+            background-color: #71797E; /* Warna latar belakang tombol biru */
             color: white; /* Warna teks putih */
             cursor: pointer;
             border-radius: 4px;
         }
         button:hover {
-            background-color: #0056b3; /* Warna latar belakang tombol biru saat dihover */
+            background-color: #71797E; /* Warna latar belakang tombol biru saat dihover */
         }
     </style>
 </head>
 <body>
-    <div class="container"><h2>GRESIXPLOITER CHAT</h2><hr color="white">
+    <div class="container"><h2>GRESIXPLOIT CHAT</h2><hr color="white">
         <div class="chat-box" id="chatBox"></div>
         <form id="form" class="message-form">
             <input id="input" type="text" placeholder="Ketik sebuah pesan...">
             <button type="submit"><i class="fas fa-paper-plane"></i></button>
         </form>
     </div>
-
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const chatBox = document.getElementById('chatBox');
@@ -151,7 +151,7 @@
                 const div = document.createElement('div');
                 div.className = messageClass; // Menggunakan className untuk menetapkan kelas
                 div.innerHTML = `
-                    <i class="fas fa-user message-user-icon"></i>
+                    <i class="fas fa-user message-user-icon" style="color:#212529;"></i>
                     <div class="message-content">${text}</div>
                     <div class="message-time">${formatTime(timestamp)}</div>
                 `;
@@ -181,7 +181,8 @@
                 }
             });
 
-            loadMessages();
+            loadMessages();   
+
         });
     </script>
 </body>
