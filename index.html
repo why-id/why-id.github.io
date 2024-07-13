@@ -1,189 +1,138 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GresiXploit Chat</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Kode+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-    <style>
-        body {
-            font-family: 'Kode Mono', monospace;
-            background-color: #212529; /* Warna latar belakang gelap */
-            color: #f8f9fa; /* Warna teks putih */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            padding: 0;
-        }
-        h2 {
-            text-align: center;
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            margin-top: 20px;            
-            animation: rainbowText 3s infinite;
-        }
-        @keyframes rainbowText {
-            0% { color: white; }
-            15% { color: #C0C0C0; }
-            30% { color: white; }
-            45% { color: #C0C0C0; }
-            60% { color: white; }
-            75% { color: #C0C0C0; }
-            90% { color: white; }
-        }
-        .container {
-            width: 100%;
-            max-width: 100%; /* Ubah ini agar lebar maksimal container penuh layar */
-            background-color: #343a40; /* Warna latar belakang kotak chat */
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            margin: 20px; /* Ubah ini agar container lebih responsif */
-        }
-        .chat-box {
-            width: 100%; /* Tambahkan ini agar lebar chat-box penuh layar */
-            height: 60vh;
-            overflow-y: auto;
-            padding: 10px;
-            margin-top: 20px;
-        }
-        .message {
-            background-color: transparent; /* Kotak pesan transparan */
-            color: #212529; /* Warna teks putih */
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            max-width: 100%;
-            word-wrap: break-word;
-            position: relative;
-            border: 0.2px solid #ffffff; /* Garis tepi putih */
-            display: flex;
-            align-items: flex-start; /* Menjadikan konten mulai dari kiri atas */
-        }
-        .message.anonim {
-            background-color: #D3D3D3; /* Kotak pesan transparan */
-        }
-        .message-content {
-            display: inline-block;
-            flex: 1;
-        }
-        .message-time {
-            font-size: 0.8em;
-            color: #ced4da; /* Warna teks abu-abu */
-            position: absolute;
-            bottom: 0;
-            right: 10px;
-        }
-        .message-user-icon {
-            font-size: 1.5rem;
-            margin-right: 10px;
-            color: #007BFF; /* Warna ikon user */
-            align-self: flex-start; /* Memposisikan ikon di kiri atas */
-            margin-top: 5px; /* Memberikan margin atas sedikit */
-        }
-        .message-content {
-            flex: 1;
-        }
-        .message-form {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            background-color: #343a40; /* Warna latar belakang form input */
-        }
-        #input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-right: 10px;
-            background-color: #495057; /* Warna latar belakang input */
-            color: #f8f9fa; /* Warna teks putih */
-        }
-        button {
-            padding: 10px 20px;
-            border: none;
-            background-color: #71797E; /* Warna latar belakang tombol biru */
-            color: white; /* Warna teks putih */
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        button:hover {
-            background-color: #71797E; /* Warna latar belakang tombol biru saat dihover */
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quote Generator</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kode+Mono&display=swap">
+  <!-- Menyematkan font Roboto Mono dari Google Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Menyematkan Font Awesome -->
+
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #000; /* Background warna gray (#f0f0f0) */
+      margin: 0;
+    }
+    .container {
+      text-align: center;
+    }
+    canvas {
+      border: 2px solid #000;
+      max-width: 100%;
+      height: auto;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background-color: #000;
+      color: #fff;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #444;
+    }
+  </style>
 </head>
 <body>
-    <div class="container"><h2>GRESIXPLOIT CHAT</h2><hr color="white">
-        <div class="chat-box" id="chatBox"></div>
-        <form id="form" class="message-form">
-            <input id="input" type="text" placeholder="Ketik sebuah pesan...">
-            <button type="submit"><i class="fas fa-paper-plane"></i></button>
-        </form>
-    </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const chatBox = document.getElementById('chatBox');
-            const form = document.getElementById('form');
-            const input = document.getElementById('input');
+  <div class="container">
+    <canvas id="quoteCanvas" width="500" height="500"></canvas>
+    <button id="downloadButton">
+      <i class="fas fa-download"></i>
+    </button>
+  </div>
 
-            function saveMessage(message) {
-                let messages = JSON.parse(localStorage.getItem("messages")) || [];
-                messages.push(message);
-                localStorage.setItem("messages", JSON.stringify(messages));
-            }
+  <script>
+    async function fetchAnimeQuote() {
+      try {
+        const res = await fetch('https://some-random-api.com/animu/quote');
+        if (!res.ok) throw new Error('Network response was not ok');
+        let { sentence, character } = await res.json();
 
-            function loadMessages() {
-                let messages = JSON.parse(localStorage.getItem("messages")) || [];
-                messages.forEach(message => {
-                    displayMessage(message);
-                });
-            }
+        // Batasi jumlah karakter dalam quote menjadi 150 karakter
+        if (sentence.length > 150) {
+          sentence = sentence.substring(0, 150) + '...';
+        }
 
-            function displayMessage(message) {
-                const { text, isAnonim, timestamp } = message;
-                const messageClass = isAnonim ? 'message anonim' : 'message';
-                const div = document.createElement('div');
-                div.className = messageClass; // Menggunakan className untuk menetapkan kelas
-                div.innerHTML = `
-                    <i class="fas fa-user message-user-icon" style="color:#212529;"></i>
-                    <div class="message-content">${text}</div>
-                    <div class="message-time">${formatTime(timestamp)}</div>
-                `;
-                chatBox.appendChild(div);
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }
+        drawQuoteOnCanvas(sentence, character);
+      } catch (error) {
+        console.error('Fetch error:', error);
+      }
+    }
 
-            function formatTime(timestamp) {
-                const date = new Date(timestamp);
-                const hours = date.getHours().toString().padStart(2, '0');
-                const minutes = date.getMinutes().toString().padStart(2, '0');
-                return `${hours}:${minutes}`;
-            }
+    function drawQuoteOnCanvas(quote, character) {
+      const canvas = document.getElementById('quoteCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#000'; // Background canvas warna gray (#f0f0f0)
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const messageText = input.value.trim();
-                if (messageText !== "") {
-                    const message = {
-                        text: messageText,
-                        isAnonim: true, // Tandai sebagai anonim
-                        timestamp: Date.now() // Waktu pengiriman
-                    };
-                    saveMessage(message);
-                    displayMessage(message);
-                    input.value = "";
-                }
-            });
+      // Gradien warna untuk quote
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+      gradient.addColorStop(0, '#ffffff'); // Warna putih (#ffffff) dari kiri
+      gradient.addColorStop(1, '#ffd700'); // Warna kuning muda (#ffd700) ke kanan
+      ctx.fillStyle = gradient;
 
-            loadMessages();   
+      ctx.font = 'italic 28px "Roboto Mono", monospace'; // Ganti font dan tambahkan gaya italic
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
 
-        });
-    </script>
+      const maxWidth = 450;
+      const lineHeight = 30;
+      const x = canvas.width / 2;
+      let y = canvas.height / 3;
+
+      const lines = wrapText(ctx, quote, maxWidth);
+      lines.forEach(line => {
+        ctx.fillText(line, x, y);
+        y += lineHeight;
+      });
+
+      y += 30; // Tambahkan ruang antara quote dan nama karakter
+      ctx.fillStyle = '#fff'; // Warna nama karakter kuning muda (#ffd700)
+      ctx.font = 'bold 16px "Kode Mono", monospace'; // Ganti font nama karakter dan tambahkan gaya bold
+      ctx.fillText(`~ ${character}`, x, y); // Tampilkan nama karakter
+    }
+
+    function wrapText(ctx, text, maxWidth) {
+      const words = text.split(' ');
+      const lines = [];
+      let currentLine = words[0];
+
+      for (let i = 1; i < words.length; i++) {
+        const word = words[i];
+        const width = ctx.measureText(currentLine + ' ' + word).width;
+        if (width < maxWidth) {
+          currentLine += ' ' + word;
+        } else {
+          lines.push(currentLine);
+          currentLine = word;
+        }
+      }
+      lines.push(currentLine);
+      return lines;
+    }
+
+    function downloadCanvasAsImage() {
+      const canvas = document.getElementById('quoteCanvas');
+      const link = document.createElement('a');
+      link.download = 'gresixploit.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+
+    document.getElementById('downloadButton').addEventListener('click', downloadCanvasAsImage);
+
+    fetchAnimeQuote();
+  </script>
 </body>
 </html>
