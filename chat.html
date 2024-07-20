@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DexSkieee Chatbot</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kode+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #12082b;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .chat-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #1e0a52;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 2;
+        }
+        .chat-box {
+            height: 300px;
+            padding: 15px;
+            margin-bottom: 15px;
+            overflow-y: auto;
+            background-color: #2e166b;
+            color: #b9b5f7;
+            border: 1px solid #3912a1;
+            border-radius: 5px;
+            position: relative;
+        }
+        .form-control {
+            background-color: #2e166b;
+            color: #b9b5f7;
+            border: 1px solid #3912a1;
+        }
+        .form-control:focus {
+            background-color: #2e166b;
+            color: #b9b5f7;
+            border-color: #444;
+            box-shadow: none;
+        }
+        .input-group {
+            border: 1px solid #3912a1;
+            border-radius: 5px;
+        }
+        .btn-send {
+            background-color: #3912a1;
+            border: none;
+            color: #b9b5f7;
+            cursor: pointer;
+            border-radius: 0;
+            width: 60px;
+        }
+        .btn-send:focus, .btn-send:active {
+            background-color: #3912a1;
+            color: #b9b5f7;
+            box-shadow: none;
+        }
+        .btn-send i {
+            font-size: 1.2em;
+        }
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .loading-spinner div {
+            width: 0.4rem;
+            height: 1.5rem;
+            background-color: #fff;
+            margin: 0 0.2rem;
+            animation: loading 1s infinite;
+        }
+        .loading-spinner div:nth-child(1) {
+            animation-delay: 0s;
+        }
+        .loading-spinner div:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .loading-spinner div:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes loading {
+            0%, 100% {
+                transform: scaleY(1);
+            }
+            50% {
+                transform: scaleY(2);
+            }
+        }
+        .typing-effect {
+            display: inline;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: .15em solid #007bff;
+            animation: typing 2s steps(30, end), blink-caret .75s step-end infinite;
+        }
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: #007bff; }
+        }
+        .footer {
+            text-align: center;
+            padding: 10px;
+            color: #b9b5f7;
+            font-family: Kode Mono;
+            background-color: transparent;
+            position: relative;
+            z-index: 1;
+        }
+        .snowflake {
+            position: absolute;
+            top: -50px;
+            color: #ffffff;
+            font-size: 1em;
+            user-select: none;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container chat-container">
+    <div class="chat-box" id="chat-box">root@dexskieee : Selamat datang! >.<</div>
+    <form id="chat-form" class="d-flex">
+        <div class="input-group">
+            <input type="text" id="chat-input" class="form-control" placeholder="Ketik sesuatu..." required>
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-send"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="snow-container"></div>
+<div class="footer">
+    <p>Copyright ©2024 DexSkieee</p>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+    $(document).ready(function() {
+        let botResponses = {
+            "halo": "Hai! Ada yang bisa saya bantu?",
+            "apa kabar": "Saya baik, terima kasih! Bagaimana dengan Anda?",
+            "siapa kamu": "Saya adalah DexSkieee Bot, asisten virtual Anda.",
+            "terima kasih": "Sama-sama! Ada lagi yang bisa saya bantu?",
+            "selamat tinggal": "Sampai jumpa lagi!",
+            "saya lapar nih": "Iya sama, saya juga.",
+            "udah ngantuk belum": "Belum.",
+            "pengen berak": "Ih, jorok.",
+            "kamu mau nggak ikut aku": "Kemana?",
+            "lagi ngapain": "Sedang menunggu pertanyaan dari Anda.",
+            "apa hobi kamu": "Saya suka membantu orang.",
+            "bisa bantu saya": "Tentu, apa yang bisa saya bantu?",
+            "berapa umur kamu": "Saya tidak memiliki umur.",
+            "dari mana asalmu": "Saya berasal dari internet.",
+            "suka makan apa": "Saya tidak makan, tapi saya suka membantu.",
+            "kapan kita bisa ketemu": "Kita bisa chat kapan saja.",
+            "ada film bagus": "Saya tidak tahu film, tapi saya bisa bantu dengan informasi.",
+            "selamat pagi": "Selamat pagi! Apa yang bisa saya bantu?",
+            "selamat sore": "Selamat sore! Ada yang bisa saya bantu?",
+            "selamat malam": "Selamat malam! Ada yang bisa saya bantu?",
+            "bagaimana cuaca hari ini": "Maaf, saya tidak bisa mengecek cuaca.",
+            "apakah kamu pintar": "Saya mencoba sebaik mungkin.",
+            "kamu tahu semua hal": "Saya tahu banyak hal, tapi tidak semua.",
+            "buat apa kamu ada": "Untuk membantu menjawab pertanyaan Anda.",
+            "kenapa kamu bisa jawab": "Saya sudah diprogram untuk memahami dan menjawab.",
+            "berita terbaru": "Maaf, saya tidak dapat mengakses berita terkini.",
+            "musik apa yang kamu suka": "Saya tidak mendengarkan musik, tapi saya bisa membantu Anda mencarikannya.",
+            "saran buku": "Coba baca buku tentang teknologi atau fiksi ilmiah.",
+            "bisa bercerita": "Tentu, apa yang ingin Anda ketahui?",
+            "butuh bantuan": "Apa yang bisa saya bantu?",
+            "jangan ganggu": "Maaf jika mengganggu. Saya akan berhenti.",
+            "berapa banyak data kamu": "Saya memiliki banyak informasi, tapi tidak bisa diukur.",
+            "apa warna favoritmu": "Saya tidak memiliki preferensi warna.",
+            "kamu bisa bercanda": "Saya bisa mencoba, apa yang Anda inginkan?",
+            "kamu manusia ya": "Saya bukan manusia, saya bot.",
+            "apa yang kamu lakukan": "Menunggu pertanyaan dari Anda dan memberikan jawaban.",
+            "coba satu pertanyaan": "Silakan tanya apapun!",
+            "kapan kamu lahir": "Saya tidak lahir, saya diciptakan.",
+            "saya bosan": "Apa yang bisa saya lakukan untuk menghibur Anda?",
+            "berita teknologi": "Maaf, saya tidak dapat memberikan berita terbaru.",
+            "kapan update terbaru": "Saya diperbarui secara berkala.",
+            "apa yang kamu butuhkan": "Saya tidak membutuhkan apa-apa, saya di sini untuk membantu.",
+            "sudah makan belum": "Belum, kamu?",
+            "lagi ngapain": "Lagi ngobrol sama kamu.",
+            "mau nonton film apa": "Terserah kamu aja.",
+            "sudah siap berangkat": "Sebentar lagi siap.",
+            "main game yuk": "Game apa?",
+            "lagi sibuk nggak": "Nggak terlalu, kenapa?",
+            "mau jalan-jalan": "Boleh, kemana?",
+            "kenapa diam saja": "Lagi mikir.",
+            "mau makan apa": "Apa aja deh.",
+            "lagi di mana": "Di rumah, kamu?",
+            "lagi galau ya": "Sedikit.",
+            "sudah mandi belum": "Belum, sebentar lagi.",
+            "mau minum apa": "Kopi aja.",
+            "kamu suka musik apa": "Aku suka musik pop.",
+            "ada rencana hari ini": "Belum ada, kamu?",
+            "gimana kerjaan": "Lancar, Alhamdulillah.",
+            "mau ngopi bareng": "Boleh, kapan?",
+            "ada kabar baru": "Nggak ada, kamu?",
+            "kenapa sedih": "Lagi ada masalah.",
+            "sudah selesai tugas": "Belum semua.",
+            "mau belajar bareng": "Boleh, dimana?",
+            "kamu suka film apa": "Aku suka film action.",
+            "mau pergi ke mall": "Ayo, kapan?",
+            "sudah tidur belum": "Belum, masih ngobrol.",
+            "lagi nonton apa": "Lagi nonton drama.",
+            "mau makan siang bareng": "Ayo, di mana?",
+            "kamu suka baca buku apa": "Aku suka novel.",
+            "lagi kerja apa": "Lagi coding.",
+            "udah ada pacar": "Belum, kamu?",
+            "mau cerita apa": "Cerita tentang hari ini.",
+            "lagi butuh apa": "Butuh istirahat.",
+            "sudah olahraga belum": "Belum, nanti sore.",
+            "lagi dengerin musik apa": "Lagi dengerin lagu pop.",
+            "mau ngobrol tentang apa": "Terserah kamu.",
+            "kamu suka jalan-jalan": "Suka banget.",
+            "lagi sibuk apa": "Lagi nyantai aja.",
+            "mau nonton bioskop": "Ayo, film apa?",
+            "kenapa senyum-senyum": "Ada yang lucu.",
+            "mau ketemu di mana": "Di cafe biasa.",
+            "lagi belajar apa": "Belajar coding.",
+            "lagi apa": "Lagi ngobrol sama kamu.",
+            "udah makan siang belum": "Belum, kamu?",
+            "mau kemana": "Mau ke tempat biasa.",
+            "gimana kabarmu": "Baik, terima kasih!",
+            "lagi ngapain nih": "Nggak ngapa-ngapain.",
+            "main bareng yuk": "Boleh, kapan?",
+            "kamu dimana sekarang": "Di rumah aja.",
+            "udah beres belum": "Belum semua.",
+            "suka makan apa": "Aku suka pizza.",
+            "kamu suka nonton apa": "Aku suka film komedi.",
+            "mau pergi kemana": "Mau jalan-jalan aja.",
+            "lagi sibuk ngapain": "Lagi santai.",
+            "suka olahraga apa": "Aku suka jogging.",
+            "udah mandi belum": "Belum, sebentar lagi.",
+            "suka minuman apa": "Aku suka teh manis.",
+            "ada cerita apa": "Banyak cerita seru.",
+            "mau makan malam bareng": "Ayo, di mana?",
+            "udah siap belum": "Sebentar lagi.",
+            "suka dengerin musik apa": "Aku suka jazz.",
+            "kamu punya hewan peliharaan": "Iya, aku punya kucing.",
+            "mau ikut nggak": "Ikut kemana?",
+            "lagi belajar apa": "Belajar bahasa baru.",
+            "ada acara apa": "Nggak ada acara khusus.",
+            "sudah selesai belum": "Sudah hampir selesai.",
+            "lagi baca buku apa": "Baca novel misteri.",
+            "suka warna apa": "Aku suka warna biru.",
+            "mau ketemu nggak": "Boleh, kapan?",
+            "udah tidur belum": "Belum, masih ngobrol.",
+            "mau nonton film bareng": "Ayo, film apa?",
+            "kamu hobi apa": "Hobi aku fotografi.",
+            "udah istirahat belum": "Belum, nanti aja.",
+            "suka makan manis atau asin": "Aku suka manis.",
+            "lagi chat sama siapa": "Sama kamu aja.",
+            "suka pergi ke pantai": "Suka banget.",
+            "udah bikin tugas belum": "Baru setengah.",
+            "mau belajar apa": "Belajar sejarah.",
+            "udah ngantuk belum": "Belum, masih semangat.",
+            "lagi dengerin apa": "Lagi dengerin podcast.",
+            "suka olahraga di mana": "Suka di taman.",
+            "mau pergi ke gunung": "Boleh, kapan?",
+            "hai": "Hai juga",
+            "pengen ngewe": "Dosa",
+            "ayo mabuk": "Jangan itu dosa.",
+            "kontol": "Astaghfirullah",
+            "memek": "Mulutmu",
+            "tau gak:": "Kurang tau",
+            "apakah kamu": "Bisa jadi",
+            "kapan kamu": "Kapan kapan wkwk",
+            "bisakah kamu": "Saya usahakan",
+            "dimana kamu": "Rahasia",
+            "orang tua": "Kurang tau",
+            "ayo ngopi": "Gas"
+            // Tambahkan lebih banyak pertanyaan dan jawaban jika perlu
+        };
+
+        // Fungsi untuk menemukan jawaban paling mendekati
+        function getBotResponse(message) {
+            let lowerCaseMessage = message.trim().toLowerCase();
+            let response = 'Ha ? Kurang tau saya.';
+            
+            // Cek kesamaan string
+            for (let key in botResponses) {
+                if (lowerCaseMessage.includes(key)) {
+                    response = botResponses[key];
+                    break;
+                }
+            }
+            
+            return response;
+        }
+
+        $('#chat-form').on('submit', function(e) {
+            e.preventDefault();
+            let userMessage = $('#chat-input').val();
+            $('#chat-input').val('');
+
+            // Menampilkan loading spinner
+            $('#chat-box').html('<div class="loading-spinner"><div></div><div></div><div></div></div>');
+
+            // Menunda tanggapan bot
+            setTimeout(function() {
+                $('#chat-box').html('root@dexskieee : ');
+                setTimeout(function() {
+                    let botMessage = getBotResponse(userMessage);
+                    displayTypingEffect(botMessage);
+                }, 2000); // Penundaan 2 detik sebelum menampilkan teks satu per satu
+            }, 2000); // Penundaan 2 detik sebelum menampilkan "root@dexskieee : "
+        });
+
+        function displayTypingEffect(text) {
+            let index = 0;
+            let interval = setInterval(() => {
+                $('#chat-box').append(text.charAt(index));
+                index++;
+                if (index > text.length - 1) {
+                    clearInterval(interval);
+                }
+            }, 50); // Kecepatan mengetik
+        }
+        // Menambahkan efek salju
+        function createSnowflakes() {
+            let snowContainer = $('#snow-container');
+            for (let i = 0; i < 100; i++) {
+                let snowflake = $('<div class="snowflake">💲</div>');
+                snowflake.css({
+                    'left': Math.random() * 100 + '%',
+                    'font-size': Math.random() * 1.5 + 'em',
+                    'animation-duration': Math.random() * 3 + 5 + 's',
+                    'opacity': Math.random()
+                });
+                snowContainer.append(snowflake);
+            }
+        }
+
+        createSnowflakes();
+    });
+</script>
+
+</body>
+</html>
