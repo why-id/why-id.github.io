@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacking Account by DexSkieee</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000000;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #000000;
+        }
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #000000;
+            color: white;
+        }
+        .chat-header .icon {
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        .header-text {
+            font-family: monospace;
+        }
+        .chat-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            background-color: #000000;
+            overflow-y: auto;
+        }
+        .chat-body .center-icon {
+            font-size: 2.5em;
+            color: #ffffff;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #222222;
+            color: #ffffff;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .chat-footer {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #000000;
+            position: sticky;
+            bottom: 0;
+        }
+        .chat-footer input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            margin: 0 10px;
+            background-color: #333333;
+            color: white;
+            font-size: 1em;
+            font-family: monospace;
+            outline: none;
+        }
+        .chat-footer button {
+            background-color: transparent;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+        .chat-footer button:focus {
+            outline: none;
+        }
+        .chat-footer .send-btn {
+            display: none;
+            background-color: white;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <i class="fa-solid fa-bars icon" onclick="toggleHeaderText()"></i>
+            <span id="header-text" class="header-text">root@DexSkieee</span>
+            <i class="fa-solid fa-ellipsis-vertical icon"></i>
+        </div>
+        <div class="chat-body">
+            <i class="fa-brands fa-ubuntu center-icon"></i>
+            <div id="output" class="output">Hi World!</div>
+        </div>
+        <div class="chat-footer">
+            <button class="attachment-btn" onclick="showInfo()"><i class="fa-solid fa-info-circle"></i></button>
+            <input type="text" id="chat-input" placeholder="Pesan" oninput="toggleSendButton()" onkeydown="handleKeyDown(event)">
+            <button class="send-btn" id="send-btn" onclick="sendMessage()"><i class="fa-solid fa-arrow-up"></i></button>
+            <button class="mic-btn" id="mic-btn" onclick="toggleMusic()"><i class="fa-solid fa-headphones-simple"></i></button>
+        </div>
+    </div>
+    <audio id="background-music" src="https://f.top4top.io/m_3124hgf420.mp3"></audio>
+    <script>
+        let isTyping = false; // Flag untuk mengecek apakah teks sedang diketik
+        let isMusicPlaying = false;
+
+        function toggleSendButton() {
+            const chatInput = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('send-btn');
+            const micBtn = document.getElementById('mic-btn');
+            if (chatInput.value.trim() !== "") {
+                sendBtn.style.display = 'flex';
+                micBtn.style.display = 'none';
+            } else {
+                sendBtn.style.display = 'none';
+                micBtn.style.display = 'flex';
+            }
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            if (isTyping) return; // Cegah pengiriman jika teks sedang diketik
+
+            const chatInput = document.getElementById('chat-input');
+            const command = chatInput.value.trim();
+            
+            if (command === "") return; // Tidak melakukan apa-apa jika input kosong
+
+            if (command.toLowerCase().startsWith('hackig @')) {
+                const target = command.split('@')[1];
+                simulateHacking('Instagram', target);
+            } else if (command.toLowerCase().startsWith('hackwa ')) {
+                const target = command.split(' ')[1];
+                simulateHacking('WhatsApp', target);
+            } else if (command.toLowerCase().startsWith('hackfb ')) {
+                const target = command.split(' ')[1];
+                simulateHacking('Facebook', target);
+            } else {
+                displayInstructions();
+            }
+
+            chatInput.value = '';
+            toggleSendButton();
+        }
+
+        function simulateHacking(platform, target) {
+            const steps = {
+                'Instagram': [
+                    'Connecting to Instagram...\n',
+                    `Fetching data for @${target}...\n`,
+                    'Bypassing security measures...\n',
+                    'Accessing account credentials...\n',
+                    'Retrieving password...\n',
+                    'Hack successful!\n\n',
+                    `Password : @${target}123`
+                ],
+                'WhatsApp': [
+                    'Connecting to WhatsApp servers...\n',
+                    `Fetching data for ${target}...\n`,
+                    'Bypassing security measures...\n',
+                    'Accessing account credentials...\n',
+                    'Retrieving OTP...\n',
+                    'Hack successful!\n\n',
+                    `OTP: ${generateOTP()}`
+                ],
+                'Facebook': [
+                    'Connecting to Facebook...\n',
+                    `Fetching data for ${target}...\n`,
+                    'Bypassing security measures...\n',
+                    'Accessing account credentials...\n',
+                    'Retrieving password...\n\n',
+                    `Password : ${target}123`
+                ]
+            };
+
+            let i = 0;
+            const output = document.getElementById('output');
+            output.innerText = ''; // Kosongkan output sebelum mulai
+
+            function displayStep() {
+                if (i < steps[platform].length) {
+                    typeWriter(steps[platform][i], displayStep);
+                    i++;
+                }
+            }
+
+            displayStep();
+        }
+
+        function generateOTP() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        function typeWriter(text, callback) {
+            const output = document.getElementById('output');
+            let i = 0;
+            const speed = 50; // Kecepatan ketikan dalam milidetik
+
+            isTyping = true; // Set flag typing true
+
+            function typing() {
+                if (i < text.length) {
+                    output.innerText += text.charAt(i);
+                    i++;
+                    setTimeout(typing, speed);
+                } else {
+                    isTyping = false; // Set flag typing false setelah selesai
+                    if (callback) callback();
+                }
+            }
+
+            typing();
+        }
+
+        function showInfo() {
+            if (isTyping) return; // Cegah menampilkan info jika teks sedang diketik
+
+            const output = document.getElementById('output');
+            const info = `Hello Friends
+
+Author   : DexSkieee
+WhatsApp : +6283856124021
+Instagram: @xyzushinnn
+TikTok   : xyzushin.mlbb
+Team     : GresiXploit
+            `;
+
+            output.innerText = ''; // Kosongkan output sebelum menampilkan info
+            typeWriter(info);
+        }
+
+        function displayInstructions() {
+            const output = document.getElementById('output');
+            const instructions = `available commands:
+
+- hackig @username >> To hack Instagram password 
+- hackwa number    >> To hack WhatsApp otp code 
+- hackfb username  >> To hack Facebook password 
+            `;
+            output.innerText = ''; // Kosongkan output sebelum menampilkan instruksi
+            typeWriter(instructions);
+        }
+
+        function toggleHeaderText() {
+            const headerText = document.getElementById('header-text');
+            headerText.style.display = headerText.style.display === 'none' ? 'inline' : 'none';
+        }
+
+        function toggleMusic() {
+            const audio = document.getElementById('background-music');
+            if (isMusicPlaying) {
+                audio.pause();
+            } else {
+                audio.play();
+            }
+            isMusicPlaying = !isMusicPlaying;
+        }
+    </script>
+</body>
+</html>
