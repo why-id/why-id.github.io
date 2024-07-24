@@ -44,6 +44,7 @@
             padding: 20px;
             background-color: #000000;
             overflow-y: auto;
+            max-height: calc(100vh - 120px); /* Adjust this value based on header and footer height */
         }
         .message {
             display: flex;
@@ -52,7 +53,7 @@
         }
         .message .icon {
             font-size: 1em;
-            color: #1F8ECD;
+            color: #ffffff; /* Set the icon color to white */
             margin-right: 10px;
             flex-shrink: 0;
             width: 40px; /* Set the width of the icon */
@@ -70,6 +71,14 @@
             white-space: pre-wrap;
             font-size: 0.9em;
             flex: 1;
+        }
+        .my-message {
+            justify-content: flex-end;
+        }
+        .my-message .text {
+            background-color: #026C3D; /* Change background color for user messages */
+            color: #ffffff;
+            order: -1; /* Reverse order of elements */
         }
         .chat-footer {
             display: flex;
@@ -135,9 +144,11 @@
     <script src="https://cdn.scaledrone.com/scaledrone.min.js"></script>
     <script>
         const CLIENT_ID = 'GNsD0FaYbkCRmfBs';  // Channel ID Scaledrone
+        const USER_ID = Math.random().toString(36).substr(2, 9); // Generate a random user ID
 
         const drone = new Scaledrone(CLIENT_ID, {
             data: {
+                id: USER_ID,
                 name: 'Anonymous',
                 color: getRandomColor(),
             },
@@ -159,8 +170,8 @@
             });
 
             room.on('data', (message, member) => {
-                const {color} = member.clientData;
-                displayMessage(message, color);
+                const isMyMessage = member.clientData.id === USER_ID;
+                displayMessage(message, member.clientData.color, isMyMessage);
             });
         });
 
@@ -183,17 +194,17 @@
             }
         });
 
-        function displayMessage(message, color) {
+        function displayMessage(message, color, isMyMessage) {
             const chatMessages = document.getElementById('chat-messages');
             const messageElement = document.createElement('div');
-            messageElement.className = 'message';
-            const timeElement = document.createElement('div');
-            timeElement.className = 'icon';
-            timeElement.innerHTML = `<i class="fas fa-user-check"></i>`;
+            messageElement.className = 'message' + (isMyMessage ? ' my-message' : '');
+            const iconElement = document.createElement('div');
+            iconElement.className = 'icon';
+            iconElement.innerHTML = `<i class="far fa-user"></i>`;
             const textElement = document.createElement('span');
             textElement.className = 'text';
             textElement.innerHTML = sanitizeInput(message);
-            messageElement.appendChild(timeElement);
+            messageElement.appendChild(iconElement);
             messageElement.appendChild(textElement);
             chatMessages.appendChild(messageElement);
             chatMessages.scrollTop = chatMessages.scrollHeight;
