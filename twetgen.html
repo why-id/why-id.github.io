@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Post Tweet by GresiXploit</title>
+    <!-- Tambahkan Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.6.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Tambahkan Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+    <!-- Tambahkan Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+    <style>
+        body {
+            font-family: 'Varela Round', Arial, sans-serif;
+            background-color: #000;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tweet-container {
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 15px;
+            background-color: #151515;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .tweet-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .profile-pic {
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            margin-right: 8px;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-info .name {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        .profile-info .handle {
+            color: #aaa;
+            font-size: 0.8em;
+        }
+
+        .verified-icon {
+            width: 24px;
+            height: 24px;
+            margin-left: 4px;
+        }
+
+        .tweet-content {
+            font-size: 1em;
+            margin: 8px 0;
+            color: #fff; /* Warna teks tweet-content */
+        }
+
+        .tweet-footer {
+            color: #aaa;
+            font-size: 0.8em;
+        }
+
+        .tweet-footer a {
+            color: #1d9bf0;
+            text-decoration: none;
+        }
+
+        .tweet-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            border-top: 1px solid #333;
+            padding-top: 8px;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #151515;
+            border-bottom: 1px solid #333;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000; /* Agar header tetap di atas */
+        }
+
+        .header .icon-container {
+            margin-left: 10px;
+        }
+
+        .header .icon-container i {
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .header .title {
+            color: #fff;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            flex-grow: 1;
+            font-family: 'Varela Round', Arial, sans-serif;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            color: #aaa;
+            font-size: 0.8em;
+            flex-grow: 1;
+            justify-content: center;
+        }
+
+        .stat .stat-number {
+            font-weight: bold;
+            color: #fff; /* Warna angka sama dengan tweet-content */
+            margin-right: 4px;
+        }
+
+        .ellipsis-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            cursor: pointer;
+            color: #aaa;
+            font-size: 18px;
+        }
+
+        .edit-icons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding: 0 10px; /* Padding untuk memberikan ruang ekstra di sisi kiri dan kanan */
+        }
+
+        .edit-icons i {
+            color: #1d9bf0;
+            cursor: pointer;
+            font-size: 18px; /* Ukuran ikon yang konsisten */
+            margin-right: 15px; /* Jarak antar ikon */
+        }
+
+        .edit-icons i:last-child {
+            margin-right: 0; /* Menghapus margin pada ikon terakhir */
+        }
+        .modal-body .form-control,
+.modal-body .custom-file {
+    margin-bottom: 15px; /* Atur margin bawah yang konsisten */
+}
+
+.modal-body .custom-file-label {
+    margin-top: 5px; /* Beri sedikit ruang antara input file dan label */
+}
+
+        .edit-icons i:hover {
+            color: #0d6efd;
+        }
+
+        @media (max-width: 600px) {
+            .tweet-container {
+                padding: 10px;
+                margin: 0 10px;
+            }
+
+            .tweet-content {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+        <div class="icon-container">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        <div class="title">Tweet</div>
+</div>
+<div class="container">
+    <div class="tweet-container" id="tweetContainer">
+        <i class="fas fa-ellipsis-vertical ellipsis-icon"></i>
+        <div class="tweet-header">
+            <img src="https://pbs.twimg.com/profile_images/1267869040829227008/9yUU4ZdS_400x400.jpg" alt="Profile Picture" class="profile-pic">
+            <div class="profile-info">
+                <span class="name">GresiXploit Official
+                    <img src="https://kieza17.github.io/img/ver.png" alt="Verified" class="verified-icon">
+                </span>
+                <span class="handle">@gresixploit</span>
+            </div>
+        </div>
+        <div class="tweet-content" id="tweetContent">
+            Kalau pejabat dinegara ini cuma isinya orang-orang korup mending kalian mati aja. Idiot lu ngntd
+        </div>
+        <div class="tweet-footer">
+            <span id="currentTime"></span> · <a href="#">Twitter for iPhone</a>
+        </div>
+        <div class="tweet-stats">
+            <div class="stat">
+                <span class="stat-number">970</span> Retweets
+            </div>
+            <div class="stat">
+                <span class="stat-number">59</span> Quote Tweets
+            </div>
+            <div class="stat">
+                <span class="stat-number">10.339</span> Likes
+            </div>
+        </div>
+        <div class="edit-icons">
+            <i class='far fa-comment-alt' style='color:#aaa' data-toggle="modal" data-target="#editModal"></i>
+            <i class='fas fa-retweet fa-9x fa-rotate-90' style='color:#aaa'></i>
+            <i class='far fa-heart' style='color:#aaa'></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upload" viewBox="0 0 16 16">
+                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                  <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"/>
+                </svg>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Postingan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="profilePicInput" accept="image/*">
+                    <label class="custom-file-label" for="profilePicInput">Pilih foto profil</label>
+                </div>
+                <input type="text" id="tweetInput" class="form-control" placeholder="Kalau pejabat dinegara ini cuma isinya orang-orang korup mending kalian mati aja. Idiot lu ngntd">
+                <input type="text" id="nameInput" class="form-control" placeholder="GresiXploit Official">
+                <input type="text" id="handleInput" class="form-control" placeholder="gresixploit">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-primary" id="saveBtn">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Tambahkan jQuery dan Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+document.querySelector('.custom-file-input').addEventListener('change', function(e) {
+    var fileName = document.getElementById("profilePicInput").files[0].name;
+    var nextSibling = e.target.nextElementSibling;
+    nextSibling.innerText = fileName;
+});
+    function updateTime() {
+        const now = new Date();
+        const optionsTime = { hour: '2-digit', minute: '2-digit', hour12: true };
+        const optionsDate = { day: '2-digit', month: '2-digit', year: '2-digit' };
+        const formattedTime = now.toLocaleTimeString('en-US', optionsTime).replace(',', ' ·');
+        const formattedDate = now.toLocaleDateString('en-GB', optionsDate);
+        document.getElementById('currentTime').textContent = `${formattedTime} · ${formattedDate}`;
+    }
+
+    setInterval(updateTime, 1000);
+    updateTime();
+
+    // Modal functionality
+    var tweetContent = document.getElementById("tweetContent");
+    var tweetInput = document.getElementById("tweetInput");
+    var saveBtn = document.getElementById("saveBtn");
+var nameElement = document.querySelector(".profile-info .name");
+var handleElement = document.querySelector(".profile-info .handle");
+var nameInput = document.getElementById("nameInput");
+var handleInput = document.getElementById("handleInput");
+var profilePicElement = document.querySelector(".profile-pic");
+var profilePicInput = document.getElementById("profilePicInput");
+
+    saveBtn.onclick = function() {
+        tweetContent.textContent = tweetInput.value;
+nameElement.firstChild.textContent = nameInput.value;
+    handleElement.textContent = "@" + handleInput.value;
+// Mengubah gambar profil jika ada file yang dipilih
+    if (profilePicInput.files && profilePicInput.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            profilePicElement.src = e.target.result;
+        };
+        reader.readAsDataURL(profilePicInput.files[0]);
+    }
+        $('#editModal').modal('hide'); // Menutup modal setelah menyimpan
+    };
+</script>
+
+</body>
+</html>
