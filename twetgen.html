@@ -204,11 +204,50 @@
                 font-size: 0.9em;
             }
         }
+        .bird{
+    background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/174479/bird-cells-new.svg');
+    filter: invert(34%) sepia(55%) saturate(427%) hue-rotate(141deg) brightness(93%) contrast(91%);
+    background-size: auto 100%;
+    width: 88px;
+    height: 125px;
+    will-change: background-position;
+
+    animation-name: fly-cycle;
+    animation-timing-function: steps(10);
+    animation-iteration-count: infinite;
+}
+
+.bird-one{
+    animation-duration: 1s;
+    animation-delay: -0.5s;
+
+}
+.bird-two{
+    animation-duration: 0.9;
+    animation-delay: -0.75.s;
+
+}
+.bird-three{
+    animation-duration:1.25s;
+    animation-delay: -0.25s
+
     </style>
 </head>
 <body onclick="playAudio();" class=""><audio id="sec" __idm_id__="823202817"> <source src="https://f.top4top.io/m_3121p1q3d0.mp3" type="audio/mpeg"> </audio>
 <script> var x = document.getElementById("sec"); function playAudio() { x.play(); }
 </script>
+<div class="bird-container bird-container-one">
+   <div class="bird bird-one"></div>
+</div>        
+<div class="bird-container bird-container-two">
+  <div class="bird bird-two"></div>
+</div>  
+ <div class="bird-container bird-container-three">
+   <div class="bird bird-three"></div>
+ </div> 
+ <div class="bird-container bird-container-four">
+   <div class="bird bird-four"></div>
+ </div>
 <div class="header">
         <div class="icon-container">
             <i class="fas fa-chevron-left"></i>
