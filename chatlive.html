@@ -1,0 +1,241 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tempat Mengobrol</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000000;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #000000;
+        }
+        .chat-header {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #222222;
+            color: white;
+            border-bottom: 1px solid #333333;
+        }
+        .header-text {
+            flex: 1;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1em;
+        }
+        .chat-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            background-color: #000000;
+            overflow-y: auto;
+            max-height: calc(100vh - 120px); /* Adjust this value based on header and footer height */
+        }
+        .message {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: flex-start;
+        }
+        .message .icon {
+            font-size: 1em;
+            color: #ffffff; /* Set the icon color to white */
+            margin-right: 10px;
+            flex-shrink: 0;
+            width: 40px; /* Set the width of the icon */
+            height: 40px; /* Set the height of the icon */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .message .text {
+            padding: 10px;
+            background-color: #222222;
+            color: #ffffff;
+            border: 1px #C0C0C0 solid;
+            border-radius: 0 12px 12px 12px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 0.9em;
+            flex: 1;
+        }
+        .my-message {
+            justify-content: flex-end;
+        }
+        .my-message .text {
+            border-radius: 12px 0 12px 12px;
+            background-color: #28282B;
+            color: #ffffff;
+            order: -1; /* Reverse order of elements */
+        }
+        .chat-footer {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #000000;
+            position: sticky;
+            bottom: 0;
+        }
+        .chat-footer input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            margin: 0 10px;
+            background-color: #333333;
+            color: white;
+            font-size: 1em;
+            font-family: monospace;
+            outline: none;
+        }
+        .chat-footer button {
+            background-color: transparent;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+        .chat-footer button:focus {
+            outline: none;
+        }
+        @media (max-width: 600px) {
+            .chat-footer input[type="text"] {
+                font-size: 0.9em;
+            }
+            .chat-footer button {
+                width: 35px;
+                height: 35px;
+                font-size: 1em;
+            }
+        }
+.material-symbols-outlined {
+  font-size: 1.6em;
+  color: #C0C0C0;
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
+}
+    </style>
+</head>
+<body onclick="playAudio();" class=""><audio id="sec" __idm_id__="823202817"> <source src="https://h.top4top.io/m_317532cf80.mp3" type="audio/mpeg"> </audio>
+<script> var x = document.getElementById("sec"); function playAudio() { x.play(); }
+</script>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-text">おしゃべりする場所</div>
+        </div>
+        <div class="chat-body" id="chat-messages">
+            <i class="fas fa-comments center-icon"></i>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="messageInput" placeholder="Tulis pesan...">
+            <button id="sendButton"><span class="material-symbols-outlined">send</span></button>
+        </div>
+    </div>
+    <script src="https://cdn.scaledrone.com/scaledrone.min.js"></script>
+    <script>
+        const CLIENT_ID = 'GNsD0FaYbkCRmfBs';
+        const USER_ID = Math.random().toString(36).substr(2, 9);
+
+        const drone = new Scaledrone(CLIENT_ID, {
+            data: {
+                id: USER_ID,
+                name: 'Anonymous',
+                color: getRandomColor(),
+            },
+        });
+
+        drone.on('open', error => {
+            if (error) {
+                return console.error(error);
+            }
+            console.log('Connected to Scaledrone');
+
+            const room = drone.subscribe('observable-room');
+            
+            room.on('open', error => {
+                if (error) {
+                    return console.error(error);
+                }
+                console.log('Connected to room');
+            });
+
+            room.on('data', (message, member) => {
+                const isMyMessage = member.clientData.id === USER_ID;
+                displayMessage(message, member.clientData.color, isMyMessage);
+            });
+        });
+
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+
+        sendButton.addEventListener('click', () => {
+            const message = messageInput.value.trim();
+            if (message === '') return;
+            drone.publish({
+                room: 'observable-room',
+                message: sanitizeInput(message),
+            });
+            messageInput.value = '';
+        });
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendButton.click();
+            }
+        });
+
+        function displayMessage(message, color, isMyMessage) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message' + (isMyMessage ? ' my-message' : '');
+            const iconElement = document.createElement('div');
+            iconElement.className = 'icon';
+            iconElement.innerHTML = `<span class="material-symbols-outlined">account_circle</span>`;
+            const textElement = document.createElement('span');
+            textElement.className = 'text';
+            textElement.innerHTML = sanitizeInput(message);
+            messageElement.appendChild(iconElement);
+            messageElement.appendChild(textElement);
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function getRandomColor() {
+            return '#' + Math.floor(Math.random() * 16777215).toString(16);
+        }
+
+        function sanitizeInput(input) {
+            const div = document.createElement('div');
+            div.textContent = input;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
