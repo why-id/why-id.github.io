@@ -1,0 +1,143 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DexSkieee Ofc</title>
+  <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Playwrite+DE+Grund:wght@100..400&display=swap" rel="stylesheet">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body, h1 {
+      font-family: 'Playwrite DE Grund', sans-serif;
+    }
+    label, button, input, .alert {
+      font-family: 'PT Sans', sans-serif;
+    }
+  </style>
+</head>
+<body onclick="playAudio();" class="">
+  <audio id="sec">
+    <source src="https://h.top4top.io/m_317532cf80.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="container mt-5">
+    <h1 class="text-center">DexSkieee Ofc</h1>
+    <form id="msisdnForm">
+      <div class="form-group">
+        <label for="sessionKey">Session Key</label>
+        <input type="text" class="form-control" id="sessionKey" placeholder="Masukkan Session Key" required>
+      </div>
+      <div class="form-group">
+        <label for="captchaToken">Captcha Token</label>
+        <input type="text" class="form-control" id="captchaToken" placeholder="Masukkan Captcha Token" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Mulai Proses</button>
+    </form>
+
+    <div id="alertContainer" class="mt-3"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    document.getElementById('msisdnForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const sessionKey = document.getElementById('sessionKey').value;
+      const captchaToken = document.getElementById('captchaToken').value;
+
+      if (sessionKey && captchaToken) {
+        startChecking(sessionKey, captchaToken);
+      }
+    });
+
+    function showAlert(message, type) {
+      const alertContainer = document.getElementById('alertContainer');
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.role = 'alert';
+      alertDiv.innerHTML = message;
+      alertContainer.appendChild(alertDiv);
+    }
+
+    async function startChecking(sessionKey, captchaToken) {
+      let attemptCount = 0;
+
+      async function checkMsisdn() {
+        const msisdn = generateRandomAxisMsisdn();
+
+        const captchaResult = await validateCaptcha(captchaToken, sessionKey);
+
+        if (!captchaResult) {
+          showAlert('Validasi CAPTCHA gagal.', 'danger');
+          return;
+        }
+
+        const options = {
+          method: 'GET',
+          url: 'https://xlcenter.xl.co.id/xcrh/page/sim-card-services/eligibility-criteria',
+          params: {
+            msisdn: msisdn,
+            simCardService: 'REACTIVATION'
+          },
+          headers: {
+            'session-key': sessionKey
+          }
+        };
+
+        try {
+          const response = await axios(options);
+          const data = response.data;
+
+          if (data.responseData && data.responseData.reasonIndonesian === 'Error! Nomor anda masih aktif') {
+            showAlert(`${msisdn}`, 'success'); // Menampilkan hanya MSISDN
+          }
+        } catch (error) {
+          // Gausa Recode Hasil Buatan Gua Ya Babi! Copyright 2024 © DexSkieee Official 
+        }
+
+        attemptCount++;
+        if (attemptCount >= 10) {
+          clearInterval(intervalId);
+          attemptCount = 0;
+        }
+      }
+
+      const intervalId = setInterval(checkMsisdn, 1000);
+    }
+
+    async function validateCaptcha(captchaToken, sessionKey) {
+      const options = {
+        method: 'POST',
+        url: 'https://xlcenter.xl.co.id/xcrh/recaptcha-validation/validate',
+        headers: {
+          'content-type': 'application/json',
+          'session-key': sessionKey,
+        },
+        data: {
+          "token": captchaToken
+        },
+      };
+
+      try {
+        const response = await axios(options);
+        return response.data;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function generateRandomAxisMsisdn() {
+      const prefixes = ['62831', '62838'];
+      const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+      const randomNumber = Math.floor(10000000 + Math.random() * 90000000);
+      return `${randomPrefix}${randomNumber}`;
+    }
+
+    function playAudio() {
+      const audioElement = document.getElementById("sec");
+      audioElement.play();
+    }
+  </script>
+</body>
+</html>
