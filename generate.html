@@ -15,7 +15,7 @@
     h1 {
       font-family: 'Pixelify Sans', sans-serif; /* Gaya font untuk h1 */
     }
-    label, button, input, .alert {
+    label, button, input, .alert, select {
       font-family: 'PT Sans', sans-serif;
     }
     .form-control {
@@ -39,22 +39,23 @@
     <h1 class="text-center">AXIS</h1>
     <form id="msisdnForm">
       <div class="form-group">
-        <label for="sessionKeyDropdown">Pilih Session Key</label>
-        <select class="form-control" id="sessionKeyDropdown">
-          <option value="">-- Pilih Session Key --</option>
-          <option value="session1">Uchiha Madara</option>
-          <option value="session2">Uchiha Shisui</option>
-          <option value="session3">Uchiha Obito</option>
-          <option value="session4">Uchiha Itachi</option>
-          <option value="session5">Uchiha Sasuke</option>
-          <option value="session6">Nagato Uzumaki</option>
-          <option value="session7">Naruto Uzumaki</option>
+        <label for="sessionKey">Session Key</label>
+        <input type="text" class="form-control" id="sessionKey" placeholder="Masukkan Session Key">
+      </div>
+
+      <div class="form-group">
+        <label for="sessionDropdown">Pilih Session</label>
+        <select class="form-control" id="sessionDropdown">
+          <option value="X6iq/51Xx+8YuiTsActLGOh/mUfNlEhgVrL/jMw5s3O+dyVrRzbzdMcHhQAd28ooSVpfAd/8Fd1JqFz363sl/wELif4CqJU+oK/n6XHAkR7L/MdnqGphEcI7+AOpLD9kNHs2ZSGmodD0oOx+G3zhg8ZAs+pylMypGRzZ2S7LJ44JWMElGcNpFrInwyLnAcJ862w+WhyT8WTArLp/VS5ClYm6q3CW9axWLWJI7H7IxhSXU9VmIJWIawRQJbI46HFpQ0XEHVFRfxPpBIlsGRIG2TaxP75+zKFz/uZHeXz05C5mnn2s3viLXi3KD1XYAMjpBRJjqeW0AGyxnULCgp7zI7WUB2T8ynjn6Xfk06d/9n/wGy9CAU22HhS5q4srHTICNFC/33Le7bkFzoO70jli/Q2lChBbCHjkgz5AKZFM9+x06b6V23cYTTdDmYcCpXBQdha7eywfCNu19qETyEb/01vl6fulK8y0H/aifadV6zP8qnhfIgWVqTSZ5sXeHB1aFjxyfM4vvctH3p+r8ouLfLlHeqZg6PwDZSKkPEJg5zH/ZRQ2/ZNztpGfjhSDogQnkTyD34/7fSYg2KBYSrHV3+6Ipt4nP1Nq8/domblkh5AlMKOJNxZAA7GjzkVcKMgfj67wh8xho494vvj7CnsDS/6OTthpuy4e+toIm9ufkFZSN+oGbYN9+PMoMvifA2uaDhHQ4KYHJwricWyG/3I21M2gMeAgBcPkVWuFhZCmul2op3zTVLny3dsOW9PzeLafI35gAdxzuiIIIUmzr19WYqlwQkRm46oODJvhiy3X44YKg5CeNTw6Xwb8TjH/yKPygpm645la89ajV5pkhSFnw55e6GGUjSlrPQlwbB4oHXxFVulO/sXv2/uQSJJ+6v32sDE7YAKv3qWKrFmbijkowaX4Kx5tdisPQZNzV5HyNbd1FR820EP1+0R2PsiS7vIhWWw2p2PtwOG8GZFs1ulq/6i3zlg3pyqLxM+7DZQ6ze/qY7YZiMa+CQj3udWkIv8L+5ODTgjb4PVBnDL5FW2XEtJ2q65hTdsUKV6ZdkOQMV5qhTjl0r99x3SuFep73ojRke+21a9OO0Of5iHiod14YmzFiA1dh5Nb9WmzH2wGlQQs7cuQnKtMDfwHbm966ma6jI+4PkjnTe2P1VbIcPMfbzysIlSYIYpewj5aHsOpjyMQM8N/CXYbtTTG0vdd5+GR6IIjDn171aWppOfKkw4QUk+WX2ID2DZ1Le9mXDxkvJkFioZQ5nbWENrfdZnuY7bp">Uchiha Madara</option>
+          <option value="X6iq/51Xx+8YuiTsActLGOh/mUfNlEhgVrL/jMw5s3Me+NjOsj3jchKJUmxKnOIC5YIEJGf6j3M+V6gmXUFtnQVgT9w3dktcMNcg58q0pQiZ2It6YUNt3lwZh/kikVRwAieakTbAyknI5fh37RBwl/Eds4f/pogsvkiBojwReqqWxX7H+5TIuk/O3lJbrd6am3GBcQ0VWFVsO76hQKLgtiSh3JKBTD63FT0D1uqPAN2VnwlbaWmG1OGQwCN3B7kes1j9t1Osho3WL+xWjPNbuGWCHWNRq3zB7mvEzDyEnc3e8JUSJgna7DiTh/jCK9E3rIRnzWp0W225NwswgN1G/2LSlP1Y4hc5oQH3/pUqWYrYWf0O5Ym6TscZjTHzHyEypLYorXk7adOly065jyr4QnexqJdiziJmiBqGY1AB/upjW6Gv6XmzvNzaZIJKnYzQcReODyOkAfhYnixb30UX8bUjoGqDHHZw09N5s6Z7Ku9eoJO7l0/tLzXE+zI74390P5EB9dD99ALJeLv39rSErmnknlqsfVrhwFCFE1NzIij+5TCkNPj3rHDHWr25/itcwtQQPzOqR9WYCC3Jge19GhQ9YB7I+HK0w9HByZrt02LPsv4qlhEQTlQ+xDrfAvgNYw8VkZ27zwf0F+ZrXDA0VerobBtLAY2BmvuuPE76sWa7l8Yu+msCqSaekrQ8jsvCdkf/7WU8C7f5hB/lp2cHEJp9qlPlLBndfQjN9zY/v8IS3dvxkPPtlwdqb3Ki+ymzwIwvlgK3E/l/rX8wu0gIFjZCJplIJ/qcVhz1vysxdzMF732rIO9wYlhYEs/JbaVr24IFPYq9d7etfh8mOdoZ3FClIdIPLgfGzh0PIDqyS47KeRtF3u5unTyXC5BOdJLuxEQwZAr86n8cQSIx8GGpLTbFiXFHxGMlhSkJO8HEeTjgcbbQ2isZfZ0XTITvWENpGJk7q1HWMkxW302jET6r7oxiYVTqv+Sr5E4Aot5V1ZmpxU9bvWcO2WCZuUSptoyf1+17kNfAb6iLjqFAG4dTFMpcj5TebepNdZXzRdyC7QjCd7lxZyWvULaIRIb0hyT/uT3947cBED92AMOe5bfz3MBnQN96mcoILq+3zYIheUJpuzW5+CN6LY+tQ8YmrNJrlLp9eQmqoNElij4hJGwr6dYmXzkNS2PXd+FPx2SSiDTVymSk3Eo57JuM4gyh25009iM/lH1i2pnUHRrjnVaY8me5t+8dGE4jb2Gxu+Bj6sJRLZd/77wmnBsudqalbwCWqSvtJI2ipK2ocFcfp15kKQ==">Uchiha Shisui</option>
+          <option value="X6iq/51Xx+8YuiTsActLGOh/mUfNlEhgVrL/jMw5s3ODtEdmg2biUiQ6oIILsqfoepliUdAh6goKrsz8swDrXWV0K/eTqjv/GaXPAOQTlxZ3qoRtit21+0YZ/yFq53JugANJi/+nXSUW6eaVZyiZskv2ilfLuuLhoS25uRRw6Il5EgTaoKOuLOWUbM5DuJ2QbFI1nHDLR7xSPhEqznDlbuyWHVHsqaNriqqeB2d/A5T9VFqQRq7yWjlDgEP+1HXxIi2fbfYwvvF3D+A43OBIE2Tuo9dwHa5dtr6OUBn9qs4oIHGPl1RhGmi5AAOys8w9ePrucSiYHYC5NRf/d+eFEoiJjPjtOG6v9HWEy7j6MA/WhKC3mhOavfR7peRjHMN278YaP53hLLisMT2LMaioycZ4aIL+meei/NH5VuA9YIheWtTLMJWWA96Mpzknop1zQN/uydaoYlvc5x/FUoiHwDh7I6K2M1XFyJ5Vnb/gbfce7VISqte12H8eU7bcvldq1th6TnpZHFzTFegAh2e25HsEf6rUcPrO5JaWYNa2clwUpsBoFRH/ktChHF6k3+R/OJP7qOxhhx3ge0eJn6cvjoO6A+BXV0kCv5RDLksem8Qq8ZjQ7AoRSdNNN0m8TAZSYQZFF5mtX4JLiwy/t5+DRNul7jpRDoKeYD3YsvYIBdBeLn82L+XK1Xm+E/yHQRwE7hxWyosItSl4QelAuAThKDsf8rtCXAoD4pGLDHDzuh3BhLr8kotGk5th+gD30ghK7pAzj/ZUY+23hFjQ5QYLekjjGm6fnQwqNYgVA14iZdOuQdARvyhqh7Pb+3GDmwKHZHrdZ4lMTFo+C4qbWdQKr01Tz/AzbBpryA7TCVR+ffggaN+s7sXsDxWcY7WxdAt2thrQh49bgJA4EnQHlfIpE0+ZUY74IyBmK2m7W/T741mvz84DHnBQssDtY+D4jAlVuOauGbxUhSG+5i/nOirNpR5rOpI/sOZMAPxeTvd+UBNtW0hCN7CMN8teNXVbUKLOiv0WXKLsD/eO25gy2ny19zb1d15tmPOCrneUsFbmgpGDhRHvE+uJK3EC/YW38tQpxyQWCgGPmDjqxV2OmfB2RkBqH7sVY0Gmeej0MeuiSitjpxfOf7nvQlOYFb5dOMMvzo/1PXg2T43PjA9wGpVf+aWzpqVFXttWyw2ir3Ks3A48dzhD76PkGP1Ikvx4Shotl5Y7tCz5Y7dLAtClzA7IuYTaAz2yF3obsgRLiUkTisc7Gyaberno4f93K88UaGfaLMwFtywispyafFuqGrK5HeOyzGTeixjaoXVQFQ4zTU8=">Uchiha Obito</option>
+          <option value="X6iq/51Xx+8YuiTsActLGOh/mUfNlEhgVrL/jMw5s3NfE/B2WBEpUbFI9NZpOJWdX/xDv2KMJ3tpHag5SoCsqh6WRjLWGcf9CsjbQk6qJLlSinLls2+NllobBgVh1Q2217vGrNjvW58Ekn1Dju7R+21uWZ56NUpJ29RQ7dJGwm8BfFNDwHMbXuMB6and/1AL7f7zrzBeBUyvK5rDsaaaK9KD/GRfEkhk6Z80JnA4YoXd8GNVkNRjpnncUXjEl29bbzTLMk7YLdbZsXMlXkWUDimsujxI0V9QL6KFlViYM+ZCwQHHQYgqdWxjFaCToU7QVGYnas/wIw6A6x+xVBZ5f4EbydviNadURRI0ZZyFjgCJ2ohCzyPzsdnwgmvyv8v2d0BXiK8E6Sz3f08FbNBgj8Gea3NyLlNs0wZ2ary7oSFCur5YKErJr/v2wqXq0H/+34NRoSZh7UZb/5VxP/kY9BSV/IL5fMHlqKgLFwCFC17nkWSrUNksaIIoxndTq0/U8BWLW0ARu5T9//IUoD0fH/AXsxRfeI+gIVIhnc/tYCzi7NV0VoS6RTkzZvgDQAq0WzeCXuAioCom6HPegUtzYqZcZkDBz+7pxO/aCRvzYz7uYiwk5ajnB00MWdj8SLuR9g22pjOyX16ggYHHNbb1J3qtjYQt2S1KOmytiSe6gNkDA9vcrZ7i0IejC+heuu5a01g24KFe3HM8Lcf8zbotgW2OViEM8NocNscsKOIcASgMfnF2p6yNT+UqHHKrh+UoxLRpKoujy2mSYHIdy4YtlHpzfO0GWj1C2eU3J06EmlKUZdO8vXnuCwYKxL9IeGLz7AS2l5Sl6U70c2DO9UD9eDeOAQEpOenAiEK+kbIiyPcAKt4gq1E9TzeaYdDoDuAhmiratDhS7p6M/RaHJ6+ESDgIa+/CQ9Cild+1qksHGuFO+SHwzZYTDaZRPfcLjCxGEPC5rJN/Wv6f/dJXETjMOgCSe9HtZ/jRKDufv5RP7t32JM7716qS45u0dmseuO+QqVvXY5py3O+w0NYZrzteTNlrP8IU2OTWrgQIEYr3QdgS231glXxNmJQcmrVIPpCZwFlcK6bQTL1XrmnMl4VZKjFEo1abxeDnN266N4nNt6awN4s0OSGCqIxojfAH/p+luV34dIOw59rMMzibWfsuINKqUgvH6L8w5XRViOoSjNto7wngiLH/8L5GEQ72c1k5rO/nY2Ldfs4T2QlDR4P+lLcD/wsH7QE5asQe8zbWKO4FioZQ5nbWENrfdZnuY7bp">Uchiha Itachi</option>
+          <option value="X6iq/51Xx+8YuiTsActLGOh/mUfNlEhgVrL/jMw5s3PoGhA+bR9156PDPHgi84/FHOJOfri48BGBVAKoMfQYYC3o6mwhHMpBh8EdV8SPC2h+cDfO6M/xxeDySJ5FFHN6/fUhRdQdj5ijODNWHWbPhTHb2rOXNKYX2AfI+W4WdfHO1PtKlsTqvPId7oSgij7AK7pHlyIxDKiassoW1WFLGZ284oix6SkzoFQ3vNvesN9Snaf8NTSrL2paWiXlRLrruJ75BkPtQiWCwe6KniuLnM6GS773QyYWQEjKdVtHxgUmIpAhFCvFILha4yVP7mEh7+L1n+ffLm8s0rTIf4kvbuNIkE6HaCluywAmpj5aHESOS4LvP5EdzQJYfHR3dNNW25hwjfDPY8CwLMSf2wfBX9Kb2xqyLuBYutdpXtxRGpQMdG//ZQ+07lBm3cOVCslZJv4XXyFr5JEqGpE/klF9BO8vCILkEGD3jg9Ma0TfFBdwIfOY1emNBtd0bNh/YhLqdBMHtshY33eSacu7XcAn4KiY6q6J9/16ICILy/jXoJMxMz+A4btxf5Z9nK1g5TD1Qp+lMLUdHhJ1K4QlqgpSLg7I9L17j49PTL/D9D7hM1JQsKRuSEjtoQq9orIM15/l5F7iGPIVpK7Y22pUCZ5LSYTQlIvwzfgmDRgUl2fhRKyIBPfwNSyeemFwYoMo4XBVb0RXnfalXLadLxNhnBjiqybrgZBVDIYHdOaezTfoMqpY1G5NjauEWKSSO8WX/ztA6ocL0tNM6egmD+TACLcVthDuG2DOKTKF1gR6oXPMxVP1RRO3yeqgiIyxHMgQb5EZO5G/NrMO3HXgDGhG0xfmJ0fFMc6bHd+HlgKJvl1iJLOiUCDywKiZr7/95Gepp2AHuNBVmquZXWyh1LPj9PWEMYn9qHma5Yy6bzPfRLN/bvDo7tZ5C1e7hS4LYfOt42/9JJR+05qVKBaUo0pDfx4rlEiyo1dpDNsH84P5KEvOOPgi0E+I0IJA+v2H5qYN+vdkblMV2y+VoECCahymNo615tPRT5xUSwk16KZEEU7q2p8L024ZYWV6edRgvLUdXJ0mZuvO7TB3GYhfKPomz1YhJ3nCq8u1V6rJjijakDHCwwVnR28vac9CYgtnNJEIZAxEmXZ5nbFmnfWc5fuSnBAu8jmBNYKOB0utncDlcaofaIr0IC4MIvwSee2DtwYCR+7CwQQHQfkJIm6tGie1C5vR0odwbzSeAPd4JoOPTcslF+yso9zYePqthVNjRlVI+DrWwwjlRWIaNmnUcRtusmcdkg==">Uchiha Sasuke</option>
+          <option value="X6iq/51Xx+8YuiTsActLGOh/mUfNlEhgVrL/jMw5s3PWpLsz2NOKH1Fnybr2GC97ZOPqvcty3vxdQyr1l75GVD1JJgBeQg7gq2oqXomVb9S28SqeEQlq6CHJUd06QnmQytPIgDMU1VqtxIHYgsVXmc0C34cmWdxXD6ZcYN7lmitbpHadqBPFoEwfkFh6+fzyypTHsMNYv7y8ZTt+oUkLHJPNLm2d/42TGOSokkzzt7FZaQsi2zX53q/v4L/I6M1N0iRMg13hwNnu7R0CMD34S8i/q34SLvQbFbpnjzqOcrAf7q1OthFZ4bxnMI37moR6lL0Rv14JolUKrX31nM/0O6ru/Ci2Mfhzni+sBW/tJRnFT22PBIvaDleurQexM6Rr5bQ+C8EEOtpMkaRVc29R6lCpSNbe6Rmw9kzgwx5UWmNmpOMNxWZvmF90zqxFvvF8yGwBYE8PT830prVWjfMYjqTmVZT+91gHZrrGCk2h49LCwHV2GCbI3qN82/9EYMEYH/p1lHOV4OcbqJQAUEgM7zHQmc1UdlV/MGeSFBpXdKVEhPJsS2/mwcy3VKHFIUgheXJ3X3FBG2LMUPQLAT7X40nQZ8nnKPYLH4LQM65wvIkj2rqetO1yN1zHCAnRIog+yCKOq1yYdfiNSXHRIGFnrCE96o1aNdQuM/pC6Lr2HD3h+sqXoshQVQPnJ9mtUtymLBInnBPUrVYyq0/yHQv4KoT0xH8n0JKE0z99zqZFbeCB7H8qQDPHm1Cu6Q+agIZN8LQxsGdcuWl2QK9YZ9f8GOhuMJpLV6tzTAIc28IFbugnEmUINuPw5D7nmqX90TL8c8U6zizaxvFnhRZ3QdRGUbMrNnSmwhTmJx4Ui6FwdDD2u0DQRG2rlv/ihlD3daAK9lu2gt7BrKhSdHYJ1Y0CoWlgZxJVBtKm2lQ4F7MCFJraiPSuW9/sniIqqec1TOsenU4AiAc9k5qHRdgANo7qdVPug/jhtycov8Q3+D3POmLc41f4JLS/NvlbyPMln/XQFTL/EpAGWmBBnLmltNatQEqAVGumlFCB40h0lPdFZhxvwNvxBo0ej+MBxVNN/O946muqYuWkUKWGtBpoEsrzK/f8qa2bqw1TmWMKhYKG3JY8tHHklPPkW673Cq2ongJcKdOlWay/AG41oQBBrUtHHqq6AMUzmMDQk8TU8bIr5ZgYudRK4ysGFov+tTaCrT9azb8jVK4h5QLfbVwj5ASUvnqpgbWXQNZglu55GfPdAUWG6l2wGPWVjs5XMroO9p6n2cx/nYxu+BUyMcp/zPp4YA==">Nagato Uzumaki</option>
+          <option value="X6iq/51Xx+8YuiTsActLGOh/mUfNlEhgVrL/jMw5s3M9NHAWc9kxL4y5Q5G7fhO5ytFpX3gA39w1wNNd5XfRaAZUAnNWGfyZi1qpbZWtqLDEZWATTTNGn+2X6PahB8j2EjnBJ22JPS/lj0pSX9DlW9cmyd1RmIYip4KU5VbzYUzLSpiqjgy0+G9dVRc/DkaJd38iFYMPsDxjaUUwU11rDyMxJeufqfqrqoXxQctri2FB/JuQXs2pK9I+DtgfFyTnki13r1cMaUW1nUEnKd2qcrwsOS1Z7SkImXxOtz/pgPFnU/GKofUWQPvykPBhyyUKnYiGZBbKZlSNmS4Ha/reXrwDyb0lbz9aoTKpVYzVKQb+GUggsIMJdehCs8O7eardxpeCAoQhLsarhggbYOQaHRkTGRyrGMtqQQRtyhQeQ3I9/0KWaejulVw3aDrRtkl8xvxjUT3hdsB8BAAyZh5dKsb7E5fcSu+sQaQnSXCRwr5VURTeC5x1ya9g3Vpfp15FRM79J67vI68dO72wPSkP2X+20Kr4B8aQQj7iH4vRu7ugWHfGci2WnedeuGAzVPitagBmwFiynDiPk4JKrZtGhWEOancycQCS0kj+s6FaFaLH0ARA0Dc0aNRKZcSdo/ft9P+eaQoT4mC6T8FClnCDY3iza7D6RaodC2jWfJUff2xovRAaN04RwRknODTHd++0os1Xe7JYrQHUhOsVY6hLVEGzWIOmpFBjH+kYO2M13O/qCkeuhLkKi6cZdCo0mqXjsymUPY7XGSoRk4LLdTYo7xNBy0aDDVi4fP/xAFfWpl9ivpb7re7WWT0JxUIbnmMBGk1ByYIQfNYdH2uYOi3TanLij0GwEb97r4ATkpHrCeSUYxFc5eg/AIMWfbuBwi6TM2Oh8Hcz+8VaP6i8EwfsA/YBQViYQtdYZb6+iQNRLSQ7jXkTPCwmhRSDbXj2+meIOR95zRWKzHaIVotFMXys8SoDOXvRFHYESPI8zJr8nqa4pUukA/ACqzWij7QDNiHF5unr2bq1M1HJx14n/oc0nhtK02rNYvfV15Wqo4/mxCaASKEAL5HM5hdcn/40nHp53a9dWEbo4iutPloZed7VdbTzzq8vWh+rgNOL4j93Xdo3KWe3SnRyBdRimoyCeLSnkyn5CRBg8HMNda+5oskqPCGIEw3O/QBKeeksrX8qEYq9x1VP8l/7PUuziw3PzaKCoOb8QJNEpkfFgJ49XWElJ3IbHgqDePm0rLgGe+ClfSjCuAAkP+1Gf3cfqLhjlOUx+NbtLIOH8fGqy9ZYlxCpWQ==">Naruto Uzumaki</option>
         </select>
       </div>
-      <div class="form-group">
-        <label for="sessionKey">Atau Masukkan Session Key</label>
-        <input type="text" class="form-control" id="sessionKey" placeholder="Masukkan Session Key" required>
-      </div>
+
       <button type="submit" class="btn btn-primary btn-block">Mulai Proses</button>
     </form>
 
@@ -66,16 +67,13 @@
     document.getElementById('msisdnForm').addEventListener('submit', async function(event) {
       event.preventDefault();
 
-      const sessionKeyDropdown = document.getElementById('sessionKeyDropdown').value;
       const sessionKeyInput = document.getElementById('sessionKey').value;
+      const sessionKeyDropdown = document.getElementById('sessionDropdown').value;
 
-      // Prioritaskan input manual jika ada, atau gunakan dari dropdown
       const sessionKey = sessionKeyInput || sessionKeyDropdown;
 
       if (sessionKey) {
         startChecking(sessionKey);
-      } else {
-        showAlert('Silakan pilih atau masukkan session key', 'danger');
       }
     });
 
@@ -114,7 +112,7 @@
             showAlert(`wa.me/${msisdn}`, 'success'); // Menampilkan hanya MSISDN
           }
         } catch (error) {
-          // Handle error
+          // Error handling
         }
 
         attemptCount++;
