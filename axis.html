@@ -14,23 +14,27 @@
     }
     label, button, input, .alert {
       font-family: 'PT Sans', sans-serif;
-      color: #fff; /* Warna teks putih */
     }
     .form-control {
       background-color: #333; /* Background input hitam */
       border: 1px solid #555; /* Border input abu-abu */
       color: #fff; /* Warna teks input putih */
     }
+    .form-control:focus {
+      background-color: #555; /* Background input saat fokus abu-abu */
+      border-color: #777; /* Border input saat fokus abu-abu lebih terang */
+      color: #fff; /* Warna teks tetap putih */
+    }
     .btn-primary {
       background-color: #555; /* Background tombol abu-abu */
       border-color: #777; /* Border tombol abu-abu tua */
     }
     .btn-primary:hover {
-      background-color: #777; /* Background tombol saat hover abu-abu lebih terang */
-      border-color: #999; /* Border tombol saat hover abu-abu lebih terang */
+      background-color: #555; /* Background tombol hover tetap sama */
+      border-color: #777; /* Border tombol hover tetap sama */
     }
     .alert {
-      color: #fff; /* Warna teks di alert */
+      color: #fff; /* Warna teks alert */
       background-color: #333; /* Background alert abu-abu gelap */
       border-color: #555; /* Border alert abu-abu */
     }
