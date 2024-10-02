@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DexSkieee Ofc</title>
+  <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Playwrite DE Grund', sans-serif;
+      background-color: #000; /* Background hitam */
+      color: #fff; /* Warna teks putih */
+    }
+    h1 {
+      font-family: 'Pixelify Sans', sans-serif; /* Gaya font untuk h1 */
+    }
+    label, button, input, .alert {
+      font-family: 'PT Sans', sans-serif;
+    }
+    .form-control {
+      background-color: #333; /* Background input hitam */
+      border: 1px solid #555; /* Border input abu-abu */
+      color: #fff; /* Warna teks input putih */
+    }
+    .form-control:focus {
+      background-color: #555; /* Background input saat fokus abu-abu */
+      border-color: #777; /* Border input saat fokus abu-abu lebih terang */
+      color: #fff; /* Warna teks tetap putih */
+    }
+  </style>
+</head>
+<body onclick="playAudio();" class="">
+  <audio id="sec">
+    <source src="https://g.top4top.io/m_319620fge0.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="container mt-5">
+    <h1 class="text-center">AXIS</h1>
+    <form id="msisdnForm">
+      <div class="form-group">
+        <label for="sessionKeyDropdown">Pilih Session Key</label>
+        <select class="form-control" id="sessionKeyDropdown">
+          <option value="">-- Pilih Session Key --</option>
+          <option value="session1">Uchiha Madara</option>
+          <option value="session2">Uchiha Shisui</option>
+          <option value="session3">Uchiha Obito</option>
+          <option value="session4">Uchiha Itachi</option>
+          <option value="session5">Uchiha Sasuke</option>
+          <option value="session6">Nagato Uzumaki</option>
+          <option value="session7">Naruto Uzumaki</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="sessionKey">Atau Masukkan Session Key</label>
+        <input type="text" class="form-control" id="sessionKey" placeholder="Masukkan Session Key" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Mulai Proses</button>
+    </form>
+
+    <div id="alertContainer" class="mt-3"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    document.getElementById('msisdnForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const sessionKeyDropdown = document.getElementById('sessionKeyDropdown').value;
+      const sessionKeyInput = document.getElementById('sessionKey').value;
+
+      // Prioritaskan input manual jika ada, atau gunakan dari dropdown
+      const sessionKey = sessionKeyInput || sessionKeyDropdown;
+
+      if (sessionKey) {
+        startChecking(sessionKey);
+      } else {
+        showAlert('Silakan pilih atau masukkan session key', 'danger');
+      }
+    });
+
+    function showAlert(message, type) {
+      const alertContainer = document.getElementById('alertContainer');
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.role = 'alert';
+      alertDiv.innerHTML = message;
+      alertContainer.appendChild(alertDiv);
+    }
+
+    async function startChecking(sessionKey) {
+      let attemptCount = 0;
+
+      async function checkMsisdn() {
+        const msisdn = generateRandomAxisMsisdn();
+
+        const options = {
+          method: 'GET',
+          url: 'https://xlcenter.xl.co.id/xcrh/page/sim-card-services/eligibility-criteria',
+          params: {
+            msisdn: msisdn,
+            simCardService: 'REACTIVATION'
+          },
+          headers: {
+            'session-key': sessionKey
+          }
+        };
+
+        try {
+          const response = await axios(options);
+          const data = response.data;
+
+          if (data.responseData && data.responseData.reasonIndonesian === 'Error! Nomor anda masih aktif') {
+            showAlert(`wa.me/${msisdn}`, 'success'); // Menampilkan hanya MSISDN
+          }
+        } catch (error) {
+          // Handle error
+        }
+
+        attemptCount++;
+        if (attemptCount >= 10) {
+          clearInterval(intervalId);
+          attemptCount = 0;
+        }
+      }
+
+      const intervalId = setInterval(checkMsisdn, 1000);
+    }
+
+    function generateRandomAxisMsisdn() {
+      const prefixes = ['62831', '62838'];
+      const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+      const randomNumber = Math.floor(10000000 + Math.random() * 90000000);
+      return `${randomPrefix}${randomNumber}`;
+    }
+
+    function playAudio() {
+      const audioElement = document.getElementById("sec");
+      audioElement.play();
+    }
+  </script>
+</body>
+</html>
