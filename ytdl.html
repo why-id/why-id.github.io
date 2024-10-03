@@ -15,7 +15,7 @@
     h1 {
       font-family: 'Pixelify Sans', sans-serif; /* Gaya font untuk h1 */
     }
-    label, button, input, .alert {
+    label, button, input, select, .alert {
       font-family: 'PT Sans', sans-serif;
     }
     .form-control {
@@ -37,10 +37,19 @@
 
   <div class="container mt-5">
     <h1 class="text-center">YT DOWNLOAD</h1> <!-- Mengubah teks AXIS ke YT DOWNLOAD -->
+
+    <!-- Form pertama untuk download video/audio -->
     <form id="downloadForm">
       <div class="form-group">
         <label for="videoUrl">YouTube Video URL</label>
         <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan URL Video YouTube" required>
+      </div>
+      <div class="form-group">
+        <label for="downloadOption">Pilih Format Download</label>
+        <select id="downloadOption" class="form-control" required>
+          <option value="mp3">Audio (MP3)</option>
+          <option value="mp4">Video (MP4)</option>
+        </select>
       </div>
       <button type="submit" class="btn btn-primary btn-block">Download</button>
     </form>
@@ -54,9 +63,14 @@
       event.preventDefault();
 
       const videoUrl = document.getElementById('videoUrl').value;
+      const downloadOption = document.getElementById('downloadOption').value;
 
       if (videoUrl) {
-        downloadMP3(videoUrl);
+        if (downloadOption === 'mp3') {
+          downloadMP3(videoUrl);
+        } else {
+          downloadMP4(videoUrl);
+        }
       }
     });
 
@@ -69,23 +83,9 @@
         });
 
         const mp3Url = response.data.result.mp3;
-        
-        // Membuat elemen link untuk mendownload file
+
+        // Membuat elemen link untuk mendownload file MP3
         const link = document.createElement('a');
         link.href = mp3Url;
         link.setAttribute('download', '');
         document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link); // Menghapus link setelah download
-      } catch (error) {
-        console.error('Error saat mendownload MP3:', error);
-      }
-    }
-
-    function playAudio() {
-      const audioElement = document.getElementById("sec");
-      audioElement.play();
-    }
-  </script>
-</body>
-</html>
