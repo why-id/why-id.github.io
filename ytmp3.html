@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DexSkieee Ofc</title>
+  <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Playwrite DE Grund', sans-serif;
+      background-color: #000; /* Background hitam */
+      color: #fff; /* Warna teks putih */
+    }
+    h1 {
+      font-family: 'Pixelify Sans', sans-serif; /* Gaya font untuk h1 */
+    }
+    label, button, input, .alert {
+      font-family: 'PT Sans', sans-serif;
+    }
+    .form-control {
+      background-color: #333; /* Background input hitam */
+      border: 1px solid #555; /* Border input abu-abu */
+      color: #fff; /* Warna teks input putih */
+    }
+    .form-control:focus {
+      background-color: #555; /* Background input saat fokus abu-abu */
+      border-color: #777; /* Border input saat fokus abu-abu lebih terang */
+      color: #fff; /* Warna teks tetap putih */
+    }
+  </style>
+</head>
+<body onclick="playAudio();" class="">
+  <audio id="sec">
+    <source src="https://g.top4top.io/m_319620fge0.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="container mt-5">
+    <h1 class="text-center">YT DOWNLOAD</h1> <!-- Mengubah teks AXIS ke YT DOWNLOAD -->
+    <form id="downloadForm">
+      <div class="form-group">
+        <label for="videoUrl">YouTube Video URL</label>
+        <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan URL Video YouTube" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Download</button>
+    </form>
+
+    <div id="alertContainer" class="mt-3"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    document.getElementById('downloadForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const videoUrl = document.getElementById('videoUrl').value;
+
+      if (videoUrl) {
+        downloadMP3(videoUrl);
+      }
+    });
+
+    async function downloadMP3(linkToDownload) {
+      try {
+        const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(linkToDownload)}`, {
+          headers: {
+            'accept': 'application/json'
+          }
+        });
+
+        const mp3Url = response.data.result.mp3;
+        
+        // Membuat elemen link untuk mendownload file
+        const link = document.createElement('a');
+        link.href = mp3Url;
+        link.setAttribute('download', '');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link); // Menghapus link setelah download
+      } catch (error) {
+        console.error('Error saat mendownload MP3:', error);
+      }
+    }
+
+    function playAudio() {
+      const audioElement = document.getElementById("sec");
+      audioElement.play();
+    }
+  </script>
+</body>
+</html>
