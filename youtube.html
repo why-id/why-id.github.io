@@ -110,6 +110,10 @@
         return;
       }
 
+      // Menghapus alert sebelumnya jika ada
+      const alertContainer = document.getElementById('alertContainer');
+      alertContainer.innerHTML = ''; // Hapus alert yang ada sebelumnya
+      
       await searchAndPrepareDownload(videoUrl);
     });
 
@@ -124,15 +128,17 @@
 
     function showAlert(message, type) {
       const alertContainer = document.getElementById('alertContainer');
-      alertContainer.innerHTML = ''; // Hapus alert yang ada sebelumnya
       const alertDiv = document.createElement('div');
       alertDiv.className = `alert alert-${type}`;
       alertDiv.innerHTML = message;
       alertContainer.appendChild(alertDiv);
 
-      setTimeout(() => {
-        alertDiv.remove();
-      }, 2000); // Hapus alert setelah 2 detik
+      // Jika alert jenis 'danger', hapus setelah 2 detik
+      if (type === 'danger') {
+        setTimeout(() => {
+          alertDiv.remove();
+        }, 2000);
+      }
     }
 
     async function searchAndPrepareDownload(query) {
