@@ -41,8 +41,9 @@
       display: block;
       margin: auto;
     }
+    /* Styling untuk loading bar */
     #loadingBar {
-      display: none; 
+      display: none; /* Sembunyikan loading bar secara default */
       position: fixed;
       top: 0;
       left: 0;
@@ -60,7 +61,7 @@
   </style>
 </head>
 <body>
-  <div id="loadingBar"></div>
+  <div id="loadingBar"></div> <!-- Loading bar -->
   <div class="container mt-5">
     <h1 class="text-center"><i class="fa fa-youtube-play youtube-icon" aria-hidden="true"></i> YT DexSkieee </h1>
 
@@ -84,10 +85,9 @@
         <option value="mp4">VIDEO/MP4</option>
       </select>
       <button id="downloadButton" class="btn btn-danger btn-block mt-2">Download</button>
-      <!-- Tombol Preview Audio -->
-      <button id="previewButton" class="btn btn-primary btn-block mt-2" disabled>Preview Audio</button>
-      <audio id="audioPreview" style="display:none;" controls>
-        <source id="audioSource" src="" type="audio/mpeg">
+      <button id="previewButton" onclick="prepareAudioPreview();" class="btn btn-warning btn-block mt-2">Preview Audio</button>
+      <audio id="sec" style="display:none;"> 
+        <source id="audioSource" src="" type="audio/mpeg"> 
       </audio>
     </div>
   </div>
@@ -96,7 +96,6 @@
   <script>
     let videoToDownload;
     let videoTitle;
-    let mp3Url;  // Menyimpan URL MP3 untuk preview
 
     // Fungsi untuk mengambil ID video dari URL
     function extractVideoId(url) {
@@ -163,20 +162,6 @@
       loadingBar.style.display = 'none';
     });
 
-    document.getElementById('previewButton').addEventListener('click', function() {
-      const audioElement = document.getElementById('audioPreview');
-      const audioSource = document.getElementById('audioSource');
-
-      if (mp3Url) {
-        audioSource.src = mp3Url;
-        audioElement.style.display = 'block';  // Tampilkan elemen audio
-        audioElement.load(); // Muat ulang elemen audio dengan URL baru
-        audioElement.play(); // Putar audio
-      } else {
-        showAlert('MP3 belum siap untuk dipreview.', 'danger');
-      }
-    });
-
     function showAlert(message, type) {
       const alertContainer = document.getElementById('alertContainer');
       const alertDiv = document.createElement('div');
@@ -215,8 +200,6 @@
 
           document.getElementById('videoInfo').style.display = 'block'; 
           document.getElementById('downloadOptions').style.display = 'block';
-
-          await prepareAudioPreview(videoToDownload); // Siapkan URL MP3 untuk preview
         } else {
           showAlert('Video tidak ditemukan.', 'danger');
         }
@@ -238,27 +221,6 @@
       }
     }
 
-    async function prepareAudioPreview(linkToDownload) {
-      try {
-        const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(linkToDownload)}`, {
-          headers: {
-            'accept': 'application/json'
-          }
-        });
-
-        mp3Url = response.data.result.mp3;
-
-        if (mp3Url) {
-          document.getElementById('previewButton').disabled = false; // Aktifkan tombol preview setelah MP3 siap
-        } else {
-          showAlert('URL untuk preview MP3 tidak ditemukan.', 'danger');
-        }
-      } catch (error) {
-        console.error('Error saat menyiapkan preview MP3:', error);
-        showAlert('Terjadi kesalahan saat menyiapkan preview MP3.', 'danger');
-      }
-    }
-
     async function downloadMP3(linkToDownload) {
       try {
         const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(linkToDownload)}`, {
@@ -267,11 +229,11 @@
           }
         });
 
-        const mp3DownloadUrl = response.data.result.mp3;
+        const mp3Url = response.data.result.mp3;
 
-        if (mp3DownloadUrl) {
+        if (mp3Url) {
           const link = document.createElement('a');
-          link.href = mp3DownloadUrl;
+          link.href = mp3Url;
           link.setAttribute('download', `${videoTitle}.mp3`); 
           document.body.appendChild(link);
           link.click();
@@ -308,6 +270,40 @@
       } catch (error) {
         console.error('Error saat mendownload MP4:', error);
         showAlert('Terjadi kesalahan saat mendownload MP4.', 'danger');
+      }
+    }
+
+    function prepareAudioPreview() {
+      const audioElement = document.getElementById("sec");
+      const audioSource = document.getElementById("audioSource");
+
+      axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(videoToDownload)}`, {
+        headers: {
+          'accept': 'application/json'
+        }
+      })
+      .then(response => {
+        const mp3Url = response.data.result.mp3;
+        if (mp3Url) {
+          audioSource.src = mp3Url; 
+          audioElement.load(); // Reload audio element with new source
+          playAudio(); // Play the audio
+        } else {
+          showAlert('URL untuk preview MP3 tidak ditemukan.', 'danger');
+        }
+      })
+      .catch(error => {
+        console.error('Error saat menyiapkan preview audio:', error);
+        showAlert('Terjadi kesalahan saat menyiapkan preview audio.', 'danger');
+      });
+    }
+
+    function playAudio() {
+      const audioElement = document.getElementById("sec");
+      if (audioElement.src) {
+        audioElement.play();
+      } else {
+        showAlert('Audio tidak tersedia untuk diputar.', 'danger');
       }
     }
   </script>
