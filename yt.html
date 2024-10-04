@@ -58,6 +58,18 @@
       50% { width: 100%; }
       100% { width: 0; }
     }
+    /* Styling untuk loading bar preview */
+    #previewLoadingBar {
+      display: none; /* Sembunyikan loading bar secara default */
+      position: fixed; /* Pastikan loading bar berada di atas */
+      top: 0; /* Mengatur posisi di atas */
+      left: 0; /* Mengatur posisi di kiri */
+      width: 100%; /* Lebar 100% */
+      height: 5px; /* Tinggi 5px */
+      background-color: #d9534f; /* Warna latar belakang */
+      z-index: 9999; /* Z-index tinggi untuk tetap di atas */
+      animation: loadingAnimation 2s linear infinite; /* Menggunakan animasi yang sama */
+    }
     /* Styling untuk informasi video */
     #videoInfoText {
       text-align: center;
@@ -65,13 +77,6 @@
       font-size: 1rem;
       color: #fff;
       font-family: 'PT Sans', sans-serif; /* Mengubah font informasi video */
-    }
-    /* Styling untuk loading bar tombol preview */
-    #previewLoadingBar {
-      display: none; /* Sembunyikan loading bar secara default */
-      height: 5px;
-      background-color: #d9534f;
-      margin-top: 10px;
     }
   </style>
 </head>
@@ -219,9 +224,8 @@
           // Tampilkan informasi video di bawah thumbnail
           const videoInfoText = document.getElementById('videoInfoText');
           videoInfoText.innerHTML = `Judul: ${title}<br>Durasi: ${timestamp}<br>Waktu: ${ago}<br>Views: ${views}`;
-          
           document.getElementById('videoInfo').style.display = 'block'; 
-          document.getElementById('downloadOptions').style.display = 'block';
+          document.getElementById('downloadOptions').style.display = 'block'; 
         } else {
           showAlert('Video tidak ditemukan.', 'danger');
         }
