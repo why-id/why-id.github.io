@@ -52,10 +52,22 @@
     </form>
 
     <div id="alertContainer" class="mt-3"></div>
+
+    <!-- Dropdown untuk memilih format download -->
+    <div id="downloadOptions" class="mt-4" style="display: none;">
+      <h5>Pilih Format Download:</h5>
+      <select id="formatSelect" class="form-control">
+        <option value="mp3">MP3</option>
+        <option value="mp4">MP4</option>
+      </select>
+      <button id="downloadButton" class="btn btn-success btn-block mt-2">Download</button>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>
+    let videoToDownload;
+
     document.getElementById('downloadForm').addEventListener('submit', async function(event) {
       event.preventDefault();
 
@@ -67,7 +79,16 @@
         return;
       }
 
-      await searchAndDownloadMP3(videoUrl);
+      await searchAndPrepareDownload(videoUrl);
+    });
+
+    document.getElementById('downloadButton').addEventListener('click', async function() {
+      const selectedFormat = document.getElementById('formatSelect').value;
+      if (selectedFormat === 'mp3') {
+        await downloadMP3(videoToDownload);
+      } else if (selectedFormat === 'mp4') {
+        await downloadMP4(videoToDownload);
+      }
     });
 
     function showAlert(message, type) {
@@ -81,45 +102,81 @@
       }, 3000);
     }
 
-    async function searchAndDownloadMP3(query) {
+    async function searchAndPrepareDownload(query) {
       try {
         const searchResponse = await axios.get(`https://api.agatz.xyz/api/ytsearch?message=${encodeURIComponent(query)}`);
         const firstVideo = searchResponse.data.data[0];
 
         if (firstVideo) {
-          const videoUrl = firstVideo.url;
+          videoToDownload = firstVideo.url; // Simpan URL video untuk digunakan saat mendownload
           const title = firstVideo.title;
           const durasi = firstVideo.timestamp;
 
           // Menampilkan informasi video
           showAlert(`Judul: ${title}, Durasi: ${durasi}`, 'success');
 
-          // Mendownload MP3
-          const downloadResponse = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(videoUrl)}`, {
-            headers: {
-              'accept': 'application/json'
-            }
-          });
-
-          const mp3Url = downloadResponse.data.result.mp3;
-
-          // Cek apakah mp3Url valid sebelum mencoba mendownload
-          if (mp3Url) {
-            const link = document.createElement('a');
-            link.href = mp3Url;
-            link.setAttribute('download', `${title}.mp3`); // Menetapkan nama file download
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          } else {
-            showAlert('URL untuk MP3 tidak ditemukan.', 'danger');
-          }
+          // Tampilkan opsi download
+          document.getElementById('downloadOptions').style.display = 'block';
         } else {
           showAlert('Video tidak ditemukan.', 'danger');
         }
       } catch (error) {
-        console.error('Error saat mencari atau mendownload MP3:', error);
-        showAlert('Terjadi kesalahan saat mencari atau mendownload MP3.', 'danger');
+        console.error('Error saat mencari video:', error);
+        showAlert('Terjadi kesalahan saat mencari video.', 'danger');
+      }
+    }
+
+    async function downloadMP3(linkToDownload) {
+      try {
+        const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(linkToDownload)}`, {
+          headers: {
+            'accept': 'application/json'
+          }
+        });
+
+        const mp3Url = response.data.result.mp3;
+
+        // Cek apakah mp3Url valid sebelum mencoba mendownload
+        if (mp3Url) {
+          const link = document.createElement('a');
+          link.href = mp3Url;
+          link.setAttribute('download', `${videoToDownload}.mp3`); // Menetapkan nama file download
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
+          showAlert('URL untuk MP3 tidak ditemukan.', 'danger');
+        }
+      } catch (error) {
+        console.error('Error saat mendownload MP3:', error);
+        showAlert('Terjadi kesalahan saat mendownload MP3.', 'danger');
+      }
+    }
+
+    async function downloadMP4(linkToDownload) {
+      try {
+        const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(linkToDownload)}`, {
+          headers: {
+            'accept': 'application/json'
+          }
+        });
+
+        const mp4Url = response.data.result.mp4;
+
+        // Cek apakah mp4Url valid sebelum mencoba mendownload
+        if (mp4Url) {
+          const link = document.createElement('a');
+          link.href = mp4Url;
+          link.setAttribute('download', `${videoToDownload}.mp4`); // Menetapkan nama file download
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
+          showAlert('URL untuk MP4 tidak ditemukan.', 'danger');
+        }
+      } catch (error) {
+        console.error('Error saat mendownload MP4:', error);
+        showAlert('Terjadi kesalahan saat mendownload MP4.', 'danger');
       }
     }
 
