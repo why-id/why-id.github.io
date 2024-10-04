@@ -19,7 +19,7 @@
     h1 {
       font-family: 'Pixelify Sans', sans-serif;
     }
-    label, button, input, select, .alert {
+    label, button, input, select {
       font-family: 'PT Sans', sans-serif;
     }
     .form-control {
@@ -50,8 +50,6 @@
       </div>
       <button type="submit" class="btn btn-danger btn-block"><i class="fa fa-download" aria-hidden="true"></i> Mulai Download</button>
     </form>
-
-    <div id="alertContainer" class="mt-3"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -62,23 +60,11 @@
       const videoUrl = document.getElementById('videoUrl').value;
 
       if (!videoUrl) {
-        showAlert('URL tidak boleh kosong.', 'danger');
         return;
       }
 
       await downloadTeraBox(videoUrl);
     });
-
-    function showAlert(message, type) {
-      const alertContainer = document.getElementById('alertContainer');
-      const alertDiv = document.createElement('div');
-      alertDiv.className = `alert alert-${type}`;
-      alertDiv.textContent = message;
-      alertContainer.appendChild(alertDiv);
-      setTimeout(() => {
-        alertDiv.remove();
-      }, 3000);
-    }
 
     async function downloadTeraBox(linkToDownload) {
       try {
@@ -101,13 +87,9 @@
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-          showAlert('Download berhasil! File telah diunduh.', 'success');
-        } else {
-          showAlert('URL untuk HD Video tidak ditemukan.', 'danger');
         }
       } catch (error) {
         console.error('Error saat mendownload:', error);
-        showAlert('Terjadi kesalahan saat mendownload dari TeraBox.', 'danger');
       }
     }
 
