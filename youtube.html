@@ -37,8 +37,10 @@
       color: #fff; /* Warna teks tetap putih */
     }
     #thumbnail {
-      max-width: 100%; /* Membuat thumbnail responsif */
-      height: auto; /* Mempertahankan aspek rasio */
+      max-width: 100%; /* Maksimal lebar thumbnail otomatis */
+      height: auto; /* Tinggi otomatis untuk menjaga rasio aspek */
+      display: block; /* Menampilkan sebagai block untuk centering */
+      margin: auto; /* Mengatur margin otomatis untuk centering */
     }
   </style>
 </head>
@@ -73,7 +75,7 @@
         <option value="mp3">MP3</option>
         <option value="mp4">MP4</option>
       </select>
-      <button id="downloadButton" class="btn btn-danger btn-block mt-2">Download</button>
+      <button id="downloadButton" class="btn btn-success btn-block mt-2">Download</button>
     </div>
   </div>
 
@@ -120,18 +122,17 @@
         if (firstVideo) {
           videoToDownload = firstVideo.url; // Simpan URL video untuk digunakan saat mendownload
           const title = firstVideo.title;
-          const durasi = firstVideo.timestamp;
+          const timestamp = firstVideo.timestamp; // Mendapatkan timestamp
           const ago = firstVideo.ago; // Mendapatkan informasi waktu
           const views = firstVideo.views; // Mendapatkan jumlah views
           const thumbnail = firstVideo.thumbnail; // Mendapatkan thumbnail
 
           // Menampilkan informasi video
           document.getElementById('thumbnail').src = thumbnail; // Set thumbnail
-          document.getElementById('videoDetails').innerHTML = `Judul: ${title}<br>Durasi: ${durasi}`;
-          document.getElementById('videoInfo').style.display = 'block'; // Tampilkan info video
-          showAlert(`Judul: ${title}<br>Durasi: ${durasi}<br>Upload: ${ago}<br>Views: ${views}`, 'success');
+          showAlert(`Judul: ${title}<br>Durasi: ${timestamp}<br>Waktu: ${ago}<br>Views: ${views}`, 'success');
 
           // Tampilkan opsi download
+          document.getElementById('videoInfo').style.display = 'block'; // Tampilkan info video
           document.getElementById('downloadOptions').style.display = 'block';
         } else {
           showAlert('Video tidak ditemukan.', 'danger');
