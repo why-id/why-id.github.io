@@ -20,7 +20,10 @@
       font-family: 'Pixelify Sans', sans-serif; /* Gaya font untuk h1 */
     }
     label, button, input, .alert {
-      font-family: 'PT Sans', sans-serif;
+      font-family: 'PT Sans', sans-serif; /* Font untuk label, button, input, dan alert */
+    }
+    #downloadOptions h5 {
+      font-family: 'PT Sans', sans-serif; /* Font untuk teks "Pilih Format Download" */
     }
     .form-control {
       background-color: #333; /* Background input hitam */
@@ -60,7 +63,7 @@
         <option value="mp3">MP3</option>
         <option value="mp4">MP4</option>
       </select>
-      <button id="downloadButton" class="btn btn-success btn-block mt-2">Download</button>
+      <button id="downloadButton" class="btn btn-danger btn-block mt-2">Download</button>
     </div>
   </div>
 
@@ -95,11 +98,8 @@
       const alertContainer = document.getElementById('alertContainer');
       const alertDiv = document.createElement('div');
       alertDiv.className = `alert alert-${type}`;
-      alertDiv.textContent = message;
+      alertDiv.innerHTML = message; // Menggunakan innerHTML untuk format lebih baik
       alertContainer.appendChild(alertDiv);
-      setTimeout(() => {
-        alertDiv.remove();
-      }, 3000);
     }
 
     async function searchAndPrepareDownload(query) {
@@ -113,7 +113,7 @@
           const durasi = firstVideo.timestamp;
 
           // Menampilkan informasi video
-          showAlert(`Judul: ${title}, Durasi: ${durasi}`, 'success');
+          showAlert(`Judul: ${title}<br>Durasi: ${durasi}`, 'success');
 
           // Tampilkan opsi download
           document.getElementById('downloadOptions').style.display = 'block';
