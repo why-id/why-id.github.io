@@ -48,10 +48,10 @@
         <label for="videoUrl">TeraBox Video URL</label>
         <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan URL TeraBox" required>
       </div>
-      <button type="submit" class="btn btn-danger btn-block">Mulai Download</button>
+      <button type="submit" class="btn btn-danger btn-block">Tampilkan URL Video</button>
     </form>
     
-    <div id="alertContainer" class="mt-3"></div>
+    <div id="resultContainer" class="mt-3"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -88,12 +88,9 @@
         const result = response.data.response[0].resolutions['HD Video'];
 
         if (result) {
-          const link = document.createElement('a');
-          link.href = result;
-          link.setAttribute('download', '');
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          // Tampilkan URL hasil download di halaman
+          const resultContainer = document.getElementById('resultContainer');
+          resultContainer.innerHTML = `<a href="${result}" target="_blank" class="btn btn-success btn-block">URL Video HD: ${result}</a>`;
         } else {
           console.log('URL untuk HD Video tidak ditemukan.');
         }
