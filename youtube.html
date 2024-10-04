@@ -143,11 +143,19 @@
 
     document.getElementById('downloadButton').addEventListener('click', async function() {
       const selectedFormat = document.getElementById('formatSelect').value;
+      
+      // Tampilkan loading bar saat download dimulai
+      const loadingBar = document.getElementById('loadingBar');
+      loadingBar.style.display = 'block';
+
       if (selectedFormat === 'mp3') {
         await downloadMP3(videoToDownload);
       } else if (selectedFormat === 'mp4') {
         await downloadMP4(videoToDownload);
       }
+      
+      // Sembunyikan loading bar setelah download selesai
+      loadingBar.style.display = 'none';
     });
 
     function showAlert(message, type) {
@@ -157,11 +165,15 @@
       alertDiv.innerHTML = message;
       alertContainer.appendChild(alertDiv);
 
-      // Jika alert jenis 'danger', hapus setelah 2 detik
-      if (type === 'danger') {
+      // Jika alert jenis 'success', hapus setelah 10 detik
+      if (type === 'success') {
         setTimeout(() => {
           alertDiv.remove();
-        }, 2000);
+        }, 10000); // Hapus setelah 10 detik
+      } else if (type === 'danger') {
+        setTimeout(() => {
+          alertDiv.remove();
+        }, 2000); // Hapus setelah 2 detik
       }
     }
 
