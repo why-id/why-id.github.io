@@ -85,17 +85,13 @@
         <option value="mp4">VIDEO/MP4</option>
       </select>
       <button id="downloadButton" class="btn btn-danger btn-block mt-2">Download</button>
-      <button onclick="prepareAudioPreview();" class="btn btn-warning btn-block mt-2">Preview Audio</button>
-      <audio id="sec" style="display:none;"> 
-        <source id="audioSource" src="" type="audio/mpeg"> 
-      </audio>
-      <script>
-        var x = document.getElementById("sec"); 
-        function playAudio() { 
-          x.play(); 
-        }
-      </script>
+      <button id="previewButton" onclick="prepareAudioPreview();" class="btn btn-primary btn-block mt-2">Preview Audio</button>
     </div>
+
+    <!-- Audio Element for Preview -->
+    <audio id="sec">
+      <source id="audioSource" src="" type="audio/mpeg">
+    </audio>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -236,16 +232,16 @@
         });
 
         const mp3Url = response.data.result.mp3;
-
         if (mp3Url) {
-          const link = document.createElement('a');
-          link.href = mp3Url;
-          link.setAttribute('download', `${videoTitle}.mp3`); 
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          const a = document.createElement('a');
+          a.href = mp3Url;
+          a.download = `${videoTitle}.mp3`; 
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          showAlert('Audio berhasil diunduh!', 'success');
         } else {
-          showAlert('URL untuk MP3 tidak ditemukan.', 'danger');
+          showAlert('URL audio tidak tersedia untuk diunduh.', 'danger');
         }
       } catch (error) {
         console.error('Error saat mendownload MP3:', error);
@@ -262,16 +258,16 @@
         });
 
         const mp4Url = response.data.result.mp4;
-
         if (mp4Url) {
-          const link = document.createElement('a');
-          link.href = mp4Url;
-          link.setAttribute('download', `${videoTitle}.mp4`); 
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          const a = document.createElement('a');
+          a.href = mp4Url;
+          a.download = `${videoTitle}.mp4`; 
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          showAlert('Video berhasil diunduh!', 'success');
         } else {
-          showAlert('URL untuk MP4 tidak ditemukan.', 'danger');
+          showAlert('URL video tidak tersedia untuk diunduh.', 'danger');
         }
       } catch (error) {
         console.error('Error saat mendownload MP4:', error);
@@ -290,10 +286,11 @@
       })
       .then(response => {
         const mp3Url = response.data.result.mp3;
+        console.log("MP3 URL:", mp3Url); // Log URL untuk debugging
         if (mp3Url) {
           audioSource.src = mp3Url; 
           audioElement.load(); // Reload audio element with new source
-          playAudio(); // Play the audio
+          audioElement.play(); // Play the audio
         } else {
           showAlert('URL untuk preview MP3 tidak ditemukan.', 'danger');
         }
@@ -302,15 +299,6 @@
         console.error('Error saat menyiapkan preview audio:', error);
         showAlert('Terjadi kesalahan saat menyiapkan preview audio.', 'danger');
       });
-    }
-
-    function playAudio() {
-      const audioElement = document.getElementById("sec");
-      if (audioElement.src) {
-        audioElement.play();
-      } else {
-        showAlert('Audio tidak tersedia untuk diputar.', 'danger');
-      }
     }
   </script>
 </body>
