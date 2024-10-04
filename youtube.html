@@ -75,7 +75,7 @@
         <option value="mp3">MP3</option>
         <option value="mp4">MP4</option>
       </select>
-      <button id="downloadButton" class="btn btn-success btn-block mt-2">Download</button>
+      <button id="downloadButton" class="btn btn-danger btn-block mt-2">Download</button>
     </div>
   </div>
 
@@ -114,6 +114,18 @@
       alertContainer.appendChild(alertDiv);
     }
 
+    function formatViewsCount(count) {
+      if (count >= 1e9) {
+        return (count / 1e9).toFixed(0) + ' Miliar'; // Mengubah menjadi Miliar
+      } else if (count >= 1e6) {
+        return (count / 1e6).toFixed(0) + ' Juta'; // Mengubah menjadi Juta
+      } else if (count >= 1e3) {
+        return (count / 1e3).toFixed(0) + ' Ribu'; // Mengubah menjadi Ribu
+      } else {
+        return count.toString(); // Mengembalikan jumlah asli jika di bawah 1000
+      }
+    }
+
     async function searchAndPrepareDownload(query) {
       try {
         const searchResponse = await axios.get(`https://api.agatz.xyz/api/ytsearch?message=${encodeURIComponent(query)}`);
@@ -124,7 +136,7 @@
           const title = firstVideo.title;
           const timestamp = firstVideo.timestamp; // Mendapatkan timestamp
           const ago = firstVideo.ago; // Mendapatkan informasi waktu
-          const views = firstVideo.views; // Mendapatkan jumlah views
+          const views = formatViewsCount(firstVideo.views); // Format jumlah views
           const thumbnail = firstVideo.thumbnail; // Mendapatkan thumbnail
 
           // Menampilkan informasi video
@@ -198,8 +210,8 @@
     }
 
     function playAudio() {
-      const audioElement = document.getElementById("sec");
-      audioElement.play();
+      const audio = document.getElementById('sec');
+      audio.play();
     }
   </script>
 </body>
