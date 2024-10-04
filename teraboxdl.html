@@ -15,7 +15,7 @@
     h1 {
       font-family: 'Pixelify Sans', sans-serif; /* Gaya font untuk h1 */
     }
-    label, button, input {
+    label, button, input, .alert {
       font-family: 'PT Sans', sans-serif;
     }
     .form-control {
@@ -30,13 +30,9 @@
     }
   </style>
 </head>
-<body onclick="playAudio();" class="">
-  <audio id="sec">
-    <source src="https://g.top4top.io/m_319620fge0.mp3" type="audio/mpeg">
-  </audio>
-
+<body>
   <div class="container mt-5">
-    <h1 class="text-center">TeraBox DOWNLOAD</h1>
+    <h1 class="text-center">YT DOWNLOAD</h1>
     <form id="downloadForm">
       <div class="form-group">
         <label for="videoUrl">TeraBox URL</label>
@@ -45,7 +41,7 @@
       <button type="submit" class="btn btn-primary btn-block">Gaskeunn</button>
     </form>
 
-    <div id="resultContainer" class="mt-3"></div> <!-- Tempat untuk menampilkan hasil URL -->
+    <div id="resultContainer" class="mt-3"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -56,7 +52,7 @@
       const videoUrl = document.getElementById('videoUrl').value;
 
       if (videoUrl) {
-        await downloadTeraBox(videoUrl);
+        downloadTeraBox(videoUrl);
       }
     });
 
@@ -72,27 +68,22 @@
           }
         });
 
+        console.log(response.data); // Tambahkan ini untuk melihat respons
+
         const result = response.data.response[0].resolutions['HD Video'];
 
         if (result) {
-          // Tampilkan URL hasil download di halaman
           const resultContainer = document.getElementById('resultContainer');
           resultContainer.innerHTML = `<a href="${result}" target="_blank" class="btn btn-success btn-block">Download HD Video: ${result}</a>`;
         } else {
-          // Menampilkan pesan jika tidak ada URL
           const resultContainer = document.getElementById('resultContainer');
           resultContainer.innerHTML = `<div class="alert alert-danger">URL untuk HD Video tidak ditemukan.</div>`;
         }
       } catch (error) {
         console.error('Error saat mendownload:', error);
         const resultContainer = document.getElementById('resultContainer');
-        resultContainer.innerHTML = `<div class="alert alert-danger">Terjadi kesalahan saat mendownload.</div>`;
+        resultContainer.innerHTML = `<div class="alert alert-danger">Terjadi kesalahan saat mendownload: ${error.message}</div>`;
       }
-    }
-
-    function playAudio() {
-      const audioElement = document.getElementById("sec");
-      audioElement.play();
     }
   </script>
 </body>
