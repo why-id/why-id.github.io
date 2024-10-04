@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TikTok Download by DexSkieee Ofc</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .youtube-icon {
+      color: #d9534f;  /* Ukuran ikon (opsional) */
+    }
+    body {
+      font-family: 'Playwrite DE Grund', sans-serif;
+      background-color: #000; /* Background hitam */
+      color: #fff; /* Warna teks putih */
+    }
+    h1 {
+      font-family: 'Pixelify Sans', sans-serif; /* Gaya font untuk h1 */
+    }
+    label, button, input, select, .alert {
+      font-family: 'PT Sans', sans-serif;
+    }
+    .form-control {
+      background-color: #333; /* Background input hitam */
+      border: 1px solid #555; /* Border input abu-abu */
+      color: #fff; /* Warna teks input putih */
+    }
+    .form-control:focus {
+      background-color: #555; /* Background input saat fokus abu-abu */
+      border-color: #777; /* Border input saat fokus abu-abu lebih terang */
+      color: #fff; /* Warna teks tetap putih */
+    }
+  </style>
+</head>
+<body onclick="playAudio();" class="">
+  <audio id="sec">
+    <source src="https://g.top4top.io/m_319620fge0.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="container mt-5">
+    <h1 class="text-center"><i class="fa-brands fa-tiktok youtube-icon" aria-hidden="true"></i> TIKTOK TOOLS</h1>
+
+    <!-- Form untuk download video/audio -->
+    <form id="downloadForm">
+      <div class="form-group">
+        <label for="videoUrl">TikTok Video URL</label>
+        <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan URL Video TikTok" required>
+      </div>
+      <div class="form-group">
+        <label for="downloadOption">Pilih Format Download</label>
+        <select id="downloadOption" class="form-control" required>
+          <option value="mp3">Audio (MP3)</option>
+          <option value="mp4">Video (MP4)</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-danger btn-block">Mulai Download</button>
+    </form>
+
+    <div id="alertContainer" class="mt-3"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    document.getElementById('downloadForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const videoUrl = document.getElementById('videoUrl').value;
+      const downloadOption = document.getElementById('downloadOption').value;
+
+      // Validasi URL
+      if (!isValidUrl(videoUrl)) {
+        showAlert('URL tidak valid. Silakan masukkan URL yang benar.', 'danger');
+        return;
+      }
+
+      if (downloadOption === 'mp3') {
+        await downloadMP3(videoUrl);
+      } else {
+        await downloadMP4(videoUrl);
+      }
+    });
+
+    function isValidUrl(url) {
+      const pattern = new RegExp('^(https?://)?(www\\.)?(tiktok\\.com|vt\\.tiktok\\.com)/.+$');
+      return pattern.test(url);
+    }
+
+    function showAlert(message, type) {
+      const alertContainer = document.getElementById('alertContainer');
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.textContent = message;
+      alertContainer.appendChild(alertDiv);
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 3000);
+    }
+
+    async function downloadMP3(linkToDownload) {
+      try {
+        const response = await axios.get(`https://widipe.com/download/tikdl?url=${encodeURIComponent(linkToDownload)}`, {
+          headers: {
+            'accept': 'application/json'
+          }
+        });
+
+        const mp3Url = response.data.result.audio;
+        const judul = response.data.result.title; // Judul sebagai nama file
+
+        // Cek apakah mp3Url valid sebelum mencoba mendownload
+        if (mp3Url) {
+          const link = document.createElement('a');
+          link.href = mp3Url;
+          link.setAttribute('download', judul + '.mp3'); // Menetapkan nama file
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
+          showAlert('URL untuk MP3 tidak ditemukan.', 'danger');
+        }
+      } catch (error) {
+        console.error('Error saat mendownload MP3:', error);
+        showAlert('Terjadi kesalahan saat mendownload MP3.', 'danger');
+      }
+    }
+
+    async function downloadMP4(linkToDownload) {
+      try {
+        const response = await axios.get(`https://widipe.com/download/tikdl?url=${encodeURIComponent(linkToDownload)}`, {
+          headers: {
+            'accept': 'application/json'
+          }
+        });
+
+        const mp4Url = response.data.result.video;
+        const judul = response.data.result.title; // Judul sebagai nama file
+
+        // Cek apakah mp4Url valid sebelum mencoba mendownload
+        if (mp4Url) {
+          const link = document.createElement('a');
+          link.href = mp4Url;
+          link.setAttribute('download', judul + '.mp4'); // Menetapkan nama file
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
+          showAlert('URL untuk MP4 tidak ditemukan.', 'danger');
+        }
+      } catch (error) {
+        console.error('Error saat mendownload MP4:', error);
+        showAlert('Terjadi kesalahan saat mendownload MP4.', 'danger');
+      }
+    }
+
+    function playAudio() {
+      const audioElement = document.getElementById("sec");
+      audioElement.play();
+    }
+  </script>
+</body>
+</html>
