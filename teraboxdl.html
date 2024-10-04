@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TeraBox Download by DexSkieee Ofc</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .download-icon {
+      color: #d9534f;
+    }
+    body {
+      font-family: 'Playwrite DE Grund', sans-serif;
+      background-color: #000;
+      color: #fff;
+    }
+    h1 {
+      font-family: 'Pixelify Sans', sans-serif;
+    }
+    label, button, input, select, .alert {
+      font-family: 'PT Sans', sans-serif;
+    }
+    .form-control {
+      background-color: #333;
+      border: 1px solid #555;
+      color: #fff;
+    }
+    .form-control:focus {
+      background-color: #555;
+      border-color: #777;
+      color: #fff;
+    }
+  </style>
+</head>
+<body onclick="playAudio();" class="">
+  <audio id="sec">
+    <source src="https://g.top4top.io/m_319620fge0.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="container mt-5">
+    <h1 class="text-center"><i class="fa fa-download download-icon" aria-hidden="true"></i> TeraBox DOWNLOAD</h1>
+
+    <!-- Form untuk download TeraBox -->
+    <form id="downloadForm">
+      <div class="form-group">
+        <label for="videoUrl">TeraBox Video URL</label>
+        <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan URL TeraBox" required>
+      </div>
+      <button type="submit" class="btn btn-danger btn-block">Mulai Download</button>
+    </form>
+
+    <div id="alertContainer" class="mt-3"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    document.getElementById('downloadForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const videoUrl = document.getElementById('videoUrl').value;
+
+      if (!videoUrl) {
+        showAlert('URL tidak boleh kosong.', 'danger');
+        return;
+      }
+
+      await downloadTeraBox(videoUrl);
+    });
+
+    function showAlert(message, type) {
+      const alertContainer = document.getElementById('alertContainer');
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.textContent = message;
+      alertContainer.appendChild(alertDiv);
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 3000);
+    }
+
+    async function downloadTeraBox(linkToDownload) {
+      try {
+        const response = await axios.post('https://ytshorts.savetube.me/api/v1/terabox-downloader', {
+          url: linkToDownload
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'accept': 'application/json'
+          }
+        });
+
+        const result = response.data.response[0].resolutions['HD Video'];
+
+        if (result) {
+          const link = document.createElement('a');
+          link.href = result;
+          link.setAttribute('download', '');
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
+          showAlert('URL untuk HD Video tidak ditemukan.', 'danger');
+        }
+      } catch (error) {
+        console.error('Error saat mendownload:', error);
+        showAlert('Terjadi kesalahan saat mendownload dari TeraBox.', 'danger');
+      }
+    }
+
+    function playAudio() {
+      const audioElement = document.getElementById("sec");
+      audioElement.play();
+    }
+  </script>
+</body>
+</html>
