@@ -48,8 +48,10 @@
         <label for="videoUrl">TeraBox Video URL</label>
         <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan URL TeraBox" required>
       </div>
-      <button type="submit" class="btn btn-danger btn-block"><i class="fa fa-download" aria-hidden="true"></i> Mulai Download</button>
+      <button type="submit" class="btn btn-danger btn-block">Mulai Download</button>
     </form>
+    
+    <div id="alertContainer" class="mt-3"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -60,6 +62,7 @@
       const videoUrl = document.getElementById('videoUrl').value;
 
       if (!videoUrl) {
+        console.log('URL tidak boleh kosong.');
         return;
       }
 
@@ -67,6 +70,8 @@
     });
 
     async function downloadTeraBox(linkToDownload) {
+      console.log("Mengirim URL ke endpoint:", linkToDownload);  // Debug: cek apakah URL terkirim
+      
       try {
         const response = await axios.post('https://ytshorts.savetube.me/api/v1/terabox-downloader', {
           url: linkToDownload
@@ -74,10 +79,12 @@
           headers: {
             'Content-Type': 'application/json',
             'accept': 'application/json',
-            'cookie': 'cf_clearance=y_ZQnN20qVD5ZSRjUJAcz_V8Y5.5GzCQe3TIgSQ.IH8-1728005445-1.2.1.1-TUD6hh7JG_ez3NzIFNaM8QrwOlnzECy.mVyHheT7ttFictm2pBKR.qK5t1zF1yQfo3Cqj7RJXC.A6p2_e6LGSKMuruncD3mH48IhZwRz3Ly41Baei1Rqjc2ne2oe7Ojuh6epqLLBtNNoupB3B6N3k6InrU_OaQ7sh7JMseidgY8CP_A7fXGbZCbXDpkoAeMMv4hq.9v6VjyCotWS_GrCpHFUuPxxE5dqqPRNXj9dx80NbdGaDdN34lNJ8CPCEBd55dlki5HIzLrq4zk.J8XmzSVwipdp1_iPP__DgebvzrL9r.VoNezvvm3P0aQbUKbqPKNU.Mw_ig.hUbu8tlt2VG21eY2Z00eRptwu63Hh8PYOaPvDSV3m5olOQTalZATPy8z0IAZpXDvwYOHQiJKhKw; _ga=GA1.1.234458975.1728005445; _ga_3Q4D9SLPKL=GS1.1.1728005444.1.1.1728005444.0.0.0; __gads=ID=ce09cfda195dcc68:T=1728005445:RT=1728005445:S=ALNI_Mb53r8vpZeV7ttaf-R8__77287Iuw; __gpi=UID=00000f3199c442f9:T=1728005445:RT=1728005445:S=ALNI_MZi53BcoEzAWP6uxanEPMKmwZS1WQ; __eoi=ID=6b03efddd78f2164:T=1728005445:RT=1728005445:S=AA-AfjbJXiy9h9hqNqOG9nJkEV3r; FCNEC=%5B%5B%22AKsRol_CgNguXR8aJh_Y6I3gLyAw1vyHacESCsDF1OHvj-LMOH6w7hURYwILrgqJzZIzqv7v0PH-4vGfsO7wMq1NK07vYfk_xSR1_7wKj5j4JAJV4udwQrWLHwuN6CUa-cOGL6F043bo0m81lX2tjiSgeePsCQcjnw%3D%3D%22%5D%5D'  // Masukkan cookie di sini
+            'cookie': 'cf_clearance=...; _ga=...; __gads=...; __gpi=...'  // Masukkan cookie lengkap di sini
           }
         });
 
+        console.log("Respons dari API:", response);  // Debug: cek respons dari API
+        
         const result = response.data.response[0].resolutions['HD Video'];
 
         if (result) {
@@ -87,9 +94,11 @@
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
+        } else {
+          console.log('URL untuk HD Video tidak ditemukan.');
         }
       } catch (error) {
-        console.error('Error saat mendownload:', error);
+        console.error('Error saat mendownload:', error.response ? error.response.data : error.message);
       }
     }
 
