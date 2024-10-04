@@ -20,7 +20,7 @@
       font-family: 'Pixelify Sans', sans-serif;
     }
     label, button, input, .alert, .form-control {
-      font-family: 'PT Sans', sans-serif; /* Menambahkan font PT Sans ke form-control */
+      font-family: 'PT Sans', sans-serif; 
     }
     #downloadOptions h5 {
       font-family: 'PT Sans', sans-serif;
@@ -41,9 +41,27 @@
       display: block;
       margin: auto;
     }
+    /* Styling untuk loading bar */
+    #loadingBar {
+      display: none; /* Sembunyikan loading bar secara default */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background-color: #d9534f;
+      z-index: 9999;
+      animation: loadingAnimation 2s linear infinite;
+    }
+    @keyframes loadingAnimation {
+      0% { width: 0; }
+      50% { width: 100%; }
+      100% { width: 0; }
+    }
   </style>
 </head>
 <body>
+  <div id="loadingBar"></div> <!-- Loading bar -->
   <div class="container mt-5">
     <h1 class="text-center"><i class="fa fa-youtube-play youtube-icon" aria-hidden="true"></i> YT DexSkieee </h1>
 
@@ -112,8 +130,15 @@
       // Menghapus alert sebelumnya jika ada
       const alertContainer = document.getElementById('alertContainer');
       alertContainer.innerHTML = ''; // Hapus alert yang ada sebelumnya
+
+      // Tampilkan loading bar
+      const loadingBar = document.getElementById('loadingBar');
+      loadingBar.style.display = 'block'; // Tampilkan loading bar
       
       await searchAndPrepareDownload(videoUrl);
+      
+      // Sembunyikan loading bar setelah pencarian selesai
+      loadingBar.style.display = 'none';
     });
 
     document.getElementById('downloadButton').addEventListener('click', async function() {
