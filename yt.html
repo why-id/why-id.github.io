@@ -58,6 +58,13 @@
       50% { width: 100%; }
       100% { width: 0; }
     }
+    /* Styling untuk informasi video */
+    #videoInfoText {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -77,6 +84,7 @@
 
     <div id="videoInfo" class="mt-4" style="display: none;">
       <img id="thumbnail" src="" alt="Thumbnail" class="img-fluid mb-2">
+      <div id="videoInfoText"></div> <!-- Tempat untuk informasi video -->
     </div>
 
     <div id="downloadOptions" class="mt-4" style="display: none;">
@@ -198,8 +206,11 @@
           const thumbnail = firstVideo.thumbnail; 
 
           document.getElementById('thumbnail').src = thumbnail; 
-          showAlert(`Judul: ${title}<br>Durasi: ${timestamp}<br>Waktu: ${ago}<br>Views: ${views}`, 'success');
-
+          
+          // Tampilkan informasi video di bawah thumbnail
+          const videoInfoText = document.getElementById('videoInfoText');
+          videoInfoText.innerHTML = `Judul: ${title}<br>Durasi: ${timestamp}<br>Waktu: ${ago}<br>Views: ${views}`;
+          
           document.getElementById('videoInfo').style.display = 'block'; 
           document.getElementById('downloadOptions').style.display = 'block';
         } else {
@@ -216,10 +227,8 @@
         return (count / 1e9).toFixed(0) + ' Miliar'; 
       } else if (count >= 1e6) {
         return (count / 1e6).toFixed(0) + ' Juta'; 
-      } else if (count >= 1e3) {
-        return (count / 1e3).toFixed(0) + ' Ribu'; 
       } else {
-        return count.toString(); 
+        return count; 
       }
     }
 
