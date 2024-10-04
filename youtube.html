@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Download by DexSkieee Ofc</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .youtube-icon {
+      color: #d9534f; /* Ukuran ikon (opsional) */
+    }
+    body {
+      font-family: 'Playwrite DE Grund', sans-serif;
+      background-color: #000; /* Background hitam */
+      color: #fff; /* Warna teks putih */
+    }
+    h1 {
+      font-family: 'Pixelify Sans', sans-serif; /* Gaya font untuk h1 */
+    }
+    label, button, input, .alert {
+      font-family: 'PT Sans', sans-serif;
+    }
+    .form-control {
+      background-color: #333; /* Background input hitam */
+      border: 1px solid #555; /* Border input abu-abu */
+      color: #fff; /* Warna teks input putih */
+    }
+    .form-control:focus {
+      background-color: #555; /* Background input saat fokus abu-abu */
+      border-color: #777; /* Border input saat fokus abu-abu lebih terang */
+      color: #fff; /* Warna teks tetap putih */
+    }
+  </style>
+</head>
+<body onclick="playAudio();" class="">
+  <audio id="sec">
+    <source src="https://g.top4top.io/m_319620fge0.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="container mt-5">
+    <h1 class="text-center"><i class="fa fa-youtube-play youtube-icon" aria-hidden="true"></i> YT DOWNLOAD</h1>
+
+    <!-- Form untuk mencari video -->
+    <form id="downloadForm">
+      <div class="form-group">
+        <label for="videoUrl">Cari Video YouTube</label>
+        <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan URL atau Judul Video YouTube" required>
+      </div>
+      <button type="submit" class="btn btn-danger btn-block">Cari Video</button>
+    </form>
+
+    <div id="alertContainer" class="mt-3"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    document.getElementById('downloadForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const videoUrl = document.getElementById('videoUrl').value;
+
+      // Validasi URL
+      if (!videoUrl) {
+        showAlert('Silakan masukkan URL atau judul video.', 'danger');
+        return;
+      }
+
+      await searchAndDownloadMP3(videoUrl);
+    });
+
+    function showAlert(message, type) {
+      const alertContainer = document.getElementById('alertContainer');
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.textContent = message;
+      alertContainer.appendChild(alertDiv);
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 3000);
+    }
+
+    async function searchAndDownloadMP3(query) {
+      try {
+        const searchResponse = await axios.get(`https://api.agatz.xyz/api/ytsearch?message=${encodeURIComponent(query)}`);
+        const firstVideo = searchResponse.data.data[0];
+
+        if (firstVideo) {
+          const videoUrl = firstVideo.url;
+          const title = firstVideo.title;
+          const durasi = firstVideo.timestamp;
+
+          // Menampilkan informasi video
+          showAlert(`Judul: ${title}, Durasi: ${durasi}`, 'success');
+
+          // Mendownload MP3
+          const downloadResponse = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(videoUrl)}`, {
+            headers: {
+              'accept': 'application/json'
+            }
+          });
+
+          const mp3Url = downloadResponse.data.result.mp3;
+
+          // Cek apakah mp3Url valid sebelum mencoba mendownload
+          if (mp3Url) {
+            const link = document.createElement('a');
+            link.href = mp3Url;
+            link.setAttribute('download', `${title}.mp3`); // Menetapkan nama file download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          } else {
+            showAlert('URL untuk MP3 tidak ditemukan.', 'danger');
+          }
+        } else {
+          showAlert('Video tidak ditemukan.', 'danger');
+        }
+      } catch (error) {
+        console.error('Error saat mencari atau mendownload MP3:', error);
+        showAlert('Terjadi kesalahan saat mencari atau mendownload MP3.', 'danger');
+      }
+    }
+
+    function playAudio() {
+      const audioElement = document.getElementById("sec");
+      audioElement.play();
+    }
+  </script>
+</body>
+</html>
