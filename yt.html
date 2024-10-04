@@ -64,11 +64,19 @@
       margin-top: 10px;
       font-size: 1rem;
       color: #fff;
+      font-family: 'PT Sans', sans-serif; /* Mengubah font informasi video */
+    }
+    /* Styling untuk loading bar tombol preview */
+    #previewLoadingBar {
+      display: none; /* Sembunyikan loading bar secara default */
+      height: 5px;
+      background-color: #d9534f;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <div id="loadingBar"></div> <!-- Loading bar -->
+  <div id="loadingBar"></div> <!-- Loading bar utama -->
   <div class="container mt-5">
     <h1 class="text-center"><i class="fa fa-youtube-play youtube-icon" aria-hidden="true"></i> YT DexSkieee </h1>
 
@@ -94,6 +102,7 @@
       </select>
       <button id="downloadButton" class="btn btn-danger btn-block mt-2">Download</button>
       <button id="previewButton" onclick="prepareAudioPreview();" class="btn btn-primary btn-block mt-2">Preview Audio</button>
+      <div id="previewLoadingBar"></div> <!-- Loading bar untuk preview -->
     </div>
 
     <!-- Audio Element for Preview -->
@@ -223,10 +232,10 @@
     }
 
     function formatViewsCount(count) {
-      if (count >= 1e9) {
-        return (count / 1e9).toFixed(0) + ' Miliar'; 
-      } else if (count >= 1e6) {
-        return (count / 1e6).toFixed(0) + ' Juta'; 
+      if (count >= 1000000000) {
+        return (count / 1000000000).toFixed(1) + ' Miliar'; 
+      } else if (count >= 1000000) {
+        return (count / 1000000).toFixed(1) + ' Juta'; 
       } else {
         return count; 
       }
@@ -288,6 +297,10 @@
       const audioElement = document.getElementById("sec");
       const audioSource = document.getElementById("audioSource");
 
+      // Tampilkan loading bar saat preview audio dimulai
+      const previewLoadingBar = document.getElementById('previewLoadingBar');
+      previewLoadingBar.style.display = 'block'; // Tampilkan loading bar
+
       axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(videoToDownload)}`, {
         headers: {
           'accept': 'application/json'
@@ -307,6 +320,10 @@
       .catch(error => {
         console.error('Error saat menyiapkan preview audio:', error);
         showAlert('Terjadi kesalahan saat menyiapkan preview audio.', 'danger');
+      })
+      .finally(() => {
+        // Sembunyikan loading bar setelah proses selesai
+        previewLoadingBar.style.display = 'none'; // Sembunyikan loading bar
       });
     }
   </script>
