@@ -37,8 +37,12 @@
       color: #fff; /* Warna teks tetap putih */
     }
     #thumbnail {
-      max-width: 100%; /* Membuat thumbnail responsif */
-      height: auto; /* Mempertahankan aspek rasio */
+      max-width: 100px; /* Maksimal lebar thumbnail */
+      max-height: 100px; /* Maksimal tinggi thumbnail */
+      border-radius: 50%; /* Membuat gambar berbentuk lingkaran */
+      object-fit: cover; /* Memastikan gambar terpotong dengan baik */
+      margin: auto; /* Mengatur margin otomatis untuk centering */
+      display: block; /* Menampilkan sebagai block untuk centering */
     }
   </style>
 </head>
@@ -64,7 +68,6 @@
     <!-- Thumbnail dan informasi video -->
     <div id="videoInfo" class="mt-4" style="display: none;">
       <img id="thumbnail" src="" alt="Thumbnail" class="img-fluid mb-2">
-      <div id="videoDetails" class="text-center"></div>
     </div>
 
     <!-- Dropdown untuk memilih format download -->
@@ -126,11 +129,10 @@
 
           // Menampilkan informasi video
           document.getElementById('thumbnail').src = thumbnail; // Set thumbnail
-          document.getElementById('videoDetails').innerHTML = `Judul: ${title}<br>Durasi: ${durasi}`;
-          document.getElementById('videoInfo').style.display = 'block'; // Tampilkan info video
           showAlert(`Judul: ${title}<br>Durasi: ${durasi}`, 'success');
 
           // Tampilkan opsi download
+          document.getElementById('videoInfo').style.display = 'block'; // Tampilkan info video
           document.getElementById('downloadOptions').style.display = 'block';
         } else {
           showAlert('Video tidak ditemukan.', 'danger');
