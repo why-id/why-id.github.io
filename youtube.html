@@ -121,13 +121,15 @@
           videoToDownload = firstVideo.url; // Simpan URL video untuk digunakan saat mendownload
           const title = firstVideo.title;
           const durasi = firstVideo.timestamp;
+          const ago = firstVideo.ago; // Mendapatkan informasi waktu
+          const views = firstVideo.views; // Mendapatkan jumlah views
           const thumbnail = firstVideo.thumbnail; // Mendapatkan thumbnail
 
           // Menampilkan informasi video
           document.getElementById('thumbnail').src = thumbnail; // Set thumbnail
           document.getElementById('videoDetails').innerHTML = `Judul: ${title}<br>Durasi: ${durasi}`;
           document.getElementById('videoInfo').style.display = 'block'; // Tampilkan info video
-          showAlert(`Judul: ${title}<br>Durasi: ${durasi}`, 'success');
+          showAlert(`Judul: ${title}<br>Durasi: ${durasi}<br>Upload: ${ago}<br>Views: ${views}`, 'success');
 
           // Tampilkan opsi download
           document.getElementById('downloadOptions').style.display = 'block';
