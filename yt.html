@@ -85,10 +85,16 @@
         <option value="mp4">VIDEO/MP4</option>
       </select>
       <button id="downloadButton" class="btn btn-danger btn-block mt-2">Download</button>
-      <button id="previewButton" onclick="prepareAudioPreview();" class="btn btn-warning btn-block mt-2">Preview Audio</button>
+      <button onclick="prepareAudioPreview();" class="btn btn-warning btn-block mt-2">Preview Audio</button>
       <audio id="sec" style="display:none;"> 
         <source id="audioSource" src="" type="audio/mpeg"> 
       </audio>
+      <script>
+        var x = document.getElementById("sec"); 
+        function playAudio() { 
+          x.play(); 
+        }
+      </script>
     </div>
   </div>
 
