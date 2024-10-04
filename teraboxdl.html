@@ -3,34 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TeraBox Download by DexSkieee Ofc</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <title>DexSkieee Ofc</title>
   <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    .download-icon {
-      color: #d9534f;
-    }
     body {
       font-family: 'Playwrite DE Grund', sans-serif;
-      background-color: #000;
-      color: #fff;
+      background-color: #000; /* Background hitam */
+      color: #fff; /* Warna teks putih */
     }
     h1 {
-      font-family: 'Pixelify Sans', sans-serif;
+      font-family: 'Pixelify Sans', sans-serif; /* Gaya font untuk h1 */
     }
-    label, button, input, select {
+    label, button, input {
       font-family: 'PT Sans', sans-serif;
     }
     .form-control {
-      background-color: #333;
-      border: 1px solid #555;
-      color: #fff;
+      background-color: #333; /* Background input hitam */
+      border: 1px solid #555; /* Border input abu-abu */
+      color: #fff; /* Warna teks input putih */
     }
     .form-control:focus {
-      background-color: #555;
-      border-color: #777;
-      color: #fff;
+      background-color: #555; /* Background input saat fokus abu-abu */
+      border-color: #777; /* Border input saat fokus abu-abu lebih terang */
+      color: #fff; /* Warna teks tetap putih */
     }
   </style>
 </head>
@@ -40,18 +36,16 @@
   </audio>
 
   <div class="container mt-5">
-    <h1 class="text-center"><i class="fa fa-download download-icon" aria-hidden="true"></i> TERABOX TOOLS</h1>
-
-    <!-- Form untuk download TeraBox -->
+    <h1 class="text-center">TeraBox DOWNLOAD</h1>
     <form id="downloadForm">
       <div class="form-group">
-        <label for="videoUrl">TeraBox Video URL</label>
+        <label for="videoUrl">TeraBox URL</label>
         <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan URL TeraBox" required>
       </div>
-      <button type="submit" class="btn btn-danger btn-block">Tampilkan URL Video</button>
+      <button type="submit" class="btn btn-primary btn-block">Gaskeunn</button>
     </form>
-    
-    <div id="resultContainer" class="mt-3"></div>
+
+    <div id="resultContainer" class="mt-3"></div> <!-- Tempat untuk menampilkan hasil URL -->
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -61,17 +55,12 @@
 
       const videoUrl = document.getElementById('videoUrl').value;
 
-      if (!videoUrl) {
-        console.log('URL tidak boleh kosong.');
-        return;
+      if (videoUrl) {
+        await downloadTeraBox(videoUrl);
       }
-
-      await downloadTeraBox(videoUrl);
     });
 
     async function downloadTeraBox(linkToDownload) {
-      console.log("Mengirim URL ke endpoint:", linkToDownload);  // Debug: cek apakah URL terkirim
-      
       try {
         const response = await axios.post('https://ytshorts.savetube.me/api/v1/terabox-downloader', {
           url: linkToDownload
@@ -79,23 +68,25 @@
           headers: {
             'Content-Type': 'application/json',
             'accept': 'application/json',
-            'cookie': 'cf_clearance=...; _ga=...; __gads=...; __gpi=...'  // Masukkan cookie lengkap di sini
+            'cookie': 'cf_clearance=...; _ga=...; __gads=...; __gpi=...' // Masukkan cookie di sini
           }
         });
 
-        console.log("Respons dari API:", response);  // Debug: cek respons dari API
-        
         const result = response.data.response[0].resolutions['HD Video'];
 
         if (result) {
           // Tampilkan URL hasil download di halaman
           const resultContainer = document.getElementById('resultContainer');
-          resultContainer.innerHTML = `<a href="${result}" target="_blank" class="btn btn-success btn-block">URL Video HD: ${result}</a>`;
+          resultContainer.innerHTML = `<a href="${result}" target="_blank" class="btn btn-success btn-block">Download HD Video: ${result}</a>`;
         } else {
-          console.log('URL untuk HD Video tidak ditemukan.');
+          // Menampilkan pesan jika tidak ada URL
+          const resultContainer = document.getElementById('resultContainer');
+          resultContainer.innerHTML = `<div class="alert alert-danger">URL untuk HD Video tidak ditemukan.</div>`;
         }
       } catch (error) {
-        console.error('Error saat mendownload:', error.response ? error.response.data : error.message);
+        console.error('Error saat mendownload:', error);
+        const resultContainer = document.getElementById('resultContainer');
+        resultContainer.innerHTML = `<div class="alert alert-danger">Terjadi kesalahan saat mendownload.</div>`;
       }
     }
 
