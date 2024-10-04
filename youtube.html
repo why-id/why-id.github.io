@@ -9,38 +9,38 @@
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
     .youtube-icon {
-      color: #d9534f; /* Ukuran ikon (opsional) */
+      color: #d9534f;
     }
     body {
       font-family: 'Playwrite DE Grund', sans-serif;
-      background-color: #000; /* Background hitam */
-      color: #fff; /* Warna teks putih */
+      background-color: #000;
+      color: #fff;
     }
     h1 {
-      font-family: 'Pixelify Sans', sans-serif; /* Gaya font untuk h1 */
+      font-family: 'Pixelify Sans', sans-serif;
     }
     label, button, input, .alert {
-      font-family: 'PT Sans', sans-serif; /* Font untuk label, button, input, dan alert */
+      font-family: 'PT Sans', sans-serif;
     }
     #downloadOptions h5 {
-      font-family: 'PT Sans', sans-serif; /* Font untuk teks "Pilih Format Download" */
+      font-family: 'PT Sans', sans-serif;
     }
     .form-control {
-      background-color: #333; /* Background input hitam */
-      border: 1px solid #555; /* Border input abu-abu */
-      color: #fff; /* Warna teks input putih */
-      font-family: 'PT Sans', sans-serif; /* Font untuk input dan dropdown */
+      background-color: #333;
+      border: 1px solid #555;
+      color: #fff;
+      font-family: 'PT Sans', sans-serif;
     }
     .form-control:focus {
-      background-color: #555; /* Background input saat fokus abu-abu */
-      border-color: #777; /* Border input saat fokus abu-abu lebih terang */
-      color: #fff; /* Warna teks tetap putih */
+      background-color: #555;
+      border-color: #777;
+      color: #fff;
     }
     #thumbnail {
-      max-width: 100%; /* Maksimal lebar thumbnail otomatis */
-      height: auto; /* Tinggi otomatis untuk menjaga rasio aspek */
-      display: block; /* Menampilkan sebagai block untuk centering */
-      margin: auto; /* Mengatur margin otomatis untuk centering */
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: auto;
     }
   </style>
 </head>
@@ -50,12 +50,12 @@
   </audio>
 
   <div class="container mt-5">
-    <h1 class="text-center"><i class="fa fa-youtube-play youtube-icon" aria-hidden="true"></i> YT DOWNLOAD</h1>
+    <h1 class="text-center"><i class="fa fa-youtube-play youtube-icon" aria-hidden="true"></i> DEXSTUBE TOOLS</h1>
 
     <!-- Form untuk mencari video -->
     <form id="downloadForm">
       <div class="form-group">
-        <label for="videoUrl">Cari Video YouTube</label>
+        <label for="videoUrl">Cari atau Download Video YouTube</label>
         <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan URL atau Judul Video YouTube" required>
       </div>
       <button type="submit" class="btn btn-danger btn-block">Cari Video</button>
@@ -75,13 +75,14 @@
         <option value="mp3">MP3</option>
         <option value="mp4">MP4</option>
       </select>
-      <button id="downloadButton" class="btn btn-success btn-block mt-2">Download</button>
+      <button id="downloadButton" class="btn btn-danger btn-block mt-2">Download</button>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>
     let videoToDownload;
+    let videoTitle; // Variabel untuk menyimpan judul video
 
     document.getElementById('downloadForm').addEventListener('submit', async function(event) {
       event.preventDefault();
@@ -100,9 +101,9 @@
     document.getElementById('downloadButton').addEventListener('click', async function() {
       const selectedFormat = document.getElementById('formatSelect').value;
       if (selectedFormat === 'mp3') {
-        await downloadMP3(videoToDownload);
+        await downloadMP3(videoToDownload, videoTitle);
       } else if (selectedFormat === 'mp4') {
-        await downloadMP4(videoToDownload);
+        await downloadMP4(videoToDownload, videoTitle);
       }
     });
 
@@ -113,13 +114,13 @@
       if (type === 'success') {
         const existingSuccessAlert = alertContainer.querySelector('.alert-success');
         if (existingSuccessAlert) {
-          existingSuccessAlert.remove(); // Hapus alert success yang sudah ada
+          existingSuccessAlert.remove();
         }
       }
 
       const alertDiv = document.createElement('div');
       alertDiv.className = `alert alert-${type}`;
-      alertDiv.innerHTML = message; // Menggunakan innerHTML untuk format lebih baik
+      alertDiv.innerHTML = message;
       alertContainer.appendChild(alertDiv);
 
       // Hapus alert otomatis jika berjenis 'danger' setelah 2 detik
@@ -132,13 +133,13 @@
 
     function formatViewsCount(count) {
       if (count >= 1e9) {
-        return (count / 1e9).toFixed(0) + ' Miliar'; // Mengubah menjadi Miliar
+        return (count / 1e9).toFixed(0) + ' Miliar';
       } else if (count >= 1e6) {
-        return (count / 1e6).toFixed(0) + ' Juta'; // Mengubah menjadi Juta
+        return (count / 1e6).toFixed(0) + ' Juta';
       } else if (count >= 1e3) {
-        return (count / 1e3).toFixed(0) + ' Ribu'; // Mengubah menjadi Ribu
+        return (count / 1e3).toFixed(0) + ' Ribu';
       } else {
-        return count.toString(); // Mengembalikan jumlah asli jika di bawah 1000
+        return count.toString();
       }
     }
 
@@ -149,18 +150,19 @@
 
         if (firstVideo) {
           videoToDownload = firstVideo.url; // Simpan URL video untuk digunakan saat mendownload
-          const title = firstVideo.title;
-          const timestamp = firstVideo.timestamp; // Mendapatkan timestamp
-          const ago = firstVideo.ago; // Mendapatkan informasi waktu
-          const views = formatViewsCount(firstVideo.views); // Format jumlah views
-          const thumbnail = firstVideo.thumbnail; // Mendapatkan thumbnail
+          videoTitle = firstVideo.title; // Simpan judul video untuk nama file
 
-          // Menampilkan informasi video
-          document.getElementById('thumbnail').src = thumbnail; // Set thumbnail
+          const title = firstVideo.title;
+          const timestamp = firstVideo.timestamp;
+          const ago = firstVideo.ago;
+          const views = formatViewsCount(firstVideo.views);
+          const thumbnail = firstVideo.thumbnail;
+
+          document.getElementById('thumbnail').src = thumbnail;
           showAlert(`Judul: ${title}<br>Durasi: ${timestamp}<br>Waktu: ${ago}<br>Views: ${views}`, 'success');
 
           // Tampilkan opsi download
-          document.getElementById('videoInfo').style.display = 'block'; // Tampilkan info video
+          document.getElementById('videoInfo').style.display = 'block';
           document.getElementById('downloadOptions').style.display = 'block';
         } else {
           showAlert('Video tidak ditemukan.', 'danger');
@@ -171,7 +173,7 @@
       }
     }
 
-    async function downloadMP3(linkToDownload) {
+    async function downloadMP3(linkToDownload, title) {
       try {
         const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(linkToDownload)}`, {
           headers: {
@@ -181,11 +183,10 @@
 
         const mp3Url = response.data.result.mp3;
 
-        // Cek apakah mp3Url valid sebelum mencoba mendownload
         if (mp3Url) {
           const link = document.createElement('a');
           link.href = mp3Url;
-          link.setAttribute('download', `${videoToDownload}.mp3`); // Menetapkan nama file download
+          link.setAttribute('download', `${title}.mp3`); // Menggunakan judul video sebagai nama file
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -198,7 +199,7 @@
       }
     }
 
-    async function downloadMP4(linkToDownload) {
+    async function downloadMP4(linkToDownload, title) {
       try {
         const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(linkToDownload)}`, {
           headers: {
@@ -208,11 +209,10 @@
 
         const mp4Url = response.data.result.mp4;
 
-        // Cek apakah mp4Url valid sebelum mencoba mendownload
         if (mp4Url) {
           const link = document.createElement('a');
           link.href = mp4Url;
-          link.setAttribute('download', `${videoToDownload}.mp4`); // Menetapkan nama file download
+          link.setAttribute('download', `${title}.mp4`); // Menggunakan judul video sebagai nama file
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
