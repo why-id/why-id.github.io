@@ -29,11 +29,16 @@
       background-color: #333; /* Background input hitam */
       border: 1px solid #555; /* Border input abu-abu */
       color: #fff; /* Warna teks input putih */
+      font-family: 'PT Sans', sans-serif; /* Font untuk input dan dropdown */
     }
     .form-control:focus {
       background-color: #555; /* Background input saat fokus abu-abu */
       border-color: #777; /* Border input saat fokus abu-abu lebih terang */
       color: #fff; /* Warna teks tetap putih */
+    }
+    #thumbnail {
+      max-width: 100%; /* Membuat thumbnail responsif */
+      height: auto; /* Mempertahankan aspek rasio */
     }
   </style>
 </head>
@@ -56,6 +61,12 @@
 
     <div id="alertContainer" class="mt-3"></div>
 
+    <!-- Thumbnail dan informasi video -->
+    <div id="videoInfo" class="mt-4" style="display: none;">
+      <img id="thumbnail" src="" alt="Thumbnail" class="img-fluid mb-2">
+      <div id="videoDetails" class="text-center"></div>
+    </div>
+
     <!-- Dropdown untuk memilih format download -->
     <div id="downloadOptions" class="mt-4" style="display: none;">
       <h5>Pilih Format Download:</h5>
@@ -63,7 +74,7 @@
         <option value="mp3">MP3</option>
         <option value="mp4">MP4</option>
       </select>
-      <button id="downloadButton" class="btn btn-danger btn-block mt-2">Download</button>
+      <button id="downloadButton" class="btn btn-success btn-block mt-2">Download</button>
     </div>
   </div>
 
@@ -111,8 +122,12 @@
           videoToDownload = firstVideo.url; // Simpan URL video untuk digunakan saat mendownload
           const title = firstVideo.title;
           const durasi = firstVideo.timestamp;
+          const thumbnail = firstVideo.thumbnail; // Mendapatkan thumbnail
 
           // Menampilkan informasi video
+          document.getElementById('thumbnail').src = thumbnail; // Set thumbnail
+          document.getElementById('videoDetails').innerHTML = `Judul: ${title}<br>Durasi: ${durasi}`;
+          document.getElementById('videoInfo').style.display = 'block'; // Tampilkan info video
           showAlert(`Judul: ${title}<br>Durasi: ${durasi}`, 'success');
 
           // Tampilkan opsi download
