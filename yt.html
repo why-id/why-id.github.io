@@ -215,15 +215,13 @@
           videoTitle = firstVideo.title;
           const title = firstVideo.title;
           const timestamp = firstVideo.timestamp;
-          const ago = firstVideo.ago;
-          const views = formatViewsCount(firstVideo.views); 
           const thumbnail = firstVideo.thumbnail; 
 
           document.getElementById('thumbnail').src = thumbnail; 
           
           // Tampilkan informasi video di bawah thumbnail
           const videoInfoText = document.getElementById('videoInfoText');
-          videoInfoText.innerHTML = `Judul: ${title}<br>Durasi: ${timestamp}<br>Waktu: ${ago}<br>Views: ${views}`;
+          videoInfoText.innerHTML = `${title}<br>Durasi : ${timestamp}`;
           document.getElementById('videoInfo').style.display = 'block'; 
           document.getElementById('downloadOptions').style.display = 'block'; 
         } else {
@@ -232,16 +230,6 @@
       } catch (error) {
         console.error('Error saat mencari video:', error);
         showAlert('Terjadi kesalahan saat mencari video.', 'danger');
-      }
-    }
-
-    function formatViewsCount(count) {
-      if (count >= 1000000000) {
-        return (count / 1000000000).toFixed(1) + ' Miliar'; 
-      } else if (count >= 1000000) {
-        return (count / 1000000).toFixed(1) + ' Juta'; 
-      } else {
-        return count; 
       }
     }
 
