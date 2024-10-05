@@ -58,16 +58,36 @@
       50% { width: 100%; }
       100% { width: 0; }
     }
+    /* Styling untuk loading bar preview */
+    #previewLoadingBar {
+      display: none; /* Sembunyikan loading bar secara default */
+      position: fixed; /* Pastikan loading bar berada di atas */
+      top: 0; /* Mengatur posisi di atas */
+      left: 0; /* Mengatur posisi di kiri */
+      width: 100%; /* Lebar 100% */
+      height: 5px; /* Tinggi 5px */
+      background-color: #d9534f; /* Warna latar belakang */
+      z-index: 9999; /* Z-index tinggi untuk tetap di atas */
+      animation: loadingAnimation 2s linear infinite; /* Menggunakan animasi yang sama */
+    }
+    /* Styling untuk informasi video */
+    #videoInfoText {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #fff;
+      font-family: 'PT Sans', sans-serif; /* Mengubah font informasi video */
+    }
   </style>
 </head>
 <body>
-  <div id="loadingBar"></div> <!-- Loading bar -->
+  <div id="loadingBar"></div> <!-- Loading bar utama -->
   <div class="container mt-5">
     <h1 class="text-center"><i class="fa fa-youtube-play youtube-icon" aria-hidden="true"></i> YT DexSkieee </h1>
 
     <form id="downloadForm">
       <div class="form-group">
-        <label for="videoUrl">Cari Video YouTube</label>
+        <label for="videoUrl">YouTube Play & Download</label>
         <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan URL atau Judul Video YouTube" required>
       </div>
       <button type="submit" class="btn btn-danger btn-block">Cari Video</button>
@@ -77,6 +97,7 @@
 
     <div id="videoInfo" class="mt-4" style="display: none;">
       <img id="thumbnail" src="" alt="Thumbnail" class="img-fluid mb-2">
+      <div id="videoInfoText"></div> <!-- Tempat untuk informasi video -->
     </div>
 
     <div id="downloadOptions" class="mt-4" style="display: none;">
@@ -85,9 +106,15 @@
         <option value="mp4">VIDEO/MP4</option>
       </select>
       <button id="downloadButton" class="btn btn-danger btn-block mt-2">Download</button>
+      <button id="previewButton" onclick="prepareAudioPreview();" class="btn btn-secondary btn-block mt-2">Preview Audio</button>
+      <div id="previewLoadingBar"></div> <!-- Loading bar untuk preview -->
     </div>
-  </div>
 
+    <!-- Audio Element for Preview -->
+    <audio id="sec">
+      <source id="audioSource" src="" type="audio/mpeg">
+    </audio>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>
     let videoToDownload;
@@ -187,33 +214,21 @@
           videoTitle = firstVideo.title;
           const title = firstVideo.title;
           const timestamp = firstVideo.timestamp;
-          const ago = firstVideo.ago;
-          const views = formatViewsCount(firstVideo.views); 
           const thumbnail = firstVideo.thumbnail; 
 
           document.getElementById('thumbnail').src = thumbnail; 
-          showAlert(`Judul: ${title}<br>Durasi: ${timestamp}<br>Waktu: ${ago}<br>Views: ${views}`, 'success');
-
+          
+          // Tampilkan informasi video di bawah thumbnail
+          const videoInfoText = document.getElementById('videoInfoText');
+          videoInfoText.innerHTML = `${title}<br>Durasi : ${timestamp}`;
           document.getElementById('videoInfo').style.display = 'block'; 
-          document.getElementById('downloadOptions').style.display = 'block';
+          document.getElementById('downloadOptions').style.display = 'block'; 
         } else {
           showAlert('Video tidak ditemukan.', 'danger');
         }
       } catch (error) {
         console.error('Error saat mencari video:', error);
         showAlert('Terjadi kesalahan saat mencari video.', 'danger');
-      }
-    }
-
-    function formatViewsCount(count) {
-      if (count >= 1e9) {
-        return (count / 1e9).toFixed(0) + ' Miliar'; 
-      } else if (count >= 1e6) {
-        return (count / 1e6).toFixed(0) + ' Juta'; 
-      } else if (count >= 1e3) {
-        return (count / 1e3).toFixed(0) + ' Ribu'; 
-      } else {
-        return count.toString(); 
       }
     }
 
@@ -226,16 +241,16 @@
         });
 
         const mp3Url = response.data.result.mp3;
-
         if (mp3Url) {
-          const link = document.createElement('a');
-          link.href = mp3Url;
-          link.setAttribute('download', `${videoTitle}.mp3`); 
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          const a = document.createElement('a');
+          a.href = mp3Url;
+          a.download = `${videoTitle}.mp3`; 
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          showAlert('Audio berhasil diunduh!', 'success');
         } else {
-          showAlert('URL untuk MP3 tidak ditemukan.', 'danger');
+          showAlert('URL audio tidak tersedia untuk diunduh.', 'danger');
         }
       } catch (error) {
         console.error('Error saat mendownload MP3:', error);
@@ -252,21 +267,55 @@
         });
 
         const mp4Url = response.data.result.mp4;
-
         if (mp4Url) {
-          const link = document.createElement('a');
-          link.href = mp4Url;
-          link.setAttribute('download', `${videoTitle}.mp4`); 
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          const a = document.createElement('a');
+          a.href = mp4Url;
+          a.download = `${videoTitle}.mp4`; 
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          showAlert('Video berhasil diunduh!', 'success');
         } else {
-          showAlert('URL untuk MP4 tidak ditemukan.', 'danger');
+          showAlert('URL video tidak tersedia untuk diunduh.', 'danger');
         }
       } catch (error) {
         console.error('Error saat mendownload MP4:', error);
         showAlert('Terjadi kesalahan saat mendownload MP4.', 'danger');
       }
+    }
+
+    function prepareAudioPreview() {
+      const audioElement = document.getElementById("sec");
+      const audioSource = document.getElementById("audioSource");
+
+      // Tampilkan loading bar saat preview audio dimulai
+      const previewLoadingBar = document.getElementById('previewLoadingBar');
+      previewLoadingBar.style.display = 'block'; // Tampilkan loading bar
+
+      axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(videoToDownload)}`, {
+        headers: {
+          'accept': 'application/json'
+        }
+      })
+      .then(response => {
+        const mp3Url = response.data.result.mp3;
+        console.log("MP3 URL:", mp3Url); // Log URL untuk debugging
+        if (mp3Url) {
+          audioSource.src = mp3Url; 
+          audioElement.load(); // Reload audio element with new source
+          audioElement.play(); // Play the audio
+        } else {
+          showAlert('URL untuk preview MP3 tidak ditemukan.', 'danger');
+        }
+      })
+      .catch(error => {
+        console.error('Error saat menyiapkan preview audio:', error);
+        showAlert('Terjadi kesalahan saat menyiapkan preview audio.', 'danger');
+      })
+      .finally(() => {
+        // Sembunyikan loading bar setelah proses selesai
+        previewLoadingBar.style.display = 'none'; // Sembunyikan loading bar
+      });
     }
   </script>
 </body>
