@@ -221,44 +221,51 @@
         playPauseIcon.classList.add("fa-play");
         isPlaying = false;
       } else {
-        showLoadingBar(); // Tampilkan loading bar saat memuat audio
-        axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(videoToDownload)}`, {
-          headers: {
-            'accept': 'application/json'
-          }
-        })
-        .then(response => {
-          const mp3Url = response.data.result.mp3;
-          if (mp3Url) {
-            audioSource.src = mp3Url; 
-            audioElement.load(); // Reload audio element with new source
-            audioElement.play(); // Play the audio
-            playPauseIcon.classList.remove("fa-play");
-            playPauseIcon.classList.add("fa-pause");
-            isPlaying = true;
+        if (audioSource.src === "") {
+          showLoadingBar(); // Tampilkan loading bar saat memuat audio
+          axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
+            headers: {
+              'accept': 'application/json'
+            }
+          })
+          .then(response => {
+            const mp3Url = response.data.data.download;
+            if (mp3Url) {
+              audioSource.src = mp3Url; 
+              audioElement.load(); // Reload audio element with new source
+              audioElement.play(); // Play the audio
+              playPauseIcon.classList.remove("fa-play");
+              playPauseIcon.classList.add("fa-pause");
+              isPlaying = true;
 
-            // Sembunyikan loading bar setelah audio mulai diputar
-            audioElement.onplaying = function() {
-              hideLoadingBar(); // Sembunyikan loading bar
-            };
+              // Sembunyikan loading bar setelah audio mulai diputar
+              audioElement.onplaying = function() {
+                hideLoadingBar(); // Sembunyikan loading bar
+              };
 
-            // Sembunyikan loading bar jika audio selesai
-            audioElement.onended = function() {
-              playPauseIcon.classList.remove("fa-pause");
-              playPauseIcon.classList.add("fa-play");
-              isPlaying = false; 
-              hideLoadingBar(); // Sembunyikan loading bar jika audio selesai
-            };
-          } else {
-            showAlert('Gagal mendapatkan URL audio.', 'danger');
-            hideLoadingBar(); // Sembunyikan loading bar jika gagal
-          }
-        })
-        .catch(error => {
-          console.error('Error saat mendapatkan audio:', error);
-          showAlert('Terjadi kesalahan saat mendapatkan audio.', 'danger');
-          hideLoadingBar(); // Sembunyikan loading bar jika terjadi kesalahan
-        });
+              // Sembunyikan loading bar jika audio selesai
+              audioElement.onended = function() {
+                playPauseIcon.classList.remove("fa-pause");
+                playPauseIcon.classList.add("fa-play");
+                isPlaying = false; 
+                hideLoadingBar(); // Sembunyikan loading bar jika audio selesai
+              };
+            } else {
+              showAlert('Gagal mendapatkan URL audio.', 'danger');
+              hideLoadingBar(); // Sembunyikan loading bar jika gagal
+            }
+          })
+          .catch(error => {
+            console.error('Error saat mendapatkan audio:', error);
+            showAlert('Terjadi kesalahan saat mendapatkan audio.', 'danger');
+            hideLoadingBar(); // Sembunyikan loading bar jika terjadi kesalahan
+          });
+        } else {
+          audioElement.play(); // Resume audio
+          playPauseIcon.classList.remove("fa-play");
+          playPauseIcon.classList.add("fa-pause");
+          isPlaying = true;
+        }
       }
     }
   </script>
