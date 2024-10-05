@@ -40,6 +40,17 @@
       z-index: 9999;
       animation: loadingAnimation 2s linear infinite;
     }
+    #previewLoadingBar {
+      display: none; /* Sembunyikan loading bar preview secara default */
+      position: fixed;
+      top: 50px; /* Agar berada di bawah loading bar utama */
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background-color: #5bc0de;
+      z-index: 9999;
+      animation: loadingAnimation 2s linear infinite;
+    }
     @keyframes loadingAnimation {
       0% { width: 0; }
       50% { width: 100%; }
@@ -57,15 +68,20 @@
 </head>
 <body>
   <div id="loadingBar"></div> <!-- Loading bar utama -->
+  <div id="previewLoadingBar"></div> <!-- Loading bar untuk preview -->
+  
   <div class="container mt-5">
     <h1 class="text-center"><i class="fa fa-youtube-play youtube-icon" aria-hidden="true"></i> YT DexSkieee </h1>
 
-    <form id="downloadForm">
-      <div class="form-group">
-        <label for="videoUrl">YouTube Play Music</label>
+    <form id="downloadForm" class="input-group">
+      <div class="input-group mb-3">
         <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan URL atau Judul Video YouTube" required>
+        <div class="input-group-append">
+          <button type="submit" class="btn btn-danger">
+            <i class="fa fa-search"></i>
+          </button>
+        </div>
       </div>
-      <button type="submit" class="btn btn-danger btn-block">Cari Video</button>
     </form>
 
     <div id="alertContainer" class="mt-3"></div>
@@ -86,6 +102,7 @@
       <source id="audioSource" src="" type="audio/mpeg">
     </audio>
   </div>
+  
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>
     let videoToDownload;
@@ -191,6 +208,7 @@
       const audioElement = document.getElementById("sec");
       const audioSource = document.getElementById("audioSource");
       const playPauseIcon = document.getElementById("playPauseIcon");
+      const previewLoadingBar = document.getElementById("previewLoadingBar");
 
       if (isPlaying) {
         audioElement.pause(); // Pause audio
@@ -198,6 +216,7 @@
         playPauseIcon.classList.add("fa-play");
         isPlaying = false;
       } else {
+        previewLoadingBar.style.display = 'block'; // Tampilkan loading bar preview
         axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(videoToDownload)}`, {
           headers: {
             'accept': 'application/json'
@@ -211,14 +230,26 @@
             audioElement.play(); // Play the audio
             playPauseIcon.classList.remove("fa-play");
             playPauseIcon.classList.add("fa-pause");
-            isPlaying = true; // Set status ke playing
+            isPlaying = true;
+
+            // Sembunyikan loading bar setelah audio mulai diputar
+            audioElement.onplaying = function() {
+              previewLoadingBar.style.display = 'none'; // Sembunyikan loading bar
+            };
+
+            // Sembunyikan loading bar jika audio selesai
+            audioElement.onended = function() {
+              playPauseIcon.classList.remove("fa-pause");
+              playPauseIcon.classList.add("fa-play");
+              isPlaying = false; 
+            };
           } else {
-            showAlert('URL untuk preview MP3 tidak ditemukan.', 'danger');
+            showAlert('Gagal mendapatkan URL audio.', 'danger');
           }
         })
         .catch(error => {
-          console.error('Error saat menyiapkan preview audio:', error);
-          showAlert('Terjadi kesalahan saat menyiapkan preview audio.', 'danger');
+          console.error('Error saat mendapatkan audio:', error);
+          showAlert('Terjadi kesalahan saat mendapatkan audio.', 'danger');
         });
       }
     }
