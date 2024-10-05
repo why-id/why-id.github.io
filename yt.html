@@ -22,6 +22,19 @@
     label, button, input, .alert, .form-control {
       font-family: 'PT Sans', sans-serif; 
     }
+    #downloadOptions h5 {
+      font-family: 'PT Sans', sans-serif;
+    }
+    .form-control {
+      background-color: #333;
+      border: 1px solid #555;
+      color: #fff;
+    }
+    .form-control:focus {
+      background-color: #555;
+      border-color: #777;
+      color: #fff;
+    }  
     #thumbnail {
       max-width: 100%;
       height: auto;
@@ -41,15 +54,15 @@
       animation: loadingAnimation 2s linear infinite;
     }
     #previewLoadingBar {
-      display: none; /* Sembunyikan loading bar preview secara default */
-      position: fixed;
-      top: 50px; /* Agar berada di bawah loading bar utama */
-      left: 0;
-      width: 100%;
-      height: 5px;
-      background-color: #5bc0de;
-      z-index: 9999;
-      animation: loadingAnimation 2s linear infinite;
+      display: none; /* Sembunyikan loading bar secara default */
+      position: fixed; /* Pastikan loading bar berada di atas */
+      top: 0; /* Mengatur posisi di atas */
+      left: 0; /* Mengatur posisi di kiri */
+      width: 100%; /* Lebar 100% */
+      height: 5px; /* Tinggi 5px */
+      background-color: #d9534f; /* Warna latar belakang */
+      z-index: 9999; /* Z-index tinggi untuk tetap di atas */
+      animation: loadingAnimation 2s linear infinite; /* Menggunakan animasi yang sama */
     }
     @keyframes loadingAnimation {
       0% { width: 0; }
@@ -216,41 +229,27 @@
         playPauseIcon.classList.add("fa-play");
         isPlaying = false;
       } else {
-        previewLoadingBar.style.display = 'block'; // Tampilkan loading bar preview
-        axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(videoToDownload)}`, {
-          headers: {
-            'accept': 'application/json'
-          }
-        })
-        .then(response => {
-          const mp3Url = response.data.result.mp3;
-          if (mp3Url) {
-            audioSource.src = mp3Url; 
-            audioElement.load(); // Reload audio element with new source
-            audioElement.play(); // Play the audio
-            playPauseIcon.classList.remove("fa-play");
-            playPauseIcon.classList.add("fa-pause");
-            isPlaying = true;
+        audioSource.src = videoToDownload; // Set source audio
+        audioElement.load(); // Load audio
+        audioElement.play(); // Play audio
+        playPauseIcon.classList.remove("fa-play");
+        playPauseIcon.classList.add("fa-pause");
+        isPlaying = true;
 
-            // Sembunyikan loading bar setelah audio mulai diputar
-            audioElement.onplaying = function() {
-              previewLoadingBar.style.display = 'none'; // Sembunyikan loading bar
-            };
+        // Tampilkan loading bar selama audio sedang dimuat
+        previewLoadingBar.style.display = 'block'; // Tampilkan loading bar
 
-            // Sembunyikan loading bar jika audio selesai
-            audioElement.onended = function() {
-              playPauseIcon.classList.remove("fa-pause");
-              playPauseIcon.classList.add("fa-play");
-              isPlaying = false; 
-            };
-          } else {
-            showAlert('Gagal mendapatkan URL audio.', 'danger');
-          }
-        })
-        .catch(error => {
-          console.error('Error saat mendapatkan audio:', error);
-          showAlert('Terjadi kesalahan saat mendapatkan audio.', 'danger');
-        });
+        // Sembunyikan loading bar setelah audio mulai diputar
+        audioElement.onplaying = function() {
+          previewLoadingBar.style.display = 'none'; // Sembunyikan loading bar
+        };
+
+        // Sembunyikan loading bar jika audio selesai
+        audioElement.onended = function() {
+          playPauseIcon.classList.remove("fa-pause");
+          playPauseIcon.classList.add("fa-play");
+          isPlaying = false; 
+        };
       }
     }
   </script>
