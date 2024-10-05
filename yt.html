@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Download by DexSkieee Ofc</title>
+  <title>YouTube Play Music by DexSkieee Ofc</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
@@ -87,7 +87,7 @@
 
     <form id="downloadForm">
       <div class="form-group">
-        <label for="videoUrl">YouTube Play & Download</label>
+        <label for="videoUrl">YouTube Play Music</label>
         <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan URL atau Judul Video YouTube" required>
       </div>
       <button type="submit" class="btn btn-danger btn-block">Cari Video</button>
@@ -101,12 +101,7 @@
     </div>
 
     <div id="downloadOptions" class="mt-4" style="display: none;">
-      <select id="formatSelect" class="form-control">
-        <option value="mp3">AUDIO/MP3</option>
-        <option value="mp4">VIDEO/MP4</option>
-      </select>
-      <button id="downloadButton" class="btn btn-danger btn-block mt-2">Download</button>
-      <button id="previewButton" onclick="prepareAudioPreview();" class="btn btn-secondary btn-block mt-2">Preview Audio</button>
+      <button id="previewButton" onclick="prepareAudioPreview();" class="btn btn-danger btn-block mt-2">Putar Music</button>
       <div id="previewLoadingBar"></div> <!-- Loading bar untuk preview -->
     </div>
 
