@@ -22,6 +22,16 @@
     label, button, input, .alert, .form-control {
       font-family: 'PT Sans', sans-serif; 
     }
+    .form-control {
+      background-color: #333;
+      border: 1px solid #555;
+      color: #fff;
+    }
+    .form-control:focus {
+      background-color: #555;
+      border-color: #777;
+      color: #fff;
+    }
     #thumbnail {
       max-width: 100%;
       height: auto;
@@ -63,7 +73,7 @@
 
     <form id="downloadForm" class="input-group">
       <div class="input-group mb-3">
-        <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan URL atau Judul Video YouTube" required>
+        <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan Link/Judul Video YouTube" required>
         <div class="input-group-append">
           <button type="submit" class="btn btn-danger">
             <i class="fa fa-search"></i>
