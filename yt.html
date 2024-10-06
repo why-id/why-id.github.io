@@ -285,7 +285,9 @@
 
             // Update slider as the audio plays
             audioElement.ontimeupdate = function() {
-              audioDurationSlider.value = audioElement.currentTime; // Update slider value
+              if (isPlaying) { // Update only if playing
+                audioDurationSlider.value = audioElement.currentTime; // Update slider value
+              }
             };
 
             // Reset audio and slider when it ends
