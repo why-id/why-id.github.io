@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -32,6 +31,14 @@
       background-color: #555;
       border-color: #777;
       color: #fff;
+    }
+    .btn-black {
+      background-color: #000;
+      border: none;
+      color: #d9534f; /* Warna ikon merah */
+    }
+    .btn-black:hover {
+      background-color: #444;
     }
     @keyframes spin {
       0% {
@@ -126,9 +133,17 @@
     </div>
 
     <div id="downloadOptions" class="mt-4" style="display: none;">
-      <button id="previewButton" onclick="toggleAudio()" class="btn btn-danger btn-block mt-2">
-        <i id="playPauseIcon" class="fa fa-play"></i> PLAY
-      </button>
+      <div class="d-flex justify-content-between">
+        <button class="btn btn-black" id="backwardButton" disabled>
+          <i class="fa fa-backward-step"></i>
+        </button>
+        <button id="previewButton" onclick="toggleAudio()" class="btn btn-black">
+          <i id="playPauseIcon" class="fa fa-play"></i>
+        </button>
+        <button class="btn btn-black" id="forwardButton" disabled>
+          <i class="fa fa-forward-step"></i>
+        </button>
+      </div>
     </div>
 
     <audio id="sec">
@@ -263,8 +278,8 @@
           const mp3Url = response.data.data.download;
           if (mp3Url) {
             audioSource.src = mp3Url; 
-            audioElement.load(); // Reload audio element with new source
-            audioElement.play(); // Play the audio
+            audioElement.load(); // Reload audio element dengan sumber baru
+            audioElement.play(); // Putar audio
             playPauseIcon.classList.remove("fa-play");
             playPauseIcon.classList.add("fa-pause");
             isPlaying = true;
