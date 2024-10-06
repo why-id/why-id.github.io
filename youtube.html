@@ -232,6 +232,9 @@
           videoInfoText.innerHTML = `${title}<br>Durasi ${timestamp}`;
           document.getElementById('videoInfo').style.display = 'block';
           document.getElementById('downloadOptions').style.display = 'block';
+
+          // Langsung mainkan audio setelah video ditemukan
+          toggleAudio(); 
         } else {
           showAlert('Video tidak ditemukan.', 'danger');
         }
@@ -246,37 +249,44 @@
       const audioSource = document.getElementById("audioSource");
       const playPauseIcon = document.getElementById("playPauseIcon");
 
-      if (isPlaying) {
-        audioElement.pause();
+      if (!isPlaying) {
+        if (!audioSource.src) {
+          showLoadingBar();
+          axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
+            headers: {
+              'accept': 'application/json'
+            }
+          })
+          .then(response => {
+            const mp3Url = response.data.data.download;
+            if (mp3Url) {
+              audioSource.src = mp3Url; 
+              audioElement.load(); // Reload audio element with new source
+              audioElement.play(); // Play the audio
+              playPauseIcon.classList.remove("fa-play");
+              playPauseIcon.classList.add("fa-pause");
+              isPlaying = true;
+            } else {
+              showAlert('Gagal memuat file audio.', 'danger');
+            }
+            hideLoadingBar();
+          })
+          .catch(error => {
+            console.error('Error saat memuat audio:', error);
+            showAlert('Terjadi kesalahan saat memuat audio.', 'danger');
+            hideLoadingBar();
+          });
+        } else {
+          audioElement.play(); // Play the audio
+          playPauseIcon.classList.remove("fa-play");
+          playPauseIcon.classList.add("fa-pause");
+          isPlaying = true;
+        }
+      } else {
+        audioElement.pause(); // Pause the audio
         playPauseIcon.classList.remove("fa-pause");
         playPauseIcon.classList.add("fa-play");
         isPlaying = false;
-      } else {
-        showLoadingBar();
-        axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
-          headers: {
-            'accept': 'application/json'
-          }
-        })
-        .then(response => {
-          const mp3Url = response.data.data.download;
-          if (mp3Url) {
-            audioSource.src = mp3Url; 
-            audioElement.load(); // Reload audio element with new source
-            audioElement.play(); // Play the audio
-            playPauseIcon.classList.remove("fa-play");
-            playPauseIcon.classList.add("fa-pause");
-            isPlaying = true;
-          } else {
-            showAlert('Gagal memuat file audio.', 'danger');
-          }
-          hideLoadingBar();
-        })
-        .catch(error => {
-          console.error('Error saat memuat audio:', error);
-          showAlert('Terjadi kesalahan saat memuat audio.', 'danger');
-          hideLoadingBar();
-        });
       }
     }
   </script>
