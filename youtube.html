@@ -259,13 +259,18 @@
           }
         })
         .then(response => {
-          audioSource.src = response.data.data.url;
-          audioElement.load();
-          audioElement.play();
+          const mp3Url = response.data.data.download;
+          if (mp3Url) {
+            audioSource.src = mp3Url; 
+            audioElement.load(); // Reload audio element with new source
+            audioElement.play(); // Play the audio
+            playPauseIcon.classList.remove("fa-play");
+            playPauseIcon.classList.add("fa-pause");
+            isPlaying = true;
+          } else {
+            showAlert('Gagal memuat file audio.', 'danger');
+          }
           hideLoadingBar();
-          playPauseIcon.classList.remove("fa-play");
-          playPauseIcon.classList.add("fa-pause");
-          isPlaying = true;
         })
         .catch(error => {
           console.error('Error saat memuat audio:', error);
