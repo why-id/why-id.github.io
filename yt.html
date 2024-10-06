@@ -135,6 +135,7 @@
       <button id="previewButton" onclick="toggleAudio()" class="btn btn-danger btn-block mt-2">
         <i id="playPauseIcon" class="fa fa-play"></i>
       </button>
+      <p class="videoInfoText">copyright &nbsp; 2024 GresiXploiter</p>
     </div>
 
     <!-- Audio Element for Preview -->
@@ -242,7 +243,7 @@
 
           // Tampilkan informasi video di bawah thumbnail
           const videoInfoText = document.getElementById('videoInfoText');
-          videoInfoText.innerHTML = `${title}<br>Durasi : ${timestamp}`;
+          videoInfoText.innerHTML = `${title}<br>Durasi ${timestamp}`;
           document.getElementById('videoInfo').style.display = 'block'; 
           document.getElementById('downloadOptions').style.display = 'block'; 
         } else {
