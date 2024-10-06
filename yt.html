@@ -44,11 +44,12 @@
       animation: spin 12s linear infinite;
       width: 300px; 
       height: 300px;
-      border: 4px solid #fff;
+      border: 4px solid transparent; /* Set border menjadi transparent */
+      border-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet) 1; /* Border berwarna-warni */
       border-radius: 50%;
       position: relative;
       background-color: #333;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5); /* Tambahkan efek bayangan */
       margin: auto;
     }
     #thumbnail::before {
@@ -98,11 +99,6 @@
       color: #fff;
       font-family: 'PT Sans', sans-serif;
     }
-    /* Styling for audio duration slider */
-    #audioDuration {
-      width: 100%;
-      margin-top: 10px;
-    }
   </style>
 </head>
 <body>
@@ -129,16 +125,13 @@
       <div id="videoInfoText"></div>
     </div>
 
-    <!-- Audio duration slider -->
-    <input type="range" id="audioDuration" value="0" min="0" step="1" disabled />
-
     <div id="downloadOptions" class="mt-4" style="display: none;">
       <button id="previewButton" onclick="toggleAudio()" class="btn btn-danger btn-block mt-2">
         <i id="playPauseIcon" class="fa fa-play"></i> PLAY
       </button>
     </div>
 
-    <audio id="sec" preload="metadata">
+    <audio id="sec">
       <source id="audioSource" src="" type="audio/mpeg">
     </audio>
   </div>
@@ -253,7 +246,6 @@
       const audioElement = document.getElementById("sec");
       const audioSource = document.getElementById("audioSource");
       const playPauseIcon = document.getElementById("playPauseIcon");
-      const audioDurationSlider = document.getElementById("audioDuration");
 
       if (isPlaying) {
         audioElement.pause();
@@ -276,26 +268,6 @@
             playPauseIcon.classList.remove("fa-play");
             playPauseIcon.classList.add("fa-pause");
             isPlaying = true;
-
-            // Update slider max value to audio duration
-            audioElement.onloadedmetadata = function() {
-              audioDurationSlider.max = audioElement.duration; // Set max to audio duration
-              audioDurationSlider.value = 0; // Reset slider value
-            };
-
-            // Update slider as the audio plays
-            audioElement.ontimeupdate = function() {
-              // Update slider only when audio is playing
-              audioDurationSlider.value = audioElement.currentTime; // Update slider value
-            };
-
-            // Reset audio and slider when it ends
-            audioElement.onended = function() {
-              isPlaying = false;
-              playPauseIcon.classList.remove("fa-pause");
-              playPauseIcon.classList.add("fa-play");
-              audioDurationSlider.value = 0; // Reset slider
-            };
           } else {
             showAlert('Gagal memuat file audio.', 'danger');
           }
