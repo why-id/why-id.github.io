@@ -38,9 +38,8 @@
       display: block;
       margin: auto;
     }
-    /* Styling untuk loading bar */
     #loadingBar {
-      display: none; /* Sembunyikan loading bar secara default */
+      display: none;
       position: fixed;
       top: 0;
       left: 0;
@@ -55,18 +54,16 @@
       50% { width: 100%; }
       100% { width: 0; }
     }
-    /* Styling untuk informasi video */
     #videoInfoText {
       text-align: center;
       margin-top: 10px;
       font-size: 1rem;
       color: #fff;
-      font-family: 'PT Sans', sans-serif; /* Mengubah font informasi video */
     }
   </style>
 </head>
 <body>
-  <div id="loadingBar"></div> <!-- Loading bar utama -->
+  <div id="loadingBar"></div>
   
   <div class="container mt-5">
     <h1 class="text-center"><i class="fa fa-youtube-play youtube-icon" aria-hidden="true"></i> YT DexSkieee </h1>
@@ -86,12 +83,16 @@
 
     <div id="videoInfo" class="mt-4" style="display: none;">
       <img id="thumbnail" src="" alt="Thumbnail" class="img-fluid mb-2">
-      <div id="videoInfoText"></div> <!-- Tempat untuk informasi video -->
+      <div id="videoInfoText"></div>
     </div>
 
     <div id="downloadOptions" class="mt-4" style="display: none;">
       <button id="previewButton" onclick="toggleAudio()" class="btn btn-danger btn-block mt-2">
         <i id="playPauseIcon" class="fa fa-play"></i>
+      </button>
+      <!-- Tombol Unduh Audio -->
+      <button id="downloadButton" class="btn btn-success btn-block mt-2">
+        <i class="fa fa-download"></i> Download MP3
       </button>
     </div>
 
@@ -105,9 +106,8 @@
   <script>
     let videoToDownload;
     let videoTitle;
-    let isPlaying = false; // Menyimpan status audio
+    let isPlaying = false;
 
-    // Fungsi untuk mengambil ID video dari URL
     function extractVideoId(url) {
       try {
         const urlObj = new URL(url);
@@ -125,42 +125,38 @@
 
     function showLoadingBar() {
       const loadingBar = document.getElementById('loadingBar');
-      loadingBar.style.display = 'block'; // Tampilkan loading bar
+      loadingBar.style.display = 'block';
     }
 
     function hideLoadingBar() {
       const loadingBar = document.getElementById('loadingBar');
-      loadingBar.style.display = 'none'; // Sembunyikan loading bar
+      loadingBar.style.display = 'none';
     }
 
     document.getElementById('downloadForm').addEventListener('submit', async function(event) {
       event.preventDefault();
 
-      showLoadingBar(); // Tampilkan loading bar saat form disubmit
+      showLoadingBar();
 
       let videoUrl = document.getElementById('videoUrl').value;
-
-      // Coba untuk mengekstrak ID video dari URL
       const videoId = extractVideoId(videoUrl);
 
       if (videoId) {
         videoUrl = `https://www.youtube.com/watch?v=${videoId}`; 
       }
 
-      // Validasi URL
       if (!videoUrl) {
         showAlert('Silakan masukkan URL atau judul video.', 'danger');
-        hideLoadingBar(); // Sembunyikan loading bar jika tidak valid
+        hideLoadingBar();
         return;
       }
 
-      // Menghapus alert sebelumnya jika ada
       const alertContainer = document.getElementById('alertContainer');
-      alertContainer.innerHTML = ''; // Hapus alert yang ada sebelumnya
+      alertContainer.innerHTML = '';
       
       await searchAndPrepareDownload(videoUrl);
       
-      hideLoadingBar(); // Sembunyikan loading bar setelah pencarian selesai
+      hideLoadingBar();
     });
 
     function showAlert(message, type) {
@@ -170,15 +166,14 @@
       alertDiv.innerHTML = message;
       alertContainer.appendChild(alertDiv);
 
-      // Jika alert jenis 'success', hapus setelah 10 detik
       if (type === 'success') {
         setTimeout(() => {
           alertDiv.remove();
-        }, 10000); // Hapus setelah 10 detik
+        }, 10000);
       } else if (type === 'danger') {
         setTimeout(() => {
           alertDiv.remove();
-        }, 2000); // Hapus setelah 2 detik
+        }, 2000);
       }
     }
 
@@ -195,8 +190,6 @@
           const thumbnail = firstVideo.thumbnail; 
 
           document.getElementById('thumbnail').src = thumbnail; 
-          
-          // Tampilkan informasi video di bawah thumbnail
           const videoInfoText = document.getElementById('videoInfoText');
           videoInfoText.innerHTML = `${title}<br>Durasi : ${timestamp}`;
           document.getElementById('videoInfo').style.display = 'block'; 
@@ -216,58 +209,73 @@
       const playPauseIcon = document.getElementById("playPauseIcon");
 
       if (isPlaying) {
-        audioElement.pause(); // Pause audio
+        audioElement.pause(); 
         playPauseIcon.classList.remove("fa-pause");
         playPauseIcon.classList.add("fa-play");
         isPlaying = false;
       } else {
-        if (audioSource.src === "") {
-          showLoadingBar(); // Tampilkan loading bar saat memuat audio
-          axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
-            headers: {
-              'accept': 'application/json'
-            }
-          })
-          .then(response => {
-            const mp3Url = response.data.data.download;
-            if (mp3Url) {
-              audioSource.src = mp3Url; 
-              audioElement.load(); // Reload audio element with new source
-              audioElement.play(); // Play the audio
-              playPauseIcon.classList.remove("fa-play");
-              playPauseIcon.classList.add("fa-pause");
-              isPlaying = true;
+        showLoadingBar();
+        axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
+          headers: {
+            'accept': 'application/json'
+          }
+        })
+        .then(response => {
+          const mp3Url = response.data.data.download;
+          if (mp3Url) {
+            audioSource.src = mp3Url; 
+            audioElement.load();
+            audioElement.play();
+            playPauseIcon.classList.remove("fa-play");
+            playPauseIcon.classList.add("fa-pause");
+            isPlaying = true;
 
-              // Sembunyikan loading bar setelah audio mulai diputar
-              audioElement.onplaying = function() {
-                hideLoadingBar(); // Sembunyikan loading bar
-              };
+            audioElement.onplaying = function() {
+              hideLoadingBar();
+            };
 
-              // Sembunyikan loading bar jika audio selesai
-              audioElement.onended = function() {
-                playPauseIcon.classList.remove("fa-pause");
-                playPauseIcon.classList.add("fa-play");
-                isPlaying = false; 
-                hideLoadingBar(); // Sembunyikan loading bar jika audio selesai
-              };
-            } else {
-              showAlert('Gagal mendapatkan URL audio.', 'danger');
-              hideLoadingBar(); // Sembunyikan loading bar jika gagal
-            }
-          })
-          .catch(error => {
-            console.error('Error saat mendapatkan audio:', error);
-            showAlert('Terjadi kesalahan saat mendapatkan audio.', 'danger');
-            hideLoadingBar(); // Sembunyikan loading bar jika terjadi kesalahan
-          });
-        } else {
-          audioElement.play(); // Resume audio
-          playPauseIcon.classList.remove("fa-play");
-          playPauseIcon.classList.add("fa-pause");
-          isPlaying = true;
-        }
+            audioElement.onended = function() {
+              playPauseIcon.classList.remove("fa-pause");
+              playPauseIcon.classList.add("fa-play");
+              isPlaying = false; 
+              hideLoadingBar();
+            };
+          } else {
+            showAlert('Gagal mendapatkan URL audio.', 'danger');
+            hideLoadingBar();
+          }
+        })
+        .catch(error => {
+          console.error('Error saat mendapatkan audio:', error);
+          showAlert('Terjadi kesalahan saat mendapatkan audio.', 'danger');
+          hideLoadingBar();
+        });
       }
     }
+
+    document.getElementById('downloadButton').addEventListener('click', function() {
+      if (videoToDownload) {
+        axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
+          headers: {
+            'accept': 'application/json'
+          }
+        })
+        .then(response => {
+          const mp3Url = response.data.data.download;
+          if (mp3Url) {
+            window.location.href = mp3Url;
+          } else {
+            showAlert('Gagal mendapatkan URL audio.', 'danger');
+          }
+        })
+        .catch(error => {
+          console.error('Error saat mendapatkan audio:', error);
+          showAlert('Terjadi kesalahan saat mendapatkan audio.', 'danger');
+        });
+      } else {
+        showAlert('Tidak ada audio yang dapat diunduh.', 'danger');
+      }
+    });
   </script>
 </body>
 </html>
