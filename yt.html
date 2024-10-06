@@ -32,12 +32,44 @@
       border-color: #777;
       color: #fff;
     }
+    
     #thumbnail {
-      max-width: 100%;
-      height: auto;
-      display: block;
-      margin: auto;
+      width: 300px; 
+      height: 300px;
+      border-radius: 50%; /* Membuat thumbnail menjadi bulat */
+      position: relative;
+      background-color: #333;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      margin: auto; /* Memposisikan di tengah */
     }
+
+    /* Lubang tengah */
+    #thumbnail::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 60px;
+      height: 60px;
+      background-color: #000;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1; /* Bawa ke depan */
+    }
+
+    /* Ikon play di tengah */
+    #thumbnail::after {
+      content: '\f04b'; /* Unicode untuk ikon play dari FontAwesome */
+      font-family: 'FontAwesome';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      font-size: 48px;
+      color: #fff;
+      transform: translate(-50%, -50%);
+      z-index: 2; /* Di atas lubang */
+    }
+
     /* Styling untuk loading bar */
     #loadingBar {
       display: none; /* Sembunyikan loading bar secara default */
@@ -85,7 +117,7 @@
     <div id="alertContainer" class="mt-3"></div>
 
     <div id="videoInfo" class="mt-4" style="display: none;">
-      <img id="thumbnail" src="" alt="Thumbnail" class="img-fluid mb-2">
+      <div id="thumbnail" class="img-fluid mb-2"></div> <!-- Thumbnail bulat -->
       <div id="videoInfoText"></div> <!-- Tempat untuk informasi video -->
     </div>
 
@@ -93,15 +125,10 @@
       <button id="previewButton" onclick="toggleAudio()" class="btn btn-danger btn-block mt-2">
         <i id="playPauseIcon" class="fa fa-play"></i>
       </button>
-
-      <!-- Tombol Unduh Audio -->
-      <button id="downloadButton" class="btn btn-danger btn-block mt-2">
-        <i class="fa fa-download"></i> Unduh Audio
-      </button>
     </div>
 
     <!-- Audio Element for Preview -->
-    <audio id="sec" controls>
+    <audio id="sec">
       <source id="audioSource" src="" type="audio/mpeg">
     </audio>
   </div>
@@ -199,8 +226,10 @@
           const timestamp = firstVideo.timestamp;
           const thumbnail = firstVideo.thumbnail; 
 
-          document.getElementById('thumbnail').src = thumbnail; 
-          
+          // Ganti gambar thumbnail dengan gaya kaset bulat
+          document.getElementById('thumbnail').style.backgroundImage = `url(${thumbnail})`; 
+          document.getElementById('thumbnail').style.backgroundSize = 'cover';
+
           // Tampilkan informasi video di bawah thumbnail
           const videoInfoText = document.getElementById('videoInfoText');
           videoInfoText.innerHTML = `${title}<br>Durasi : ${timestamp}`;
@@ -236,65 +265,36 @@
           const mp3Url = response.data.data.download;
           if (mp3Url) {
             audioSource.src = mp3Url; 
-            audioSource.type = "audio/mpeg"; // Set the MIME type to audio/mpeg
-            audioElement.load();
-            audioElement.play();
+            audioElement.load(); // Reload audio element with new source
+            audioElement.play(); // Play the audio
             playPauseIcon.classList.remove("fa-play");
             playPauseIcon.classList.add("fa-pause");
             isPlaying = true;
 
+            // Sembunyikan loading bar setelah audio mulai diputar
             audioElement.onplaying = function() {
-              hideLoadingBar(); // Sembunyikan loading bar setelah audio mulai diputar
+              hideLoadingBar(); // Sembunyikan loading bar
             };
 
+            // Sembunyikan loading bar jika audio selesai
             audioElement.onended = function() {
               playPauseIcon.classList.remove("fa-pause");
               playPauseIcon.classList.add("fa-play");
-              isPlaying = false; // Reset status saat audio selesai
-              hideLoadingBar(); // Sembunyikan loading bar setelah audio selesai
+              isPlaying = false; 
+              hideLoadingBar(); // Sembunyikan loading bar jika audio selesai
             };
           } else {
             showAlert('Gagal mendapatkan URL audio.', 'danger');
-            hideLoadingBar();
+            hideLoadingBar(); // Sembunyikan loading bar jika gagal
           }
         })
         .catch(error => {
           console.error('Error saat mendapatkan audio:', error);
           showAlert('Terjadi kesalahan saat mendapatkan audio.', 'danger');
-          hideLoadingBar();
+          hideLoadingBar(); // Sembunyikan loading bar jika terjadi kesalahan
         });
       }
     }
-
-    document.getElementById('downloadButton').addEventListener('click', function() {
-      if (videoToDownload) {
-        axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
-          headers: {
-            'accept': 'application/json'
-          }
-        })
-        .then(response => {
-          const mp3Url = response.data.data.download;
-          if (mp3Url) {
-            const link = document.createElement('a');
-            link.href = mp3Url;
-            link.download = `${videoTitle}.mp3`; // Set file name and extension
-            link.type = "audio/mpeg"; // Set MIME type to audio/mpeg
-            document.body.appendChild(link);
-            link.click(); // Trigger download
-            document.body.removeChild(link);
-          } else {
-            showAlert('Gagal mendapatkan URL audio.', 'danger');
-          }
-        })
-        .catch(error => {
-          console.error('Error saat mendapatkan audio:', error);
-          showAlert('Terjadi kesalahan saat mendapatkan audio.', 'danger');
-        });
-      } else {
-        showAlert('Tidak ada audio yang dapat diunduh.', 'danger');
-      }
-    });
   </script>
 </body>
 </html>
