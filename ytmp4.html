@@ -382,41 +382,63 @@
       }
     }
 
-    async function toggleAudio() {
-      const videoElement = document.getElementById("videoElement");
-      const audioElement = document.getElementById("audioElement");
-      const audioSource = document.getElementById("audioSource");
-      const playAudioButton = document.getElementById("playAudioButton");
+    async function function toggleVideo() {
+  const videoElement = document.getElementById("videoElement");
+  const audioElement = document.getElementById("audioElement");
+  const playButton = document.getElementById("playButton");
 
-      if (videoElement.style.display !== "none") {
-        // Pindah ke mode audio
-        videoElement.style.display = "none"; // Sembunyikan video
-        audioElement.style.display = "block"; // Tampilkan audio
-        
-        // Dapatkan URL MP3 dan putar
-        const response = await axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
-          headers: {
-            'accept': 'application/json'
-          }
-        });
-        const mp3Url = response.data.data.download;
-        if (mp3Url) {
-          audioSource.src = mp3Url;
-          audioElement.load();
-          audioElement.play();
-        } else {
-          showAlert('Gagal memuat file audio.', 'danger');
-        }
+  // Hentikan audio jika sedang berjalan
+  if (!audioElement.paused) {
+    audioElement.pause();
+    audioElement.style.display = "none";
+  }
 
-        playAudioButton.innerText = "Putar Video";
-      } else {
-        // Pindah ke mode video
-        videoElement.style.display = "block"; // Tampilkan video
-        audioElement.style.display = "none"; // Sembunyikan audio
-        videoElement.play(); // Putar video
-        playAudioButton.innerText = "Play Musik";
-      }
+  if (isPlaying) {
+    videoElement.pause();
+    playButton.style.display = "block";
+  } else {
+    videoElement.play();
+    playButton.style.display = "none";
+  }
+  isPlaying = !isPlaying;
+}
+
+async function toggleAudio() {
+  const videoElement = document.getElementById("videoElement");
+  const audioElement = document.getElementById("audioElement");
+  const audioSource = document.getElementById("audioSource");
+  const playAudioButton = document.getElementById("playAudioButton");
+
+  // Hentikan video jika sedang berjalan
+  if (!videoElement.paused) {
+    videoElement.pause();
+    videoElement.style.display = "none";
+  }
+
+  if (audioElement.style.display !== "block") {
+    // Pindah ke mode audio
+    audioElement.style.display = "block";
+    const response = await axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
+      headers: { 'accept': 'application/json' }
+    });
+    const mp3Url = response.data.data.download;
+    if (mp3Url) {
+      audioSource.src = mp3Url;
+      audioElement.load();
+      audioElement.play();
+    } else {
+      showAlert('Gagal memuat file audio.', 'danger');
     }
+    playAudioButton.innerText = "Putar Video";
+  } else {
+    // Pindah ke mode video
+    audioElement.pause();
+    audioElement.style.display = "none";
+    videoElement.style.display = "block";
+    videoElement.play();
+    playAudioButton.innerText = "Play Musik";
+  }
+}
   </script>
 </body>
 </html>
