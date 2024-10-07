@@ -100,7 +100,7 @@
       height: 10px;
       background: #555;
       margin-top: 10px;
-      cursor: pointer;
+      cursor: default; /* Ubah cursor agar tidak berubah saat mengarahkan ke progress bar */
     }
     #progress {
       height: 100%;
@@ -154,7 +154,7 @@
         </div>
       </div>
       <!-- Indikator progres video -->
-      <div id="progressBar" onclick="setProgress(event)">
+      <div id="progressBar">
         <div id="progress"></div>
       </div>
     </div>
@@ -299,13 +299,6 @@
       const progressBar = document.getElementById("progress");
       const percentage = (videoElement.currentTime / videoElement.duration) * 100;
       progressBar.style.width = `${percentage}%`;
-    }
-
-    function setProgress(event) {
-      const videoElement = document.getElementById("videoElement");
-      const progressBar = document.getElementById("progressBar");
-      const newTime = (event.offsetX / progressBar.clientWidth) * videoElement.duration;
-      videoElement.currentTime = newTime;
     }
 
     function toggleVideo() {
