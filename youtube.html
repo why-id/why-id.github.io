@@ -376,13 +376,51 @@
       }
     }
 
-    function downloadVideo() {
-      const downloadFormat = document.getElementById('downloadFormat').value;
+    async function downloadVideo() {
+      const format = document.getElementById('downloadFormat').value;
+      if (!format) {
+        showAlert('Silakan pilih format download.', 'danger');
+        return;
+      }
 
-      if (downloadFormat === 'mp4') {
-        window.open(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, '_blank');
-      } else if (downloadFormat === 'mp3') {
-        window.open(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, '_blank');
+      let downloadUrl;
+      if (format === 'mp4') {
+        try {
+          const response = await axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
+            headers: {
+              'accept': 'application/json'
+            }
+          });
+          downloadUrl = response.data.data.download;
+        } catch (error) {
+          console.error('Error saat mendapatkan link download:', error);
+          showAlert('Terjadi kesalahan saat mendapatkan link download.', 'danger');
+          return;
+        }
+      } else if (format === 'mp3') {
+        try {
+          const response = await axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
+            headers: {
+              'accept': 'application/json'
+            }
+          });
+          downloadUrl = response.data.data.download;
+        } catch (error) {
+          console.error('Error saat mendapatkan link download:', error);
+          showAlert('Terjadi kesalahan saat mendapatkan link download.', 'danger');
+          return;
+        }
+      }
+
+      if (downloadUrl) {
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `download.${format}`; // Nama file download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        showAlert('Gagal mendapatkan link untuk download.', 'danger');
       }
     }
   </script>
