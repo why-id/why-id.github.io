@@ -80,6 +80,7 @@
       <div class="video-container">
         <video id="videoElement" width="100%" controls>
           <source id="videoSource" src="" type="video/mp4">
+          Your browser does not support the video tag.
         </video>
         <div class="custom-controls">
           <button class="play-pause"><i class="fa fa-play" id="playPauseIcon"></i></button>
@@ -163,18 +164,19 @@
           const videoSource = firstVideo.url;
           const title = firstVideo.title;
 
+          // Set sumber video dan tampilkan informasi video
           document.getElementById("videoSource").src = videoSource; 
+          document.getElementById("videoInfoText").innerHTML = title;
+          document.getElementById('videoInfo').style.display = 'block';
+          document.getElementById('downloadOptions').style.display = 'block';
+
+          // Memuat dan memutar video
           video.load(); 
           video.play(); 
           isPlaying = true;
 
-          document.getElementById('videoInfoText').innerHTML = title;
-          document.getElementById('videoInfo').style.display = 'block';
-          document.getElementById('downloadOptions').style.display = 'block';
-
           // Mendapatkan link download MP4
-          const videoToDownload = firstVideo.url; // Ganti dengan URL yang benar
-          axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
+          axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoSource)}`, {
             headers: {
               'accept': 'application/json'
             }
@@ -228,7 +230,7 @@
     muteUnmute.addEventListener("click", () => {
       if (isMuted) {
         video.muted = false;
-        volumeSlider.value = video.volume;
+        volumeSlider.value = volumeSlider.value; // Set volume slider to previous value
         muteUnmute.querySelector("i").classList.replace("fa-volume-off", "fa-volume-up");
       } else {
         video.muted = true;
