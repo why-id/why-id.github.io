@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
+    /* Gaya yang sama seperti sebelumnya */
     .youtube-icon {
       color: #d9534f; 
     }
@@ -44,7 +45,6 @@
       width: 100%;
       max-width: 640px;
       margin: auto;
-      border: 4px solid #fff;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
       position: relative;
     }
@@ -94,6 +94,19 @@
       margin: 0 10px;
       cursor: pointer;
     }
+    /* Indikator progres video */
+    #progressBar {
+      width: 100%;
+      height: 10px;
+      background: #555;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    #progress {
+      height: 100%;
+      background: #d9534f;
+      width: 0;
+    }
   </style>
 </head>
 <body>
@@ -117,7 +130,7 @@
 
     <div id="videoInfo" class="mt-4" style="display: none;">
       <div id="videoPlayer" class="img-fluid mb-2">
-        <video id="videoElement" width="100%" controls>
+        <video id="videoElement" width="100%">
           <source id="videoSource" src="" type="video/mp4">
         </video>
         <i class="fa fa-play play-button" id="playButton" onclick="toggleVideo()"></i>
@@ -134,13 +147,15 @@
           <button class="btn btn-black" id="muteButton" onclick="toggleMute()">
             <i class="fa fa-volume-up" id="muteIcon"></i>
           </button>
-          <button class="btn btn-black" id="pauseButton" onclick="togglePause()">
-            <i class="fa fa-pause" id="pauseIcon"></i>
-          </button>
-          <button class="btn btn-black" id="fullscreenButton" onclick="toggleFullscreen()">
+          <!-- Hapus tombol fullscreen -->
+          <!-- <button class="btn btn-black" id="fullscreenButton" onclick="toggleFullscreen()">
             <i class="fa fa-expand"></i>
-          </button>
+          </button> -->
         </div>
+      </div>
+      <!-- Indikator progres video -->
+      <div id="progressBar" onclick="setProgress(event)">
+        <div id="progress"></div>
       </div>
     </div>
   </div>
@@ -253,9 +268,8 @@
 
     async function loadAndPlayVideo() {
       const videoElement = document.getElementById("videoElement");
-
       try {
-        const response = await axios.get(`/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
+        const response = await axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
           headers: {
             'accept': 'application/json'
           }
@@ -267,6 +281,8 @@
           videoElement.play(); 
           isPlaying = true;
           document.getElementById("playButton").style.display = "none"; // Sembunyikan tombol play saat video dimulai
+          // Update progress bar
+          videoElement.addEventListener('timeupdate', updateProgress);
         } else {
           showAlert('Gagal memuat file video.', 'danger');
         }
@@ -276,6 +292,20 @@
       } finally {
         hideLoadingBar();
       }
+    }
+
+    function updateProgress() {
+      const videoElement = document.getElementById("videoElement");
+      const progressBar = document.getElementById("progress");
+      const percentage = (videoElement.currentTime / videoElement.duration) * 100;
+      progressBar.style.width = `${percentage}%`;
+    }
+
+    function setProgress(event) {
+      const videoElement = document.getElementById("videoElement");
+      const progressBar = document.getElementById("progressBar");
+      const newTime = (event.offsetX / progressBar.clientWidth) * videoElement.duration;
+      videoElement.currentTime = newTime;
     }
 
     function toggleVideo() {
@@ -302,37 +332,6 @@
 
       muteIcon.classList.toggle("fa-volume-up", !isMuted);
       muteIcon.classList.toggle("fa-volume-off", isMuted);
-    }
-
-    function togglePause() {
-      const videoElement = document.getElementById("videoElement");
-      const pauseButton = document.getElementById("pauseButton");
-
-      if (isPlaying) {
-        videoElement.pause();
-        isPlaying = false;
-      } else {
-        videoElement.play();
-        isPlaying = true;
-      }
-      // Update ikon pause
-      pauseButton.innerHTML = isPlaying ? '<i class="fa fa-pause"></i>' : '<i class="fa fa-play"></i>';
-    }
-
-    function toggleFullscreen() {
-      const videoPlayer = document.getElementById("videoPlayer");
-
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      } else {
-        if (videoPlayer.requestFullscreen) {
-          videoPlayer.requestFullscreen();
-        } else if (videoPlayer.webkitRequestFullscreen) { // Safari
-          videoPlayer.webkitRequestFullscreen();
-        } else if (videoPlayer.msRequestFullscreen) { // IE11
-          videoPlayer.msRequestFullscreen();
-        }
-      }
     }
 
     videoElement.addEventListener('ended', () => {
