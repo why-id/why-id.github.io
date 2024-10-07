@@ -1,161 +1,375 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Download by DexSkieee Ofc</title>
+  <title>YouTube Play Video by DexSkieee Ofc</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
     .youtube-icon {
-            color: #d9534f;  /* Ukuran ikon (opsional) */
+      color: #d9534f; 
     }
     body {
       font-family: 'Playwrite DE Grund', sans-serif;
-      background-color: #000; /* Background hitam */
-      color: #fff; /* Warna teks putih */
+      background-color: #000; 
+      color: #fff; 
     }
     h1 {
-      font-family: 'Pixelify Sans', sans-serif; /* Gaya font untuk h1 */
+      font-family: 'Pixelify Sans', sans-serif;
     }
-    label, button, input, select, .alert {
-      font-family: 'PT Sans', sans-serif;
+    label, button, input, .alert, .form-control {
+      font-family: 'PT Sans', sans-serif; 
     }
     .form-control {
-      background-color: #333; /* Background input hitam */
-      border: 1px solid #555; /* Border input abu-abu */
-      color: #fff; /* Warna teks input putih */
+      background-color: #333;
+      border: 1px solid #555;
+      color: #fff;
     }
     .form-control:focus {
-      background-color: #555; /* Background input saat fokus abu-abu */
-      border-color: #777; /* Border input saat fokus abu-abu lebih terang */
-      color: #fff; /* Warna teks tetap putih */
+      background-color: #555;
+      border-color: #777;
+      color: #fff;
+    }
+    .btn-black {
+      background-color: #000;
+      border: none;
+      color: #d9534f; 
+    }
+    .btn-black:hover {
+      background-color: #444;
+    }
+    #videoPlayer {
+      width: 100%;
+      max-width: 640px;
+      margin: auto;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+    #loadingBar {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background-color: #d9534f;
+      z-index: 9999;
+      animation: loadingAnimation 2s linear infinite;
+    }
+    @keyframes loadingAnimation {
+      0% { width: 0; }
+      50% { width: 100%; }
+      100% { width: 0; }
+    }
+    #videoInfoText {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #fff;
+      font-family: 'PT Sans', sans-serif;
+    }
+    .play-button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3rem;
+      color: white;
+      cursor: pointer;
+      display: none;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .control-button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 2rem;
+      margin: 0 10px;
+      cursor: pointer;
+    }
+    #progressBar {
+      width: 100%;
+      height: 5px;
+      background: #555;
+      margin-top: 10px;
+      cursor: default;
+    }
+    #progress {
+      height: 100%;
+      background: #d9534f;
+      width: 0;
     }
   </style>
 </head>
-<body onclick="playAudio();" class="">
-  <audio id="sec">
-    <source src="https://g.top4top.io/m_319620fge0.mp3" type="audio/mpeg">
-  </audio>
-
+<body>
+  <div id="loadingBar"></div>
+  
   <div class="container mt-5">
-    <h1 class="text-center"><i class="fa fa-youtube-play youtube-icon" aria-hidden="true"></i> YT DOWNLOAD</h1> <!-- Mengubah teks AXIS ke YT DOWNLOAD -->
+    <h1 class="text-center"><i class="fa fa-youtube-play youtube-icon" aria-hidden="true"></i> YT DexSkieee </h1>
 
-    <!-- Form untuk download video/audio -->
-    <form id="downloadForm">
-      <div class="form-group">
-        <label for="videoUrl">YouTube Video URL</label>
-        <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan URL Video YouTube" required>
+    <form id="downloadForm" class="input-group">
+      <div class="input-group mb-3">
+        <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan Link/Judul Video YouTube" required>
+        <div class="input-group-append">
+          <button type="submit" class="btn btn-danger">
+            <i class="fa fa-search"></i>
+          </button>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="downloadOption">Pilih Format Download</label>
-        <select id="downloadOption" class="form-control" required>
-          <option value="mp3">Audio (MP3)</option>
-          <option value="mp4">Video (MP4)</option>
-        </select>
-      </div>
-      <button type="submit" class="btn btn-danger btn-block">Mulai Download</button>
     </form>
 
     <div id="alertContainer" class="mt-3"></div>
-  </div>
 
+    <div id="videoInfo" class="mt-4" style="display: none;">
+      <div id="videoPlayer" class="img-fluid mb-2">
+        <video id="videoElement" width="100%">
+          <source id="videoSource" src="" type="video/mp4">
+        </video>
+        <i class="fa fa-play play-button" id="playButton" onclick="toggleVideo()"></i>
+      </div>
+      <div id="videoInfoText"></div>
+      <div class="controls mt-2">
+        <div class="d-flex justify-content-between w-100">
+          <button class="btn btn-black" id="backwardButton" disabled>
+            <i class="fa fa-fast-backward"></i>
+          </button>
+          <button id="forwardButton" class="btn btn-black" disabled>
+            <i class="fa fa-fast-forward"></i>
+          </button>
+          <button class="btn btn-black" id="muteButton" onclick="toggleMute()">
+            <i class="fa fa-volume-up" id="muteIcon"></i>
+          </button>
+        </div>
+      </div>
+      <div id="progressBar">
+        <div id="progress"></div>
+      </div>
+      <!-- Tombol untuk beralih ke mode audio -->
+      <button class="btn btn-black" id="toggleAudioModeButton" onclick="toggleAudioMode()">Beralih ke Mode Audio</button>
+    </div>
+  </div>
+  
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>
+    let videoToDownload;
+    let videoTitle;
+    let isPlaying = false;
+    let isMuted = false;
+    let isAudioMode = false;
+
+    function extractVideoId(url) {
+      try {
+        const urlObj = new URL(url);
+        if (urlObj.hostname === 'youtu.be') {
+          return urlObj.pathname.substring(1); 
+        } else if (urlObj.hostname.includes('youtube.com')) {
+          return urlObj.searchParams.get("v"); 
+        } else {
+          return null;
+        }
+      } catch (error) {
+        console.error('Error saat memparsing URL:', error);
+        return null;
+      }
+    }
+
+    function showLoadingBar() {
+      const loadingBar = document.getElementById('loadingBar');
+      loadingBar.style.display = 'block';
+    }
+
+    function hideLoadingBar() {
+      const loadingBar = document.getElementById('loadingBar');
+      loadingBar.style.display = 'none';
+    }
+
     document.getElementById('downloadForm').addEventListener('submit', async function(event) {
       event.preventDefault();
 
-      const videoUrl = document.getElementById('videoUrl').value;
-      const downloadOption = document.getElementById('downloadOption').value;
+      showLoadingBar();
 
-      // Validasi URL
-      if (!isValidUrl(videoUrl)) {
-        showAlert('URL tidak valid. Silakan masukkan URL yang benar.', 'danger');
+      let videoUrl = document.getElementById('videoUrl').value;
+      const videoId = extractVideoId(videoUrl);
+
+      if (videoId) {
+        videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+      }
+
+      if (!videoUrl) {
+        showAlert('Silakan masukkan URL atau judul video.', 'danger');
+        hideLoadingBar();
         return;
       }
 
-      if (downloadOption === 'mp3') {
-        await downloadMP3(videoUrl);
-      } else {
-        await downloadMP4(videoUrl);
-      }
-    });
+      const alertContainer = document.getElementById('alertContainer');
+      alertContainer.innerHTML = '';
 
-    function isValidUrl(url) {
-      const pattern = new RegExp('^(https?://)?(www\\.)?(youtube\\.com|youtu\\.?be)/.+$');
-      return pattern.test(url);
-    }
+      await searchAndPrepareDownload(videoUrl);
+      
+      hideLoadingBar();
+    });
 
     function showAlert(message, type) {
       const alertContainer = document.getElementById('alertContainer');
       const alertDiv = document.createElement('div');
       alertDiv.className = `alert alert-${type}`;
-      alertDiv.textContent = message;
+      alertDiv.innerHTML = message;
       alertContainer.appendChild(alertDiv);
-      setTimeout(() => {
-        alertDiv.remove();
-      }, 3000);
-    }
 
-    async function downloadMP3(linkToDownload) {
-      try {
-        const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(linkToDownload)}`, {
-          headers: {
-            'accept': 'application/json'
-          }
-        });
-
-        const mp3Url = response.data.result.mp3;
-
-        // Cek apakah mp3Url valid sebelum mencoba mendownload
-        if (mp3Url) {
-          const link = document.createElement('a');
-          link.href = mp3Url;
-          link.setAttribute('download', ''); // Menetapkan atribut download
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        } else {
-          showAlert('URL untuk MP3 tidak ditemukan.', 'danger');
-        }
-      } catch (error) {
-        console.error('Error saat mendownload MP3:', error);
-        showAlert('Terjadi kesalahan saat mendownload MP3.', 'danger');
+      if (type === 'success') {
+        setTimeout(() => {
+          alertDiv.remove();
+        }, 10000);
+      } else if (type === 'danger') {
+        setTimeout(() => {
+          alertDiv.remove();
+        }, 2000);
       }
     }
 
-    async function downloadMP4(linkToDownload) {
+    async function searchAndPrepareDownload(query) {
       try {
-        const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(linkToDownload)}`, {
+        const searchResponse = await axios.get(`https://api.agatz.xyz/api/ytsearch?message=${encodeURIComponent(query)}`);
+        const firstVideo = searchResponse.data.data[0];
+
+        if (firstVideo) {
+          videoToDownload = firstVideo.url;
+          videoTitle = firstVideo.title;
+          document.getElementById('videoInfoText').innerText = videoTitle;
+          document.getElementById('videoInfo').style.display = 'block';
+          loadAndPlayVideo();
+        } else {
+          showAlert('Video tidak ditemukan.', 'danger');
+        }
+      } catch (error) {
+        console.error('Error saat mencari video:', error);
+        showAlert('Terjadi kesalahan saat mencari video.', 'danger');
+      }
+    }
+
+    async function loadAndPlayVideo() {
+      const videoElement = document.getElementById("videoElement");
+      try {
+        const response = await axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
           headers: {
             'accept': 'application/json'
           }
         });
+        const mp4Url = response.data.data.download;
 
-        const mp4Url = response.data.result.mp4;
-
-        // Cek apakah mp4Url valid sebelum mencoba mendownload
         if (mp4Url) {
-          const link = document.createElement('a');
-          link.href = mp4Url;
-          link.setAttribute('download', ''); // Menetapkan atribut download
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          document.getElementById('videoSource').src = mp4Url;
+          videoElement.load();
+          videoElement.play();
+          isPlaying = true;
         } else {
-          showAlert('URL untuk MP4 tidak ditemukan.', 'danger');
+          showAlert('Gagal memuat file video.', 'danger');
         }
       } catch (error) {
-        console.error('Error saat mendownload MP4:', error);
-        showAlert('Terjadi kesalahan saat mendownload MP4.', 'danger');
+        console.error('Error saat memuat video:', error);
+        showAlert('Terjadi kesalahan saat memuat video.', 'danger');
       }
     }
 
-    function playAudio() {
-      const audioElement = document.getElementById("sec");
-      audioElement.play();
+    async function toggleAudioMode() {
+      const videoElement = document.getElementById("videoElement");
+      const videoSource = document.getElementById("videoSource");
+      const toggleAudioModeButton = document.getElementById("toggleAudioModeButton");
+
+      if (!isAudioMode) {
+        try {
+          const response = await axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
+            headers: {
+              'accept': 'application/json'
+            }
+          });
+          const mp3Url = response.data.data.download;
+
+          if (mp3Url) {
+            videoElement.pause(); 
+            videoSource.src = mp3Url;
+            videoElement.load(); 
+            videoElement.play(); 
+            isPlaying = true;
+            isAudioMode = true;
+            toggleAudioModeButton.innerText = "Beralih ke Mode Video"; 
+            document.getElementById("videoPlayer").style.display = "none"; 
+          } else {
+            showAlert('Gagal memuat file audio.', 'danger');
+          }
+        } catch (error) {
+          console.error('Error saat memuat audio:', error);
+          showAlert('Terjadi kesalahan saat memuat audio.', 'danger');
+        }
+      } else {
+        try {
+          const response = await axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
+            headers: {
+              'accept': 'application/json'
+            }
+          });
+          const mp4Url = response.data.data.download;
+
+          if (mp4Url) {
+            videoElement.pause(); 
+            videoSource.src = mp4Url; 
+            videoElement.load(); 
+            videoElement.play(); 
+            isPlaying = true;
+            isAudioMode = false;
+            toggleAudioModeButton.innerText = "Beralih ke Mode Audio"; 
+            document.getElementById("videoPlayer").style.display = "block"; 
+          } else {
+            showAlert('Gagal memuat file video.', 'danger');
+          }
+        } catch (error) {
+          console.error('Error saat memuat video:', error);
+          showAlert('Terjadi kesalahan saat memuat video.', 'danger');
+        }
+      }
     }
+
+    function toggleVideo() {
+      const videoElement = document.getElementById("videoElement");
+      if (isPlaying) {
+        videoElement.pause();
+        document.getElementById("playButton").style.display = "block";
+        isPlaying = false;
+      } else {
+        videoElement.play();
+        document.getElementById("playButton").style.display = "none";
+        isPlaying = true;
+      }
+    }
+
+    function toggleMute() {
+      const videoElement = document.getElementById("videoElement");
+      const muteIcon = document.getElementById("muteIcon");
+      if (isMuted) {
+        videoElement.muted = false;
+        muteIcon.classList.remove("fa-volume-off");
+        muteIcon.classList.add("fa-volume-up");
+        isMuted = false;
+      } else {
+        videoElement.muted = true;
+        muteIcon.classList.remove("fa-volume-up");
+        muteIcon.classList.add("fa-volume-off");
+        isMuted = true;
+      }
+    }
+
+    document.getElementById('videoElement').addEventListener('timeupdate', function() {
+      const progressBar = document.getElementById("progress");
+      const videoElement = document.getElementById("videoElement");
+      const percentage = (videoElement.currentTime / videoElement.duration) * 100;
+      progressBar.style.width = percentage + "%";
+    });
   </script>
 </body>
 </html>
