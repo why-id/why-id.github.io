@@ -82,6 +82,19 @@
       cursor: pointer;
       display: none; /* Tampilkan hanya saat video tidak dimainkan */
     }
+    .controls {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .control-button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 2rem;
+      margin: 0 10px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -111,6 +124,14 @@
         <i class="fa fa-play play-button" id="playButton" onclick="toggleVideo()"></i>
       </div>
       <div id="videoInfoText"></div>
+      <div class="controls">
+        <button class="control-button" id="muteButton" onclick="toggleMute()">
+          <i class="fa fa-volume-up" id="muteIcon"></i>
+        </button>
+        <button class="control-button" id="fullscreenButton" onclick="toggleFullscreen()">
+          <i class="fa fa-expand"></i>
+        </button>
+      </div>
     </div>
 
     <div id="downloadOptions" class="mt-4" style="display: none;">
@@ -130,6 +151,7 @@
     let videoToDownload;
     let videoTitle;
     let isPlaying = false;
+    let isMuted = false;
 
     function extractVideoId(url) {
       try {
@@ -233,9 +255,6 @@
 
     async function loadAndPlayVideo() {
       const videoElement = document.getElementById("videoElement");
-      const playButton = document.getElementById("playButton");
-      showLoadingBar();
-
       try {
         const response = await axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
           headers: {
@@ -247,8 +266,8 @@
           document.getElementById("videoSource").src = mp4Url; 
           videoElement.load(); 
           videoElement.play(); 
-          playButton.style.display = "none"; // Sembunyikan tombol play
           isPlaying = true;
+          document.getElementById("playButton").style.display = "none"; // Sembunyikan tombol play saat video dimulai
         } else {
           showAlert('Gagal memuat file video.', 'danger');
         }
@@ -257,6 +276,42 @@
         showAlert('Terjadi kesalahan saat memuat video.', 'danger');
       } finally {
         hideLoadingBar();
+      }
+    }
+
+    function toggleVideo() {
+      const videoElement = document.getElementById("videoElement");
+      const playButton = document.getElementById("playButton");
+
+      if (isPlaying) {
+        videoElement.pause();
+        playButton.style.display = "block"; // Tampilkan tombol play saat video pause
+        isPlaying = false;
+      } else {
+        videoElement.play();
+        playButton.style.display = "none"; // Sembunyikan tombol play saat video dimulai
+        isPlaying = true;
+      }
+    }
+
+    function toggleMute() {
+      const videoElement = document.getElementById("videoElement");
+      const muteIcon = document.getElementById("muteIcon");
+
+      isMuted = !isMuted;
+      videoElement.muted = isMuted;
+
+      muteIcon.classList.toggle("fa-volume-up", !isMuted);
+      muteIcon.classList.toggle("fa-volume-off", isMuted);
+    }
+
+    function toggleFullscreen() {
+      const videoPlayer = document.getElementById("videoPlayer");
+
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        videoPlayer.requestFullscreen();
       }
     }
 
