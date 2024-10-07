@@ -1,91 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DexSkieee Ofc</title>
-  <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Playwrite DE Grund', sans-serif;
-      background-color: #000; /* Background hitam */
-      color: #fff; /* Warna teks putih */
-    }
-    h1 {
-      font-family: 'Pixelify Sans', sans-serif; /* Gaya font untuk h1 */
-    }
-    label, button, input, .alert {
-      font-family: 'PT Sans', sans-serif;
-    }
-    .form-control {
-      background-color: #333; /* Background input hitam */
-      border: 1px solid #555; /* Border input abu-abu */
-      color: #fff; /* Warna teks input putih */
-    }
-    .form-control:focus {
-      background-color: #555; /* Background input saat fokus abu-abu */
-      border-color: #777; /* Border input saat fokus abu-abu lebih terang */
-      color: #fff; /* Warna teks tetap putih */
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Video Wrapper Using HTML, CSS, and JavaScript</title>
+    <style>
+        body{
+            background: linear-gradient(to right, #ee0979, #ff6a00);
+            display: flex;
+            justify-content: center;  
+            align-items: center;
+            height: 100vh;
+        }
+        .wrapper {
+            position: relative;
+            width: 640px;
+            height: 360px;
+            box-shadow: 0 18px 20px 6px rgba(0,0,0,0.5);
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+        }
+        button {
+            background-color: transparent;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        input[type="range"] {
+            width: 200px;
+            margin: 0 8px;
+        }
+    </style>
 </head>
-<body onclick="playAudio();" class="">
-  <audio id="sec">
-    <source src="https://g.top4top.io/m_319620fge0.mp3" type="audio/mpeg">
-  </audio>
+<body>
+    
+    <div class="wrapper">
+        <video id="main-video">
+            <source src="https://api.cnvmp3.cc/api/stream?id=Xc1HhpwiLBS9GnyuAUqvL&exp=1728262667718&sig=52FXkL1G_R1pAR7iID7bTcpOXgMrT5Xr41ISGLjNEg0&sec=sRFqGJcxUjCJ9Dr7QvC9XPd4U4L9MJk8JOo6qCQx0Mc&iv=siNA8_c5Y8h4_nuS5zSlhQ" type="video/mp4">
+        </video>
+        <div class="controls">
+            <button id="playBtn">►</button>
+            <input id="rangeArea" type="range" min="0" max="100" step="0.1" value="0">
+            <button id="muteBtn"></button>
+            <input id="volumeArea" type="range" min="0" max="1" step="0.1" value="1">
+        </div>
+    </div>
 
-  <div class="container mt-5">
-    <h1 class="text-center">YT DOWNLOAD</h1> <!-- Mengubah teks AXIS ke YT DOWNLOAD -->
-    <form id="downloadForm">
-      <div class="form-group">
-        <label for="videoUrl">YouTube Video URL</label>
-        <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan URL Video YouTube" required>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block">Gaskeunn</button>
-    </form>
+    <script>
+        const X = document.getElementById('main-video');
+        const Y = document.getElementById('playBtn');
+        const Z = document.getElementById('rangeArea');
+        const A = document.getElementById('muteBtn');
+        const B = document.getElementById('volumeArea'); 
 
-    <div id="alertContainer" class="mt-3"></div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script>
-    document.getElementById('downloadForm').addEventListener('submit', async function(event) {
-      event.preventDefault();
-
-      const videoUrl = document.getElementById('videoUrl').value;
-
-      if (videoUrl) {
-        downloadMP3(videoUrl);
-      }
-    });
-
-    async function downloadMP3(linkToDownload) {
-      try {
-        const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(linkToDownload)}`, {
-          headers: {
-            'accept': 'application/json'
-          }
+        Y.addEventListener('click', function() {
+            if (X.paused) {
+                X.play();
+                Y.innerHTML = '❚❚';
+            } else {
+                X.pause();
+                Y.innerHTML = '►';
+            }
         });
 
-        const mp3Url = response.data.result.mp3;
-        
-        // Membuat elemen link untuk mendownload file
-        const link = document.createElement('a');
-        link.href = mp3Url;
-        link.setAttribute('download', '');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link); // Menghapus link setelah download
-      } catch (error) {
-        console.error('Error saat mendownload MP3:', error);
-      }
-    }
+        X.addEventListener('timeupdate', function() {
+            const progress = (X.currentTime / X.duration) * 100;
+            Z.value = progress;
+        });
 
-    function playAudio() {
-      const audioElement = document.getElementById("sec");
-      audioElement.play();
-    }
-  </script>
+        Z.addEventListener('input', function() {
+            const time = (Z.value / 100) * X.duration;
+            X.currentTime = time;
+        });
+
+        A.addEventListener('click', function() {
+            if (X.muted) {
+                X.muted = false;
+                A.innerHTML = '';
+                B.value = X.volume;
+            } else {
+                X.muted = true;
+                A.innerHTML = '';
+                B.value = 0;
+            }
+        });
+
+        B.addEventListener('input', function() {
+            X.volume = B.value;
+            if (B.value > 0) {
+                X.muted = false;
+                A.innerHTML = '';
+            } else {
+                X.muted = true;
+                A.innerHTML = '';
+            }
+        });
+    </script>
 </body>
 </html>
