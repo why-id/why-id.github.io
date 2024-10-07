@@ -135,6 +135,9 @@
           <button class="btn btn-black" id="muteButton" onclick="toggleMute()">
             <i class="fa fa-volume-up" id="muteIcon"></i>
           </button>
+          <button class="btn btn-black" id="pauseButton" onclick="togglePause()">
+            <i class="fa fa-pause" id="pauseIcon"></i>
+          </button>
           <button class="btn btn-black" id="fullscreenButton" onclick="toggleFullscreen()">
             <i class="fa fa-expand"></i>
           </button>
@@ -251,8 +254,9 @@
 
     async function loadAndPlayVideo() {
       const videoElement = document.getElementById("videoElement");
+
       try {
-        const response = await axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
+        const response = await axios.get(`/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
           headers: {
             'accept': 'application/json'
           }
@@ -301,13 +305,32 @@
       muteIcon.classList.toggle("fa-volume-off", isMuted);
     }
 
+    function togglePause() {
+      const videoElement = document.getElementById("videoElement");
+      const pauseButton = document.getElementById("pauseButton");
+
+      if (isPlaying) {
+        videoElement.pause();
+        isPlaying = false;
+      } else {
+        videoElement.play();
+        isPlaying = true;
+      }
+    }
+
     function toggleFullscreen() {
       const videoPlayer = document.getElementById("videoPlayer");
 
       if (document.fullscreenElement) {
         document.exitFullscreen();
       } else {
-        videoPlayer.requestFullscreen();
+        if (videoPlayer.requestFullscreen) {
+          videoPlayer.requestFullscreen();
+        } else if (videoPlayer.webkitRequestFullscreen) { // Safari
+          videoPlayer.webkitRequestFullscreen();
+        } else if (videoPlayer.msRequestFullscreen) { // IE11
+          videoPlayer.msRequestFullscreen();
+        }
       }
     }
 
