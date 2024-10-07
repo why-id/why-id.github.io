@@ -143,7 +143,7 @@
             <i class="fa fa-fast-forward"></i>
           </button>
           <button class="btn btn-black" id="muteButton" onclick="toggleMute()">
-            <i class="fa fa-volume-up" id="muteIcon"></i>
+            <i class="fa fa-bell" id="muteIcon"></i>
           </button>
           <!-- Tombol untuk toggle mode audio/video dengan ikon -->
           <button class="btn btn-black" id="toggleAudioModeButton" onclick="toggleAudioMode()">
@@ -371,13 +371,13 @@
       const muteIcon = document.getElementById("muteIcon");
       if (isMuted) {
         videoElement.muted = false;
-        muteIcon.classList.remove("fa-volume-off");
-        muteIcon.classList.add("fa-volume-up");
+        muteIcon.classList.remove("fa-bell-slash");
+        muteIcon.classList.add("fa-bell");
         isMuted = false;
       } else {
         videoElement.muted = true;
-        muteIcon.classList.remove("fa-volume-up");
-        muteIcon.classList.add("fa-volume-off");
+        muteIcon.classList.remove("fa-bell");
+        muteIcon.classList.add("fa-bell-slash");
         isMuted = true;
       }
     }
