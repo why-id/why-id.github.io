@@ -1,116 +1,300 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Video Wrapper Using HTML, CSS, and JavaScript</title>
-    <style>
-        body{
-            background: linear-gradient(to right, #ee0979, #ff6a00);
-            display: flex;
-            justify-content: center;  
-            align-items: center;
-            height: 100vh;
-        }
-        .wrapper {
-            position: relative;
-            width: 640px;
-            height: 360px;
-            box-shadow: 0 18px 20px 6px rgba(0,0,0,0.5);
-        }
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        .controls {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
-        }
-        button {
-            background-color: transparent;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        input[type="range"] {
-            width: 200px;
-            margin: 0 8px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Play Music by DexSkieee Ofc</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .youtube-icon {
+      color: #d9534f; 
+    }
+    body {
+      font-family: 'Playwrite DE Grund', sans-serif;
+      background-color: #000; 
+      color: #fff; 
+    }
+    h1 {
+      font-family: 'Pixelify Sans', sans-serif;
+    }
+    label, button, input, .alert, .form-control {
+      font-family: 'PT Sans', sans-serif; 
+    }
+    .form-control {
+      background-color: #333;
+      border: 1px solid #555;
+      color: #fff;
+    }
+    .form-control:focus {
+      background-color: #555;
+      border-color: #777;
+      color: #fff;
+    }
+    .btn-black {
+      background-color: #000;
+      border: none;
+      color: #d9534f; /* Warna ikon merah */
+    }
+    .btn-black:hover {
+      background-color: #444;
+    }
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    #thumbnail {
+      animation: spin 17s linear infinite;
+      width: 300px; 
+      height: 300px;
+      border: 4px outset #fff;
+      border-radius: 50%;
+      position: relative;
+      background-color: #333;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      margin: auto;
+    }
+    #thumbnail::before {
+      content: '';
+      border: 4px outset #fff;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 60px;
+      height: 60px;
+      background-color: #000;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+    }
+    #thumbnail::after {
+      content: '';
+      font-family: 'FontAwesome';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      font-size: 48px;
+      color: #fff;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+    }
+    #loadingBar {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background-color: #d9534f;
+      z-index: 9999;
+      animation: loadingAnimation 2s linear infinite;
+    }
+    @keyframes loadingAnimation {
+      0% { width: 0; }
+      50% { width: 100%; }
+      100% { width: 0; }
+    }
+    #videoInfoText {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #fff;
+      font-family: 'PT Sans', sans-serif;
+    }
+  </style>
 </head>
 <body>
-    
-    <div class="wrapper">
-        <video id="main-video">
-            <source src="https://api.cnvmp3.cc/api/stream?id=Xc1HhpwiLBS9GnyuAUqvL&exp=1728262667718&sig=52FXkL1G_R1pAR7iID7bTcpOXgMrT5Xr41ISGLjNEg0&sec=sRFqGJcxUjCJ9Dr7QvC9XPd4U4L9MJk8JOo6qCQx0Mc&iv=siNA8_c5Y8h4_nuS5zSlhQ" type="video/mp4">
-        </video>
-        <div class="controls">
-            <button id="playBtn">►</button>
-            <input id="rangeArea" type="range" min="0" max="100" step="0.1" value="0">
-            <button id="muteBtn"></button>
-            <input id="volumeArea" type="range" min="0" max="1" step="0.1" value="1">
+  <div id="loadingBar"></div>
+  
+  <div class="container mt-5">
+    <h1 class="text-center"><i class="fa fa-youtube-play youtube-icon" aria-hidden="true"></i> YT DexSkieee </h1>
+
+    <form id="downloadForm" class="input-group">
+      <div class="input-group mb-3">
+        <input type="text" class="form-control" id="videoUrl" placeholder="Masukkan Link/Judul Video YouTube" required>
+        <div class="input-group-append">
+          <button type="submit" class="btn btn-danger">
+            <i class="fa fa-search"></i>
+          </button>
         </div>
+      </div>
+    </form>
+
+    <div id="alertContainer" class="mt-3"></div>
+
+    <div id="videoInfo" class="mt-4" style="display: none;">
+      <video id="previewVideo" width="300" height="300" controls style="display: none;">
+        <source id="videoSource" src="" type="video/mp4">
+        Browser Anda tidak mendukung tag video.
+      </video>
+      <div id="videoInfoText"></div>
     </div>
 
-    <script>
-        const X = document.getElementById('main-video');
-        const Y = document.getElementById('playBtn');
-        const Z = document.getElementById('rangeArea');
-        const A = document.getElementById('muteBtn');
-        const B = document.getElementById('volumeArea'); 
+    <div id="downloadOptions" class="mt-4" style="display: none;">
+      <div class="d-flex justify-content-between">
+        <button class="btn btn-black" id="backwardButton" disabled>
+          <i class="fa fa-fast-backward"></i>
+        </button>
+        <button id="previewButton" onclick="toggleVideo()" class="btn btn-black">
+          <i id="playPauseIcon" class="fa fa-play"></i>
+        </button>
+        <button class="btn btn-black" id="forwardButton" disabled>
+          <i class="fa fa-fast-forward"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    let videoToDownload;
+    let videoTitle;
+    let isPlayingVideo = false;
 
-        Y.addEventListener('click', function() {
-            if (X.paused) {
-                X.play();
-                Y.innerHTML = '❚❚';
-            } else {
-                X.pause();
-                Y.innerHTML = '►';
-            }
-        });
+    // Fungsi untuk mengambil ID video dari URL
+    function extractVideoId(url) {
+      try {
+        const urlObj = new URL(url);
+        if (urlObj.hostname === 'youtu.be') {
+          return urlObj.pathname.substring(1); // Format pendek
+        } else if (urlObj.hostname.includes('youtube.com')) {
+          return urlObj.searchParams.get("v"); // Format panjang
+        } else {
+          return null;
+        }
+      } catch (error) {
+        console.error('Error saat memparsing URL:', error);
+        return null;
+      }
+    }
 
-        X.addEventListener('timeupdate', function() {
-            const progress = (X.currentTime / X.duration) * 100;
-            Z.value = progress;
-        });
+    function showLoadingBar() {
+      const loadingBar = document.getElementById('loadingBar');
+      loadingBar.style.display = 'block';
+    }
 
-        Z.addEventListener('input', function() {
-            const time = (Z.value / 100) * X.duration;
-            X.currentTime = time;
-        });
+    function hideLoadingBar() {
+      const loadingBar = document.getElementById('loadingBar');
+      loadingBar.style.display = 'none';
+    }
 
-        A.addEventListener('click', function() {
-            if (X.muted) {
-                X.muted = false;
-                A.innerHTML = '';
-                B.value = X.volume;
-            } else {
-                X.muted = true;
-                A.innerHTML = '';
-                B.value = 0;
-            }
-        });
+    document.getElementById('downloadForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
 
-        B.addEventListener('input', function() {
-            X.volume = B.value;
-            if (B.value > 0) {
-                X.muted = false;
-                A.innerHTML = '';
-            } else {
-                X.muted = true;
-                A.innerHTML = '';
-            }
+      showLoadingBar();
+
+      let videoUrl = document.getElementById('videoUrl').value;
+
+      const videoId = extractVideoId(videoUrl);
+
+      if (videoId) {
+        videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+      }
+
+      if (!videoUrl) {
+        showAlert('Silakan masukkan URL atau judul video.', 'danger');
+        hideLoadingBar();
+        return;
+      }
+
+      const alertContainer = document.getElementById('alertContainer');
+      alertContainer.innerHTML = '';
+
+      await searchAndPrepareDownload(videoUrl);
+      
+      hideLoadingBar();
+    });
+
+    function showAlert(message, type) {
+      const alertContainer = document.getElementById('alertContainer');
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.innerHTML = message;
+      alertContainer.appendChild(alertDiv);
+
+      if (type === 'success') {
+        setTimeout(() => {
+          alertDiv.remove();
+        }, 10000);
+      } else if (type === 'danger') {
+        setTimeout(() => {
+          alertDiv.remove();
+        }, 2000);
+      }
+    }
+
+    async function searchAndPrepareDownload(query) {
+      try {
+        const searchResponse = await axios.get(`https://api.agatz.xyz/api/ytsearch?message=${encodeURIComponent(query)}`);
+        const firstVideo = searchResponse.data.data[0];
+
+        if (firstVideo) {
+          videoToDownload = firstVideo.url;
+          videoTitle = firstVideo.title;
+          const title = firstVideo.title;
+          const timestamp = firstVideo.timestamp;
+          const thumbnail = firstVideo.thumbnail;
+
+          document.getElementById('thumbnail').style.backgroundImage = `url(${thumbnail})`;
+          document.getElementById('thumbnail').style.backgroundSize = 'cover';
+
+          const videoInfoText = document.getElementById('videoInfoText');
+          videoInfoText.innerHTML = `${title}<br>Durasi ${timestamp}`;
+          document.getElementById('videoInfo').style.display = 'block';
+          document.getElementById('downloadOptions').style.display = 'block';
+        } else {
+          showAlert('Video tidak ditemukan.', 'danger');
+        }
+      } catch (error) {
+        console.error('Error saat mencari video:', error);
+        showAlert('Terjadi kesalahan saat mencari video.', 'danger');
+      }
+    }
+
+    function toggleVideo() {
+      const videoElement = document.getElementById("previewVideo");
+      const videoSource = document.getElementById("videoSource");
+      const playPauseIcon = document.getElementById("playPauseIcon");
+
+      if (isPlayingVideo) {
+        videoElement.pause();
+        playPauseIcon.classList.remove("fa-pause");
+        playPauseIcon.classList.add("fa-play");
+        isPlayingVideo = false;
+      } else {
+        showLoadingBar();
+        axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
+          headers: {
+            'accept': 'application/json'
+          }
+        })
+        .then(response => {
+          const mp4Url = response.data.data.download;
+          if (mp4Url) {
+            videoSource.src = mp4Url;
+            videoElement.load();
+            videoElement.style.display = 'block'; // Menampilkan elemen video
+            videoElement.play();
+            playPauseIcon.classList.remove("fa-play");
+            playPauseIcon.classList.add("fa-pause");
+            isPlayingVideo = true;
+          } else {
+            showAlert('Gagal memuat file video.', 'danger');
+          }
+          hideLoadingBar();
+        })
+        .catch(error => {
+          console.error('Error saat memuat video:', error);
+          showAlert('Terjadi kesalahan saat memuat video.', 'danger');
+          hideLoadingBar();
         });
-    </script>
+      }
+    }
+  </script>
 </body>
 </html>
