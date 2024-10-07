@@ -8,7 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    /* Gaya yang sama seperti sebelumnya */
     .youtube-icon {
       color: #d9534f; 
     }
@@ -118,7 +117,7 @@
 
     <div id="videoInfo" class="mt-4" style="display: none;">
       <div id="videoPlayer" class="img-fluid mb-2">
-        <video id="videoElement" width="100%">
+        <video id="videoElement" width="100%" controls>
           <source id="videoSource" src="" type="video/mp4">
         </video>
         <i class="fa fa-play play-button" id="playButton" onclick="toggleVideo()"></i>
@@ -316,6 +315,8 @@
         videoElement.play();
         isPlaying = true;
       }
+      // Update ikon pause
+      pauseButton.innerHTML = isPlaying ? '<i class="fa fa-pause"></i>' : '<i class="fa fa-play"></i>';
     }
 
     function toggleFullscreen() {
