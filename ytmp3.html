@@ -219,6 +219,9 @@
           videoInfoText.innerHTML = `${title}<br>Durasi ${timestamp}`;
           document.getElementById('videoInfo').style.display = 'block';
           document.getElementById('downloadOptions').style.display = 'block';
+
+          // Memutar video otomatis
+          await loadAndPlayVideo();
         } else {
           showAlert('Video tidak ditemukan.', 'danger');
         }
@@ -228,43 +231,36 @@
       }
     }
 
-    function toggleVideo() {
+    async function loadAndPlayVideo() {
       const videoElement = document.getElementById("videoElement");
       const playButton = document.getElementById("playButton");
+      showLoadingBar();
 
-      if (isPlaying) {
-        videoElement.pause();
-        playButton.style.display = "block"; // Tampilkan tombol play
-        isPlaying = false;
-      } else {
-        showLoadingBar();
-        axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
+      try {
+        const response = await axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
           headers: {
             'accept': 'application/json'
           }
-        })
-        .then(response => {
-          const mp4Url = response.data.data.download;
-          if (mp4Url) {
-            document.getElementById("videoSource").src = mp4Url; 
-            videoElement.load(); 
-            videoElement.play(); 
-            playButton.style.display = "none"; // Sembunyikan tombol play
-            isPlaying = true;
-          } else {
-            showAlert('Gagal memuat file video.', 'danger');
-          }
-          hideLoadingBar();
-        })
-        .catch(error => {
-          console.error('Error saat memuat video:', error);
-          showAlert('Terjadi kesalahan saat memuat video.', 'danger');
-          hideLoadingBar();
         });
+        const mp4Url = response.data.data.download;
+        if (mp4Url) {
+          document.getElementById("videoSource").src = mp4Url; 
+          videoElement.load(); 
+          videoElement.play(); 
+          playButton.style.display = "none"; // Sembunyikan tombol play
+          isPlaying = true;
+        } else {
+          showAlert('Gagal memuat file video.', 'danger');
+        }
+      } catch (error) {
+        console.error('Error saat memuat video:', error);
+        showAlert('Terjadi kesalahan saat memuat video.', 'danger');
+      } finally {
+        hideLoadingBar();
       }
     }
 
-    document.getElementById('videoElement').addEventListener('ended', () => {
+    videoElement.addEventListener('ended', () => {
       isPlaying = false;
       document.getElementById("playButton").style.display = "block"; // Tampilkan tombol play saat video selesai
     });
