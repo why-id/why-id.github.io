@@ -257,7 +257,12 @@
           document.getElementById('videoInfoText').innerText = `Judul: ${videoTitle}`;
           document.getElementById('videoInfo').style.display = 'block';
           document.getElementById('downloadButton').disabled = false;
-          loadVideo();
+
+          if (isAudioMode) {
+            loadAudio(); // Memuat audio jika dalam mode audio
+          } else {
+            loadVideo(); // Memuat video jika dalam mode video
+          }
         } else {
           showAlert('Video tidak ditemukan.', 'danger');
         }
@@ -267,9 +272,42 @@
       }
     }
 
+    async function loadAudio() {
+      const videoElement = document.getElementById("videoElement");
+      const videoSource = document.getElementById("videoSource");
+      const toggleIcon = document.getElementById("toggleIcon");
+
+      try {
+        const response = await axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
+          headers: {
+            'accept': 'application/json'
+          }
+        });
+        const mp3Url = response.data.data.download;
+
+        if (mp3Url) {
+          videoElement.pause(); 
+          videoSource.src = mp3Url;
+          videoElement.load();
+          videoElement.play();
+          isPlaying = true;
+          isAudioMode = true;
+          toggleIcon.classList.remove("fa-toggle-off");
+          toggleIcon.classList.add("fa-toggle-on");
+          document.getElementById("videoPlayer").style.display = "none";
+        } else {
+          showAlert('Gagal memuat file audio.', 'danger');
+        }
+      } catch (error) {
+        console.error('Error saat memuat audio:', error);
+        showAlert('Terjadi kesalahan saat memuat audio.', 'danger');
+      }
+    }
+
     async function loadVideo() {
       const videoElement = document.getElementById("videoElement");
       const videoSource = document.getElementById("videoSource");
+      const toggleIcon = document.getElementById("toggleIcon");
 
       try {
         const response = await axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
@@ -280,10 +318,15 @@
         const mp4Url = response.data.data.download;
 
         if (mp4Url) {
+          videoElement.pause();
           videoSource.src = mp4Url;
           videoElement.load();
           videoElement.play();
           isPlaying = true;
+          isAudioMode = false;
+          toggleIcon.classList.remove("fa-toggle-on");
+          toggleIcon.classList.add("fa-toggle-off");
+          document.getElementById("videoPlayer").style.display = "block";
         } else {
           showAlert('Gagal memuat file video.', 'danger');
         }
@@ -293,147 +336,53 @@
       }
     }
 
-    async function toggleAudioMode() {
-      const videoElement = document.getElementById("videoElement");
-      const videoSource = document.getElementById("videoSource");
-      const toggleIcon = document.getElementById("toggleIcon");
-
-      if (!isAudioMode) {
-        try {
-          const response = await axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
-            headers: {
-              'accept': 'application/json'
-            }
-          });
-          const mp3Url = response.data.data.download;
-
-          if (mp3Url) {
-            videoElement.pause(); 
-            videoSource.src = mp3Url;
-            videoElement.load(); 
-            videoElement.play(); 
-            isPlaying = true;
-            isAudioMode = true;
-            toggleIcon.classList.remove("fa-toggle-off");
-            toggleIcon.classList.add("fa-toggle-on"); 
-            document.getElementById("videoPlayer").style.display = "none"; 
-          } else {
-            showAlert('Gagal memuat file audio.', 'danger');
-          }
-        } catch (error) {
-          console.error('Error saat memuat audio:', error);
-          showAlert('Terjadi kesalahan saat memuat audio.', 'danger');
-        }
+    function toggleAudioMode() {
+      if (isAudioMode) {
+        loadVideo(); 
       } else {
-        try {
-          const response = await axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
-            headers: {
-              'accept': 'application/json'
-            }
-          });
-          const mp4Url = response.data.data.download;
-
-          if (mp4Url) {
-            videoElement.pause(); 
-            videoSource.src = mp4Url; 
-            videoElement.load(); 
-            videoElement.play(); 
-            isPlaying = true;
-            isAudioMode = false;
-            toggleIcon.classList.remove("fa-toggle-on");
-            toggleIcon.classList.add("fa-toggle-off"); 
-            document.getElementById("videoPlayer").style.display = "block"; 
-          } else {
-            showAlert('Gagal memuat file video.', 'danger');
-          }
-        } catch (error) {
-          console.error('Error saat memuat video:', error);
-          showAlert('Terjadi kesalahan saat memuat video.', 'danger');
-        }
+        loadAudio();
       }
     }
 
     function toggleVideo() {
-      const videoElement = document.getElementById("videoElement");
+      const videoElement = document.getElementById('videoElement');
+      const playButton = document.getElementById('playButton');
+      
       if (isPlaying) {
         videoElement.pause();
-        document.getElementById("playButton").style.display = "block";
+        playButton.style.display = 'block';
         isPlaying = false;
       } else {
         videoElement.play();
-        document.getElementById("playButton").style.display = "none";
+        playButton.style.display = 'none';
         isPlaying = true;
       }
     }
 
     function toggleMute() {
-      const videoElement = document.getElementById("videoElement");
-      const muteIcon = document.getElementById("muteIcon");
+      const videoElement = document.getElementById('videoElement');
+      const muteIcon = document.getElementById('muteIcon');
+      
       if (isMuted) {
         videoElement.muted = false;
-        muteIcon.classList.remove("fa-bell-slash");
-        muteIcon.classList.add("fa-bell");
+        muteIcon.classList.remove('fa-bell-slash');
+        muteIcon.classList.add('fa-bell');
         isMuted = false;
       } else {
         videoElement.muted = true;
-        muteIcon.classList.remove("fa-bell");
-        muteIcon.classList.add("fa-bell-slash");
+        muteIcon.classList.remove('fa-bell');
+        muteIcon.classList.add('fa-bell-slash');
         isMuted = true;
       }
     }
 
-    document.getElementById('videoElement').addEventListener('timeupdate', function() {
-      const progressBar = document.getElementById("progress");
-      const videoElement = document.getElementById("videoElement");
-      const percentage = (videoElement.currentTime / videoElement.duration) * 100;
-      progressBar.style.width = percentage + "%";
-    });
+    function downloadVideo() {
+      const downloadFormat = document.getElementById('downloadFormat').value;
 
-    async function downloadVideo() {
-      const format = document.getElementById('downloadFormat').value;
-      if (!format) {
-        showAlert('Silakan pilih format download.', 'danger');
-        return;
-      }
-
-      let downloadUrl;
-      if (format === 'mp4') {
-        try {
-          const response = await axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
-            headers: {
-              'accept': 'application/json'
-            }
-          });
-          downloadUrl = response.data.data.download;
-        } catch (error) {
-          console.error('Error saat mendapatkan link download:', error);
-          showAlert('Terjadi kesalahan saat mendapatkan link download.', 'danger');
-          return;
-        }
-      } else if (format === 'mp3') {
-        try {
-          const response = await axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
-            headers: {
-              'accept': 'application/json'
-            }
-          });
-          downloadUrl = response.data.data.download;
-        } catch (error) {
-          console.error('Error saat mendapatkan link download:', error);
-          showAlert('Terjadi kesalahan saat mendapatkan link download.', 'danger');
-          return;
-        }
-      }
-
-      if (downloadUrl) {
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = `download.${format}`; // Nama file download
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        showAlert('Gagal mendapatkan link untuk download.', 'danger');
+      if (downloadFormat === 'mp4') {
+        window.open(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, '_blank');
+      } else if (downloadFormat === 'mp3') {
+        window.open(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, '_blank');
       }
     }
   </script>
