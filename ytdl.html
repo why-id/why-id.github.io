@@ -145,13 +145,15 @@
           <button class="btn btn-black" id="muteButton" onclick="toggleMute()">
             <i class="fa fa-volume-up" id="muteIcon"></i>
           </button>
+          <!-- Tombol untuk toggle mode audio/video dengan ikon -->
+          <button class="btn btn-black" id="toggleAudioModeButton" onclick="toggleAudioMode()">
+            <i class="fa fa-toggle-off" id="toggleIcon"></i>
+          </button>
         </div>
       </div>
       <div id="progressBar">
         <div id="progress"></div>
       </div>
-      <!-- Tombol untuk beralih ke mode audio -->
-      <button class="btn btn-black" id="toggleAudioModeButton" onclick="toggleAudioMode()">Beralih ke Mode Audio</button>
     </div>
   </div>
   
@@ -255,6 +257,8 @@
 
     async function loadAndPlayVideo() {
       const videoElement = document.getElementById("videoElement");
+      const videoSource = document.getElementById("videoSource");
+
       try {
         const response = await axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
           headers: {
@@ -264,7 +268,7 @@
         const mp4Url = response.data.data.download;
 
         if (mp4Url) {
-          document.getElementById('videoSource').src = mp4Url;
+          videoSource.src = mp4Url;
           videoElement.load();
           videoElement.play();
           isPlaying = true;
@@ -280,7 +284,7 @@
     async function toggleAudioMode() {
       const videoElement = document.getElementById("videoElement");
       const videoSource = document.getElementById("videoSource");
-      const toggleAudioModeButton = document.getElementById("toggleAudioModeButton");
+      const toggleIcon = document.getElementById("toggleIcon");
 
       if (!isAudioMode) {
         try {
@@ -298,7 +302,8 @@
             videoElement.play(); 
             isPlaying = true;
             isAudioMode = true;
-            toggleAudioModeButton.innerText = "Beralih ke Mode Video"; 
+            toggleIcon.classList.remove("fa-toggle-off");
+            toggleIcon.classList.add("fa-toggle-on"); 
             document.getElementById("videoPlayer").style.display = "none"; 
           } else {
             showAlert('Gagal memuat file audio.', 'danger');
@@ -323,7 +328,8 @@
             videoElement.play(); 
             isPlaying = true;
             isAudioMode = false;
-            toggleAudioModeButton.innerText = "Beralih ke Mode Audio"; 
+            toggleIcon.classList.remove("fa-toggle-on");
+            toggleIcon.classList.add("fa-toggle-off"); 
             document.getElementById("videoPlayer").style.display = "block"; 
           } else {
             showAlert('Gagal memuat file video.', 'danger');
