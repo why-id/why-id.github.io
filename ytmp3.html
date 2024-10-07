@@ -125,12 +125,14 @@
       </div>
       <div id="videoInfoText"></div>
       <div class="controls">
-        <button class="control-button" id="muteButton" onclick="toggleMute()">
-          <i class="fa fa-volume-up" id="muteIcon"></i>
-        </button>
-        <button class="control-button" id="fullscreenButton" onclick="toggleFullscreen()">
-          <i class="fa fa-expand"></i>
-        </button>
+        <div class="d-flex justify-content-between w-100">
+          <button class="btn btn-black" id="muteButton" onclick="toggleMute()">
+            <i class="fa fa-volume-up" id="muteIcon"></i>
+          </button>
+          <button class="btn btn-black" id="fullscreenButton" onclick="toggleFullscreen()">
+            <i class="fa fa-expand"></i>
+          </button>
+        </div>
       </div>
     </div>
 
