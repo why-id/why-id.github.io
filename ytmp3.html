@@ -124,8 +124,14 @@
         <i class="fa fa-play play-button" id="playButton" onclick="toggleVideo()"></i>
       </div>
       <div id="videoInfoText"></div>
-      <div class="controls">
+      <div class="controls mt-2">
         <div class="d-flex justify-content-between w-100">
+          <button class="btn btn-black" id="backwardButton" disabled>
+            <i class="fa fa-fast-backward"></i>
+          </button>
+          <button id="forwardButton" class="btn btn-black" disabled>
+            <i class="fa fa-fast-forward"></i>
+          </button>
           <button class="btn btn-black" id="muteButton" onclick="toggleMute()">
             <i class="fa fa-volume-up" id="muteIcon"></i>
           </button>
@@ -133,17 +139,6 @@
             <i class="fa fa-expand"></i>
           </button>
         </div>
-      </div>
-    </div>
-
-    <div id="downloadOptions" class="mt-4" style="display: none;">
-      <div class="d-flex justify-content-between">
-        <button class="btn btn-black" id="backwardButton" disabled>
-          <i class="fa fa-fast-backward"></i>
-        </button>
-        <button id="forwardButton" class="btn btn-black" disabled>
-          <i class="fa fa-fast-forward"></i>
-        </button>
       </div>
     </div>
   </div>
@@ -242,7 +237,6 @@
           const videoInfoText = document.getElementById('videoInfoText');
           videoInfoText.innerHTML = `${title}<br>Durasi ${timestamp}`;
           document.getElementById('videoInfo').style.display = 'block';
-          document.getElementById('downloadOptions').style.display = 'block';
 
           // Memutar video otomatis
           await loadAndPlayVideo();
