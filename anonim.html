@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anonymous Chat - WebRTC</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f0f0f0; text-align: center; padding: 50px; }
+    #chatBox { width: 400px; height: 400px; border: 1px solid #ccc; padding: 10px; margin: 20px auto; background: white; overflow-y: scroll; }
+    #messageInput { width: 300px; padding: 10px; }
+    button { padding: 10px; cursor: pointer; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h1>Anonymous Chat (P2P)</h1>
+  <div id="chatBox">
+    <div id="messages"></div>
+  </div>
+  <input type="text" id="messageInput" placeholder="Type a message..." />
+  <button onclick="sendMessage()">Send</button>
+  
+  <div id="offerSection">
+    <p>Share this code with your partner:</p>
+    <textarea id="offer" readonly></textarea>
+    <button onclick="copyOffer()">Copy</button>
+  </div>
+  
+  <div id="answerSection" class="hidden">
+    <p>Enter the code from your partner:</p>
+    <textarea id="answer"></textarea>
+    <button onclick="connect()">Connect</button>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('messages');
+    let peerConnection;
+    const config = { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] };
+    let dataChannel;
+
+    // Create PeerConnection and DataChannel
+    function createConnection() {
+      peerConnection = new RTCPeerConnection(config);
+      dataChannel = peerConnection.createDataChannel('chat');
+
+      dataChannel.onmessage = (event) => {
+        const messageElement = document.createElement('div');
+        messageElement.textContent = 'Stranger: ' + event.data;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      };
+
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate) return;
+        document.getElementById('offer').value = JSON.stringify(peerConnection.localDescription);
+      };
+
+      dataChannel.onopen = () => console.log('Connection opened');
+      dataChannel.onclose = () => console.log('Connection closed');
+    }
+
+    // Create offer and display it
+    async function startChat() {
+      createConnection();
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      document.getElementById('offerSection').classList.add('hidden');
+      document.getElementById('answerSection').classList.remove('hidden');
+    }
+
+    // Copy the offer to clipboard
+    function copyOffer() {
+      const offerText = document.getElementById('offer');
+      offerText.select();
+      document.execCommand('copy');
+      alert('Offer code copied');
+    }
+
+    // Connect with the partner using their answer
+    async function connect() {
+      const answer = JSON.parse(document.getElementById('answer').value);
+      await peerConnection.setRemoteDescription(answer);
+      alert('Connected to your partner!');
+    }
+
+    // Send a message
+    function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const message = input.value;
+      if (message && dataChannel) {
+        dataChannel.send(message);
+        const messageElement = document.createElement('div');
+        messageElement.textContent = 'You: ' + message;
+        chatBox.appendChild(messageElement);
+        input.value = '';
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    }
+
+    // Start chat when page loads
+    window.onload = startChat;
+  </script>
+</body>
+</html>
