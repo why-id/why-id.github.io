@@ -128,7 +128,6 @@
             <i class="fas fa-comments center-icon"></i>
         </div>
         <div class="chat-footer">
-            <input type="text" id="messageInput" placeholder="Tulis pesan..." required>
             <button id="sendButton" onclick="openModal()"><span class="material-symbols-outlined">send</span></button>
         </div>
     </div>
@@ -138,8 +137,18 @@
         <div class="modal-content">
             <label for="chatIdInput">Masukkan ID Chat:</label>
             <input type="text" id="chatIdInput" placeholder="ID Chat Telegram..." required>
-            <button onclick="sendMessage()">Kirim Pesan</button>
+            <button onclick="showMessageInput()">Lanjutkan</button>
             <button onclick="closeIdModal()">Batal</button>
+        </div>
+    </div>
+
+    <!-- Modal untuk Input Pesan -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <label for="messageInput">Masukkan Pesan:</label>
+            <input type="text" id="messageInput" placeholder="Tulis pesan..." required>
+            <button onclick="sendMessage()">Kirim Pesan</button>
+            <button onclick="closeMessageModal()">Batal</button>
         </div>
     </div>
 
@@ -151,6 +160,8 @@
     </div>
 
     <script>
+        let chatId = '';
+
         function openModal() {
             document.getElementById('idModal').style.display = 'block';
         }
@@ -159,17 +170,25 @@
             document.getElementById('idModal').style.display = 'none';
         }
 
+        function showMessageInput() {
+            chatId = document.getElementById('chatIdInput').value;
+            if (!chatId.trim()) {
+                alert('ID chat tidak boleh kosong.');
+                return;
+            }
+            closeIdModal();
+            document.getElementById('messageModal').style.display = 'block';
+        }
+
+        function closeMessageModal() {
+            document.getElementById('messageModal').style.display = 'none';
+        }
+
         function sendMessage() {
             const message = document.getElementById('messageInput').value;
-            const chatId = document.getElementById('chatIdInput').value;
 
             if (!message.trim()) {
                 alert('Pesan tidak boleh kosong.');
-                return;
-            }
-
-            if (!chatId.trim()) {
-                alert('ID chat tidak boleh kosong.');
                 return;
             }
 
@@ -189,9 +208,8 @@
             .then(data => {
                 if (data.ok) {
                     document.getElementById('messageInput').value = '';
-                    document.getElementById('chatIdInput').value = '';
-                    closeIdModal();
-                    openModal(); // Menampilkan modal sukses
+                    closeMessageModal();
+                    openSuccessModal(); // Menampilkan modal sukses
                 } else {
                     alert('Gagal mengirim pesan, coba lagi.');
                 }
@@ -202,20 +220,22 @@
             });
         }
 
-        function openModal() {
+        function openSuccessModal() {
             document.getElementById('successModal').style.display = 'block';
-            setTimeout(closeModal, 2000); // Auto close after 2 seconds
+            setTimeout(closeSuccessModal, 2000); // Auto close after 2 seconds
         }
 
-        function closeModal() {
+        function closeSuccessModal() {
             document.getElementById('successModal').style.display = 'none';
         }
 
         window.onclick = function(event) {
             if (event.target == document.getElementById('successModal')) {
-                closeModal();
+                closeSuccessModal();
             } else if (event.target == document.getElementById('idModal')) {
                 closeIdModal();
+            } else if (event.target == document.getElementById('messageModal')) {
+                closeMessageModal();
             }
         }
     </script>
