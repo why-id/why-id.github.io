@@ -154,9 +154,8 @@
       
     </div>
   </div>
-  
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script>
+<script>
     let videoToDownload;
     let videoTitle;
     let isPlaying = false;
@@ -235,6 +234,7 @@
 
     async function searchAndPrepareDownload(query) {
       try {
+        // Endpoint pencarian tetap menggunakan endpoint lama
         const searchResponse = await axios.get(`https://api.agatz.xyz/api/ytsearch?message=${encodeURIComponent(query)}`);
         const firstVideo = searchResponse.data.data[0];
 
@@ -243,7 +243,6 @@
           videoTitle = firstVideo.title; 
           document.getElementById('videoInfoText').innerText = `${videoTitle}`;
           document.getElementById('videoInfo').style.display = 'block';
-          document.getElementById('downloadButton').disabled = false;
 
           if (isAudioMode) {
             loadAudio(); // Memuat audio jika dalam mode audio
@@ -265,12 +264,13 @@
       const toggleIcon = document.getElementById("toggleIcon");
 
       try {
-        const response = await axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
+        // Menggunakan endpoint baru untuk proses audio (mp3)
+        const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(videoToDownload)}`, {
           headers: {
             'accept': 'application/json'
           }
         });
-        const mp3Url = response.data.data.download;
+        const mp3Url = response.data.result.mp3;
 
         if (mp3Url) {
           videoElement.pause(); 
@@ -297,12 +297,13 @@
       const toggleIcon = document.getElementById("toggleIcon");
 
       try {
-        const response = await axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
+        // Menggunakan endpoint baru untuk proses video (mp4)
+        const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(videoToDownload)}`, {
           headers: {
             'accept': 'application/json'
           }
         });
-        const mp4Url = response.data.data.download;
+        const mp4Url = response.data.result.mp4;
 
         if (mp4Url) {
           videoElement.pause();
@@ -323,93 +324,57 @@
       }
     }
 
-    function toggleAudioMode() {
-      if (isAudioMode) {
-        loadVideo(); 
-      } else {
-        loadAudio();
-      }
-    }
-
     function toggleVideo() {
-      const videoElement = document.getElementById('videoElement');
-      const playButton = document.getElementById('playButton');
-      
-      if (isPlaying) {
-        videoElement.pause();
-        playButton.style.display = 'block';
-        isPlaying = false;
-      } else {
+      const videoElement = document.getElementById("videoElement");
+      const playButton = document.getElementById("playButton");
+
+      if (videoElement.paused) {
         videoElement.play();
         playButton.style.display = 'none';
         isPlaying = true;
+      } else {
+        videoElement.pause();
+        playButton.style.display = 'block';
+        isPlaying = false;
       }
     }
 
     function toggleMute() {
-      const videoElement = document.getElementById('videoElement');
-      const muteIcon = document.getElementById('muteIcon');
-      
+      const videoElement = document.getElementById("videoElement");
+      const muteIcon = document.getElementById("muteIcon");
+
       if (isMuted) {
         videoElement.muted = false;
-        muteIcon.classList.remove('fa-bell-slash');
-        muteIcon.classList.add('fa-bell');
+        muteIcon.classList.remove("fa-volume-off");
+        muteIcon.classList.add("fa-bell");
         isMuted = false;
       } else {
         videoElement.muted = true;
-        muteIcon.classList.remove('fa-bell');
-        muteIcon.classList.add('fa-bell-slash');
+        muteIcon.classList.remove("fa-bell");
+        muteIcon.classList.add("fa-volume-off");
         isMuted = true;
       }
     }
 
-    async function downloadVideo() {
-      const format = document.getElementById('downloadFormat').value;
-      if (!format) {
-        showAlert('Silakan pilih format download.', 'danger');
-        return;
-      }
-
-      let downloadUrl;
-      if (format === 'mp4') {
-        try {
-          const response = await axios.get(`https://api.agatz.xyz/api/ytmp4?url=${encodeURIComponent(videoToDownload)}`, {
-            headers: {
-              'accept': 'application/json'
-            }
-          });
-          downloadUrl = response.data.data.download;
-        } catch (error) {
-          console.error('Error saat mendapatkan link download:', error);
-          showAlert('Terjadi kesalahan saat mendapatkan link download.', 'danger');
-          return;
-        }
-      } else if (format === 'mp3') {
-        try {
-          const response = await axios.get(`https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoToDownload)}`, {
-            headers: {
-              'accept': 'application/json'
-            }
-          });
-          downloadUrl = response.data.data.download;
-        } catch (error) {
-          console.error('Error saat mendapatkan link download:', error);
-          showAlert('Terjadi kesalahan saat mendapatkan link download.', 'danger');
-          return;
-        }
-      }
-
-      if (downloadUrl) {
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = `download.${format}`; // Nama file download
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    function toggleAudioMode() {
+      if (isAudioMode) {
+        loadVideo();
       } else {
-        showAlert('Gagal mendapatkan link untuk download.', 'danger');
+        loadAudio();
       }
     }
+function downloadVideoOrAudio() {
+  const downloadLink = document.createElement('a');
+  const fileUrl = isAudioMode ? videoSource.src : videoSource.src; // Audio jika mode audio, video jika tidak
+
+  downloadLink.href = fileUrl;
+  downloadLink.download = videoTitle + (isAudioMode ? '.mp3' : '.mp4'); // Mengatur nama file
+  downloadLink.click();
+
+  showAlert('Download dimulai!', 'success');
+}
+
   </script>
+
 </body>
 </html>
