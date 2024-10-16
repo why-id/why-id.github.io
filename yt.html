@@ -140,18 +140,6 @@
           </button>
         </div>
       </div>
-
-      <!-- Penambahan dropdown untuk memilih format download -->
-      <div class="mt-3 text-center">
-        <select id="downloadFormat" class="form-control w-50 mx-auto">
-          <option value="" disabled selected>Pilih Format Download</option>
-          <option value="mp4">Download MP4</option>
-          <option value="mp3">Download MP3</option>
-        </select>
-        <button id="downloadButton" class="btn btn-danger mt-2" onclick="downloadVideo()" disabled>Download</button>
-      </div>
-
-      
     </div>
   </div>
   
@@ -233,143 +221,137 @@
       }
     }
 
-    Gagal memuat file audio.', 'danger');
+    async function searchAndPrepareDownload(query) {
+      try {
+        // Endpoint pencarian tetap menggunakan endpoint lama
+        const searchResponse = await axios.get(`https://api.agatz.xyz/api/ytsearch?message=${encodeURIComponent(query)}`);
+        const firstVideo = searchResponse.data.data[0];
+
+        if (firstVideo) {
+          videoToDownload = firstVideo.url; 
+          videoTitle = firstVideo.title; 
+          document.getElementById('videoInfoText').innerText = `${videoTitle}`;
+          document.getElementById('videoInfo').style.display = 'block';
+
+          if (isAudioMode) {
+            loadAudio(); // Memuat audio jika dalam mode audio
+          } else {
+            loadVideo(); // Memuat video jika dalam mode video
+          }
+        } else {
+          showAlert('Video tidak ditemukan.', 'danger');
+        }
+      } catch (error) {
+        console.error('Error saat mencari video:', error);
+        showAlert('Terjadi kesalahan saat mencari video.', 'danger');
+      }
+    }
+
+    async function loadAudio() {
+      const videoElement = document.getElementById("videoElement");
+      const videoSource = document.getElementById("videoSource");
+      const toggleIcon = document.getElementById("toggleIcon");
+
+      try {
+        // Menggunakan endpoint baru untuk proses audio (mp3)
+        const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(videoToDownload)}`, {
+          headers: {
+            'accept': 'application/json'
+          }
+        });
+        const mp3Url = response.data.result.mp3;
+
+        if (mp3Url) {
+          videoElement.pause(); 
+          videoSource.src = mp3Url;
+          videoElement.load();
+          videoElement.play();
+          isPlaying = true;
+          isAudioMode = true;
+          toggleIcon.classList.remove("fa-toggle-off");
+          toggleIcon.classList.add("fa-toggle-on");
+          document.getElementById("videoPlayer").style.display = "none";
+        } else {
+          showAlert('Gagal memuat file audio.', 'danger');
         }
       } catch (error) {
         console.error('Error saat memuat audio:', error);
         showAlert('Terjadi kesalahan saat memuat audio.', 'danger');
       }
     }
-async function searchAndPrepareDownload(query) {
-  try {
-    // Endpoint pencarian tetap menggunakan endpoint lama
-    const searchResponse = await axios.get(`https://api.agatz.xyz/api/ytsearch?message=${encodeURIComponent(query)}`);
-    const firstVideo = searchResponse.data.data[0];
 
-    if (firstVideo) {
-      videoToDownload = firstVideo.url; 
-      videoTitle = firstVideo.title; 
-      document.getElementById('videoInfoText').innerText = `${videoTitle}`;
-      document.getElementById('videoInfo').style.display = 'block';
-      document.getElementById('downloadButton').disabled = false;
+    async function loadVideo() {
+      const videoElement = document.getElementById("videoElement");
+      const videoSource = document.getElementById("videoSource");
+      const toggleIcon = document.getElementById("toggleIcon");
 
-      if (isAudioMode) {
-        loadAudio(); // Memuat audio jika dalam mode audio
+      try {
+        // Menggunakan endpoint baru untuk proses video (mp4)
+        const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(videoToDownload)}`, {
+          headers: {
+            'accept': 'application/json'
+          }
+        });
+        const mp4Url = response.data.result.mp4;
+
+        if (mp4Url) {
+          videoElement.pause();
+          videoSource.src = mp4Url;
+          videoElement.load();
+          videoElement.play();
+          isPlaying = true;
+          isAudioMode = false;
+          toggleIcon.classList.remove("fa-toggle-on");
+          toggleIcon.classList.add("fa-toggle-off");
+          document.getElementById("videoPlayer").style.display = "block";
+        } else {
+          showAlert('Gagal memuat file video.', 'danger');
+        }
+      } catch (error) {
+        console.error('Error saat memuat video:', error);
+        showAlert('Terjadi kesalahan saat memuat video.', 'danger');
+      }
+    }
+
+    function toggleVideo() {
+      const videoElement = document.getElementById("videoElement");
+      const playButton = document.getElementById("playButton");
+
+      if (videoElement.paused) {
+        videoElement.play();
+        playButton.style.display = 'none';
+        isPlaying = true;
       } else {
-        loadVideo(); // Memuat video jika dalam mode video
+        videoElement.pause();
+        playButton.style.display = 'block';
+        isPlaying = false;
       }
-    } else {
-      showAlert('Video tidak ditemukan.', 'danger');
     }
-  } catch (error) {
-    console.error('Error saat mencari video:', error);
-    showAlert('Terjadi kesalahan saat mencari video.', 'danger');
-  }
-}
 
-async function loadAudio() {
-  const videoElement = document.getElementById("videoElement");
-  const videoSource = document.getElementById("videoSource");
-  const toggleIcon = document.getElementById("toggleIcon");
+    function toggleMute() {
+      const videoElement = document.getElementById("videoElement");
+      const muteIcon = document.getElementById("muteIcon");
 
-  try {
-    // Menggunakan endpoint baru untuk proses audio (mp3)
-    const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(videoToDownload)}`, {
-      headers: {
-        'accept': 'application/json'
+      if (isMuted) {
+        videoElement.muted = false;
+        muteIcon.classList.remove("fa-volume-off");
+        muteIcon.classList.add("fa-bell");
+        isMuted = false;
+      } else {
+        videoElement.muted = true;
+        muteIcon.classList.remove("fa-bell");
+        muteIcon.classList.add("fa-volume-off");
+        isMuted = true;
       }
-    });
-    const mp3Url = response.data.result.mp3;
-
-    if (mp3Url) {
-      videoElement.pause(); 
-      videoSource.src = mp3Url;
-      videoElement.load();
-      videoElement.play();
-      isPlaying = true;
-      isAudioMode = true;
-      toggleIcon.classList.remove("fa-toggle-off");
-      toggleIcon.classList.add("fa-toggle-on");
-      document.getElementById("videoPlayer").style.display = "none";
-    } else {
-      showAlert('Gagal memuat file audio.', 'danger');
     }
-  } catch (error) {
-    console.error('Error saat memuat audio:', error);
-    showAlert('Terjadi kesalahan saat memuat audio.', 'danger');
-  }
-}
 
-async function loadVideo() {
-  const videoElement = document.getElementById("videoElement");
-  const videoSource = document.getElementById("videoSource");
-  const toggleIcon = document.getElementById("toggleIcon");
-
-  try {
-    // Menggunakan endpoint baru untuk proses video (mp4)
-    const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(videoToDownload)}`, {
-      headers: {
-        'accept': 'application/json'
+    function toggleAudioMode() {
+      if (isAudioMode) {
+        loadVideo();
+      } else {
+        loadAudio();
       }
-    });
-    const mp4Url = response.data.result.mp4;
-
-    if (mp4Url) {
-      videoElement.pause();
-      videoSource.src = mp4Url;
-      videoElement.load();
-      videoElement.play();
-      isPlaying = true;
-      isAudioMode = false;
-      toggleIcon.classList.remove("fa-toggle-on");
-      toggleIcon.classList.add("fa-toggle-off");
-      document.getElementById("videoPlayer").style.display = "block";
-    } else {
-      showAlert('Gagal memuat file video.', 'danger');
     }
-  } catch (error) {
-    console.error('Error saat memuat video:', error);
-    showAlert('Terjadi kesalahan saat memuat video.', 'danger');
-  }
-}
-
-async function downloadVideo() {
-  const format = document.getElementById('downloadFormat').value;
-  if (!format) {
-    showAlert('Silakan pilih format download.', 'danger');
-    return;
-  }
-
-  let downloadUrl;
-  try {
-    const response = await axios.get(`https://widipe.com/download/ytdl?url=${encodeURIComponent(videoToDownload)}`, {
-      headers: {
-        'accept': 'application/json'
-      }
-    });
-    if (format === 'mp4') {
-      downloadUrl = response.data.result.mp4;
-    } else if (format === 'mp3') {
-      downloadUrl = response.data.result.mp3;
-    }
-  } catch (error) {
-    console.error('Error saat mendapatkan link download:', error);
-    showAlert('Terjadi kesalahan saat mendapatkan link download.', 'danger');
-    return;
-  }
-
-  if (downloadUrl) {
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = `download.${format}`; // Nama file download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } else {
-    showAlert('Gagal mendapatkan link untuk download.', 'danger');
-  }
-}
-
   </script>
 </body>
 </html>
