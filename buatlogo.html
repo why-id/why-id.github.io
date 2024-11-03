@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DexSkieee Ofc</title>
+  <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Playwrite DE Grund', sans-serif;
+      background-color: #000;
+      color: #fff;
+    }
+    h1 {
+      font-family: 'Pixelify Sans', sans-serif;
+    }
+    label, button, input, .alert {
+      font-family: 'PT Sans', sans-serif;
+    }
+    .form-control {
+      background-color: #333;
+      border: 1px solid #555;
+      color: #fff;
+    }
+    .form-control:focus {
+      background-color: #555;
+      border-color: #777;
+      color: #fff;
+    }
+  </style>
+</head>
+<body onclick="playAudio();" class="">
+  <audio id="sec">
+    <source src="https://g.top4top.io/m_319620fge0.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="container mt-5">
+    <h1 class="text-center">TEXTPRO</h1>
+    <form id="textproForm">
+      <div class="form-group">
+        <label for="textproUrl">Textpro URL</label>
+        <input type="text" class="form-control" id="textproUrl" placeholder="Masukkan URL textpro.me" required>
+      </div>
+      <div class="form-group">
+        <label for="queryText">Text Query</label>
+        <input type="text" class="form-control" id="queryText" placeholder="Masukkan Teks untuk Textpro" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Mulai Proses</button>
+    </form>
+
+    <div id="alertContainer" class="mt-3"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const fakeUa = () => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36";
+
+    class Textprome {
+      async text(url, text) {
+        if (!url) throw new Error("URL salah!");
+
+        try {
+          const resultOne = await axios.get(url, {
+            headers: { "User-Agent": fakeUa() }
+          });
+
+          const getOneCookies = resultOne.headers["set-cookie"];
+          const dataFromResult = [];
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(resultOne.data, 'text/html');
+          const inputs = doc.querySelectorAll("form.ajax-submit input");
+
+          inputs.forEach(input => {
+            dataFromResult.push({
+              name: input.getAttribute("name"),
+              value: input.getAttribute("value") || ""
+            });
+          });
+
+          const FormDataAppend = new FormData();
+          if (typeof text === "string") text = [text];
+          text.forEach(teks => FormDataAppend.append("text[]", teks));
+
+          dataFromResult.forEach(item => FormDataAppend.append(item.name, item.value));
+
+          const resultTwo = await axios.post(url, FormDataAppend, {
+            headers: {
+              ...FormDataAppend.getHeaders(),
+              "User-Agent": fakeUa(),
+              "Cookie": getOneCookies
+            }
+          });
+
+          const getData = /<div.*?id="form_value".+>(.*?)<\/div>/.exec(resultTwo.data);
+          if (!getData) throw new Error("Gagal memproses data");
+
+          const dataJson = JSON.parse(getData[1]);
+          const dataStringify = new URLSearchParams(dataJson).toString();
+
+          const resultThree = await axios.post("https://textpro.me/effect/create-image", dataStringify, {
+            headers: {
+              "User-Agent": fakeUa(),
+              "Cookie": getOneCookies
+            }
+          });
+
+          return "https://textpro.me" + resultThree.data.fullsize_image;
+
+        } catch (error) {
+          throw error;
+        }
+      }
+    }
+
+    document.getElementById('textproForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const textproUrl = document.getElementById('textproUrl').value;
+      const queryText = document.getElementById('queryText').value;
+
+      if (textproUrl && queryText) {
+        const textprome = new Textprome();
+        try {
+          const result = await textprome.text(textproUrl, queryText);
+          showAlert(`Image URL: ${result}`, 'success');
+        } catch (error) {
+          showAlert(`Error: ${error.message}`, 'danger');
+        }
+      }
+    });
+
+    function showAlert(message, type) {
+      const alertContainer = document.getElementById('alertContainer');
+      alertContainer.innerHTML = `<div class="alert alert-${type}" role="alert">${message}</div>`;
+    }
+
+    function playAudio() {
+      const audioElement = document.getElementById("sec");
+      audioElement.play();
+    }
+  </script>
+</body>
+</html>
