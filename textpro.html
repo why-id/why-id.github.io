@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DexSkieee Ofc</title>
+  <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Playwrite DE Grund', sans-serif;
+      background-color: #000;
+      color: #fff;
+    }
+    h1 {
+      font-family: 'Pixelify Sans', sans-serif;
+    }
+    label, button, input, .alert {
+      font-family: 'PT Sans', sans-serif;
+    }
+    .form-control {
+      background-color: #333;
+      border: 1px solid #555;
+      color: #fff;
+    }
+    .form-control:focus {
+      background-color: #555;
+      border-color: #777;
+      color: #fff;
+    }
+  </style>
+</head>
+<body onclick="playAudio();" class="">
+  <audio id="sec">
+    <source src="https://g.top4top.io/m_319620fge0.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="container mt-5">
+    <h1 class="text-center">TEXTPRO</h1>
+    <form id="textproForm">
+      <div class="form-group">
+        <label for="textproUrl">Textpro URL</label>
+        <input type="text" class="form-control" id="textproUrl" placeholder="Masukkan URL textpro.me" required>
+      </div>
+      <div class="form-group">
+        <label for="queryText">Text Query</label>
+        <input type="text" class="form-control" id="queryText" placeholder="Masukkan Teks untuk Textpro" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Mulai Proses</button>
+    </form>
+
+    <div id="alertContainer" class="mt-3"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const { default: axios, isAxiosError } = require("axios");
+    const cheerio = require("cheerio");
+    const formData = require("form-data");
+    const qs = require("qs");
+
+    const fakeUa = () => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36";
+
+    class Textprome {
+      constructor() {}
+
+      text(url, text) {
+        return new Promise(async (resolve, reject) => {
+          if (!url) return reject("URL salah!");
+
+          try {
+            const resultOne = await axios.request({
+              method: "GET",
+              url,
+              headers: {
+                "User-Agent": fakeUa()
+              }
+            });
+
+            if (isAxiosError(resultOne)) throw new Error('axios error');
+
+            const $ = cheerio.load(resultOne.data);
+            let getOneCookies = resultOne.headers["set-cookie"];
+            let dataFromResult = [];
+
+            $("form.ajax-submit").find("input").get().forEach(mappingInput => {
+              dataFromResult.push({
+                name: $(mappingInput).attr("name"),
+                value: $(mappingInput).attr("value")
+              });
+            });
+
+            const FormDataAppend = new formData();
+            let dataResultFilter = dataFromResult.filter(formDataFilter => formDataFilter.name !== "text[]");
+
+            if (typeof text === "string") text = [text];
+            for (let teks of text) FormDataAppend.append("text[]", teks);
+
+            dataResultFilter.forEach((item) => {
+              FormDataAppend.append(item.name, item.value);
+            });
+
+            const resultTwo = await axios.request({
+              method: "POST",
+              url,
+              data: FormDataAppend,
+              headers: {
+                ...FormDataAppend.getHeaders(),
+                "Accept": "*/*",
+                "Accept-Language": "en-US,en;q=0.9",
+                "User-Agent": fakeUa(),
+                "Cookie": getOneCookies
+              }
+            });
+
+            if (isAxiosError(resultTwo)) throw new Error('axios error');
+
+            const getData = /<div.*?id="form_value".+>(.*?)<\/div>/.exec(resultTwo.data);
+            const dataJson = JSON.parse(getData[1]);
+            const dataStringify = qs.stringify(dataJson);
+
+            const resultThree = await axios({
+              method: "POST",
+              url: "https://textpro.me/effect/create-image",
+              data: dataStringify,
+              headers: {
+                "Accept": "*/*",
+                "Accept-Language": "en-US,en;q=0.9",
+                "User-Agent": fakeUa(),
+                "Cookie": getOneCookies
+              }
+            });
+
+            if (isAxiosError(resultThree)) throw new Error('axios error');
+
+            resolve("https://textpro.me" + resultThree.data.fullsize_image);
+
+          } catch (error) {
+            reject(error);
+          }
+        });
+      }
+    }
+
+    document.getElementById('textproForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const textproUrl = document.getElementById('textproUrl').value;
+      const queryText = document.getElementById('queryText').value;
+
+      if (textproUrl && queryText) {
+        const textprome = new Textprome();
+        try {
+          const result = await textprome.text(textproUrl, queryText);
+          showAlert(`Image URL: ${result}`, 'success');
+        } catch (error) {
+          showAlert(`Error: ${error.message}`, 'danger');
+        }
+      }
+    });
+
+    function showAlert(message, type) {
+      const alertContainer = document.getElementById('alertContainer');
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.role = 'alert';
+      alertDiv.innerHTML = message;
+      alertContainer.appendChild(alertDiv);
+    }
+
+    function playAudio() {
+      const audioElement = document.getElementById("sec");
+      audioElement.play();
+    }
+  </script>
+</body>
+</html>
