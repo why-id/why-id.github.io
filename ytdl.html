@@ -30,14 +30,14 @@
     }
   </style>
 </head>
-<body onclick="playAudio();" class="">
+<body onclick="playAudio();">
   <audio id="sec">
     <source src="https://g.top4top.io/m_319620fge0.mp3" type="audio/mpeg">
   </audio>
 
   <div class="container mt-5">
-    <h1 class="text-center">TEXTPRO</h1>
-    <form id="textproForm">
+    <h1 class="text-center">AXIS</h1>
+    <form id="textproForm" action="javascript:void(0);">
       <div class="form-group">
         <label for="textproUrl">Textpro URL</label>
         <input type="text" class="form-control" id="textproUrl" placeholder="Masukkan URL textpro.me" required>
@@ -152,7 +152,8 @@
         const textprome = new Textprome();
         try {
           const result = await textprome.text(textproUrl, queryText);
-          showAlert(`Image URL: ${result}`, 'success');
+          // Display the resulting URL as plain text (not a hyperlink)
+          showAlert(`Generated Image URL: ${result}`, 'success');
         } catch (error) {
           showAlert(`Error: ${error.message}`, 'danger');
         }
