@@ -5,11 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Efek Klik Partikel</title>
     
+    <!-- Link ke font PT Sans dari Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css">
     <link rel="stylesheet" href="https://ctf.rajawalisecteam.eu.org/assets/css/bootstrap4-neon-glow.min.css">
     <link rel="stylesheet" href="https://ctf.rajawalisecteam.eu.org/assets/css/particles.css">
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <link rel='stylesheet' href='https://cdn.jsdelivr.net/font-hack/2.020/css/hack.min.css'>
+    
+    <style>
+      /* Menggunakan font PT Sans untuk keseluruhan body */
+      body {
+        font-family: 'PT Sans', sans-serif;
+      }
+    </style>
   </head>
   <body>
     <!-- Particles Background -->
@@ -20,11 +29,11 @@
       particlesJS("particles-js", {
         particles: {
           number: { value: 80, density: { enable: true, value_area: 800 } },
-          color: { value: "#ffffff" },
+          color: { value: "#FF0000" },
           shape: { type: "circle" },
           opacity: { value: 0.5, random: true, anim: { enable: true, speed: 1, opacity_min: 0 } },
           size: { value: 3, random: true, anim: { enable: false } },
-          line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.4, width: 1 },
+          line_linked: { enable: true, distance: 150, color: "#FF0000", opacity: 0.4, width: 1 },
           move: { enable: true, speed: 2, direction: "none", random: true, straight: false, out_mode: "out" }
         },
         interactivity: {
@@ -35,5 +44,40 @@
         retina_detect: true
       });
     </script>
+
+    <!-- GresiXploiter Team Members Table -->
+    <div class="container mt-5">
+      <h3 class="text-center mb-4">GresiXploiter Team</h3>
+      <table class="table table-bordered">
+        <thead>
+          <tr class="text-center">
+            <th>No</th>
+            <th>Nama Anggota</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>DexSkieee (Founder)</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Tn. Dyoo</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Tony Slank</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>GODZILLA</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>PutSkieee</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </body>
 </html>
