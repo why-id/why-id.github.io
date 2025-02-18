@@ -1,0 +1,269 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+            <title>
+            Speed Test
+        </title>
+        <meta name="keywords" content=""/>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta http-equiv="Content-Style-Type" content="text/css" />
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+        
+                        <link href="https://speedtest.ph/css/app.css?id=d16393a4cefb6747c2f60635b98d0d0f" rel="stylesheet">
+        
+
+    <link href="https://speedtest.ph/fireprobe/app_assets/544/css/fireprobe.css?v=6242c59dfc0226d5cd0caf5c53fbb144" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Exo+2:100,200,300,400" rel="stylesheet">
+
+            
+
+            </head>
+<body bgcolor="black">        
+        <div id="rescale-on" class="container">
+            <div class="row mb-3">
+                <div class="col-12">
+
+                    <div id="tester-wrapper">
+                        <div id="fireprobe" class="tfr">
+<div class="name">                                    
+                                                                    </div>
+                            
+                                                            <div id="tester">
+                                                                        <canvas id="start-canvas" width="500" height="500">
+                                        <p></p>
+                                    </canvas>
+
+                                    <div class="start loading">
+                                        <div class="text" data-scale="3.0" data-scale-portrait="10.0" data-scale-src="#rescale-on"
+                                             data-scale-attr="font-size">
+                                            <div class="wave">
+                                    <span class="dot" data-scale="1.0" data-scale-portrait="2.0" data-scale-src="#rescale-on"
+                                          data-scale-attr="width,height"></span>
+                                                <span class="dot" data-scale="1.0" data-scale-portrait="2.0" data-scale-src="#rescale-on"
+                                                      data-scale-attr="width,height"></span>
+                                                <span class="dot" data-scale="1.0" data-scale-portrait="2.0" data-scale-src="#rescale-on"
+                                                      data-scale-attr="width,height"></span>
+                                            </div>
+
+                                            <span class="label">
+                                   MULAI
+                                </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="clear"></div>
+                                    <div id="server">
+                                        <canvas id="server-canvas" width="36" height="36"></canvas>
+                                        <div class="server spacer">
+                        <span class="title">
+                            Mencari server terbaik...
+                        </span>
+                                            <span class="value"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="ip spacer">
+                    <span class="title">
+                        IP :
+                    </span>
+                                        <span class="value">...</span>
+                                    </div>
+
+                                    <div class="isp spacer tfr">
+                    <span class="title">
+                        Provider :
+                    </span>
+                                        <span class="value">...</span>
+                                    </div>
+                                                                            
+                                                                        <canvas id="testing-mode-canvas" width="100" height="100"></canvas>
+                                    <div class="testing-mode">
+                    <span class="title tfr">
+                        Testing:
+                    </span>
+                                        <br/>
+                                        <span class="value tfr">
+                        Ping
+                    </span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar"></div>
+                                    </div>
+                                    <div class="current result">
+                                        <div class="current-result value">
+                                            <span class="value-1 tfr">...</span>
+                                            <br/>
+                                            <span class="value-2 tfr">Mb/s</span>
+                                        </div>
+                                    </div>
+                                    <div class="download result">
+                                        <div class="download-label label tfr">
+                                            Download:
+                                        </div>
+                                        <div class="download-result value">
+                                            <span class="value-1 tfr">...</span>
+                                            <span class="value-2 tfr">Mb/s</span>
+                                        </div>
+                                    </div>
+                                    <canvas id="download-chart-canvas" width="250" height="100"></canvas>
+                                    <div class="upload result">
+                                        <div class="upload-label label tfr">
+                                            Upload:
+                                        </div>
+                                        <div class="upload-result value">
+                                            <span class="value-1 tfr">...</span>
+                                            <span class="value-2 tfr">Mb/s</span>
+                                        </div>
+                                    </div>
+                                    <canvas id="upload-chart-canvas" width="250" height="100"></canvas>
+                                    <div class="ping result">
+                                        <div class="ping-label label tfr">
+                                            Ping:
+                                        </div>
+                                        <div class="ping-result value">
+                                            <span class="value-1 tfr">...</span>
+                                            <span class="value-2 tfr">ms</span></div>
+                                    </div>
+                                    <div class="jitter result">
+                                        <div class="jitter-label label tfr">
+                                            Jitter:
+                                        </div>
+                                        <div class="jitter-result value">
+                                            <span class="value-1 tfr">...</span>
+                                            <span class="value-2 tfr">ms</span>
+                                        </div>
+                                    </div>
+                                    <canvas id="gauge-canvas" width="1100" height="850"></canvas>
+                                    <canvas id="gauge-canvas-2" width="1100" height="850"></canvas>
+                                    
+                                    
+                                    
+                </div>
+            </div>
+        </div>
+
+
+                    <div class="container advertisment my-3">
+                <div class="row">
+                    
+                                            <!-- 20211214 SpeedTest.ph -->
+                        <div class="col-12" style="display: block" align="center">
+    
+</div>                                    </div>
+            </div>
+        
+        <div class="container add-server-to-our-platform">
+            
+
+
+    
+
+
+    <script>
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-4023970-30']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RSZ33B0SLY"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-RSZ33B0SLY');
+    </script>
+
+        <script src="https://speedtest.ph/js/app.js?id=d16393a4cefb6747c2f60635b98d0d0f" type="text/javascript"></script>
+
+
+    <script type="text/javascript">
+        var fireprobeInitialized = false;
+
+        function fireprobeInit() {
+            if (fireprobeInitialized) {
+                return;
+            }
+
+            fireprobeInitialized = true;
+
+            fireprobe = new fireProbeApp('https://www.fireprobe.net/api/gateway', 544, logger.INFO);
+            fireprobe.initialize();
+
+            function fireProbeEvent(data) {
+                                _gaq.push(['_trackEvent', 'FireProbe', data]);                                                 gtag('event', 'FireProbe', {'event_category':data});
+                            }
+
+            function fireProbeStats(data) {
+            }
+
+            let originalUrl = window.location.href;
+
+            $(document).ready(function () {
+                setTimeout(function () {
+                    $('#fireprobe .start').show();
+                }, 200);
+            });
+
+            $('body').on('fireprobe_test_started', function () {
+                window.history.replaceState({}, undefined, originalUrl);
+                $('#tester-wrapper').addClass('started');
+                $('.tester').addClass('started');
+                $('.add-server-to-our-platform').addClass('started');
+                $('.result--share-buttons-wrapper').addClass('d-none');
+            });
+
+            $('body').on('fireprobe_graphics_initialized', function () {
+                $('#fireprobe .start').removeClass('loading');
+                $('#fireprobe .start .text').attr('data-scale', '4.5');
+                $('#fireprobe .start .text').attr('data-scale-portrait', '12.0');
+                $('body').get(0).dispatchEvent(new Event('fireprobe_rescale'));
+            });
+
+                        window.onpopstate = function() {location.reload()}
+
+            $('body').on('fireprobe_test_finnished', function (e, data) {
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'json',
+                    url: "https://speedtest.ph/api/gateway",
+                    cache: false,
+                    processData: true,
+                    data: {
+                        action: 'result',
+                        download: data.download,
+                        upload: data.upload,
+                        jitter: data.jitter,
+                        latency: data.latency
+                    },
+                    success: function (_data) {
+                        window.history.pushState({}, undefined, _data.resultUrl);
+                        $('#shareFacebook').attr('data-popup', 'https://www.facebook.com/sharer/sharer.php?u=' + _data.resultUrl);
+                        $('#shareTwitter').attr('data-popup', 'https://twitter.com/intent/tweet?url=' + _data.resultUrl);
+                        $('#shareUrl').attr('data-onclick-copy-data', _data.resultUrl);
+                        $('.result--share-buttons-wrapper').removeClass('d-none');
+                    }
+                });
+            });
+                    }
+
+                    window.fireprobeLoaded = function () {
+                fireprobeInit();
+            }
+            </script>
+
+    <script src="https://speedtest.ph/fireprobe/app_assets/544/js/fireprobe.bundle.min.js?v=6242c59dfc0226d5cd0caf5c53fbb144" type="text/javascript"></script>
+
+
+</body>
+</html>
