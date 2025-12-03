@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Walkie Talkie Pro</title>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --case-color: #2c3e50;
+            --screen-bg: #89c403; /* Warna layar hijau retro */
+            --accent: #e74c3c;
+            --led-off: #330000;
+            --led-on: #ff0000;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+            overflow: hidden;
+        }
+
+        .walkie-talkie {
+            background-color: var(--case-color);
+            width: 300px;
+            padding: 25px;
+            border-radius: 40px;
+            box-shadow: 
+                inset 5px 5px 15px rgba(255,255,255,0.1),
+                15px 15px 40px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            border: 2px solid #34495e;
+        }
+
+        /* Antena */
+        .walkie-talkie::before {
+            content: '';
+            position: absolute;
+            top: -70px;
+            right: 50px;
+            width: 24px;
+            height: 90px;
+            background: linear-gradient(90deg, #2c3e50, #1a252f);
+            border-radius: 12px 12px 0 0;
+            z-index: -1;
+            border: 2px solid #000;
+        }
+
+        /* Knob Volume (Hiasan) */
+        .walkie-talkie::after {
+            content: '';
+            position: absolute;
+            top: -30px;
+            left: 50px;
+            width: 40px;
+            height: 40px;
+            background: #1a252f;
+            border-radius: 5px;
+            z-index: -1;
+        }
+
+        .screen {
+            background-color: var(--screen-bg);
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: 3px solid #555;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.2);
+            box-sizing: border-box;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
+        }
+
+        .status-led {
+            width: 12px;
+            height: 12px;
+            background-color: var(--led-off);
+            border-radius: 50%;
+            margin: 5px auto;
+            border: 1px solid #000;
+        }
+
+        .status-led.on {
+            background-color: var(--led-on);
+            box-shadow: 0 0 15px var(--led-on);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 2px solid #555;
+            background: rgba(255,255,255,0.8);
+            font-family: inherit;
+            border-radius: 4px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .btn-connect {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        .btn-connect:hover { background-color: #000; }
+
+        .btn-ptt {
+            width: 130px;
+            height: 130px;
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #c0392b);
+            border-radius: 50%;
+            border: 4px solid #96281b;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #7c1e15, 0 15px 20px rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            transition: all 0.1s;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-ptt:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #7c1e15, 0 5px 10px rgba(0,0,0,0.4);
+            background: #c0392b;
+        }
+
+        .speaker-grill {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .grill-line {
+            height: 5px;
+            background-color: #1a252f;
+            border-radius: 3px;
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        #myIdDisplay { color: #000; font-size: 1.1em; }
+        .hint { font-size: 10px; margin-top: 5px; opacity: 0.7; }
+
+    </style>
+</head>
+<body>
+
+    <div class="walkie-talkie">
+        <div class="screen">
+            <div style="font-size:10px;">FREQUENCY ID</div>
+            <div id="myIdDisplay">---</div>
+            
+            <div class="status-led" id="led"></div>
+            <div id="statusText">OFFLINE</div>
+            
+            <div id="connectPanel">
+                <input type="text" id="destId" placeholder="ID TEMAN">
+                <button class="btn-connect" onclick="connectToPeer()">SET FREQ</button>
+            </div>
+        </div>
+
+        <button class="btn-ptt" id="pttBtn">PUSH<br>TO TALK</button>
+
+        <div class="speaker-grill">
+            <div class="grill-line" style="width: 60%;"></div>
+            <div class="grill-line" style="width: 80%;"></div>
+            <div class="grill-line" style="width: 90%;"></div>
+            <div class="grill-line" style="width: 80%;"></div>
+            <div class="grill-line" style="width: 60%;"></div>
+        </div>
+        
+        <audio id="remoteAudio" autoplay></audio>
+    </div>
+
+    <script>
+        let peer = null;
+        let conn = null;
+        let localStream = null;
+        let currentCall = null;
+        let audioCtx = null;
+
+        const myIdDisplay = document.getElementById('myIdDisplay');
+        const statusText = document.getElementById('statusText');
+        const pttBtn = document.getElementById('pttBtn');
+        const led = document.getElementById('led');
+        const destIdInput = document.getElementById('destId');
+        const connectPanel = document.getElementById('connectPanel');
+
+        // --- AUDIO FX SECTION (Membuat suara kresek & bip) ---
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Fungsi membuat suara White Noise (Kresek radio)
+        function playSquelchNoise() {
+            if (!audioCtx) return;
+            
+            const bufferSize = audioCtx.sampleRate * 0.4; // Durasi 0.4 detik
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+
+            // Isi buffer dengan random noise
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = buffer;
+
+            const gainNode = audioCtx.createGain();
+            // Volume kresek
+            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+
+            noiseSource.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            noiseSource.start();
+        }
+
+        // Fungsi membuat suara "Roger Beep"
+        function playRogerBeep() {
+            if (!audioCtx) return;
+
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(1200, audioCtx.currentTime); // Frekuensi bip
+
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.1); // Bip pendek 0.1 detik
+        }
+        // -----------------------------------------------------
+
+
+        function initPeer() {
+            peer = new Peer(); 
+
+            peer.on('open', (id) => {
+                myIdDisplay.innerText = id;
+                statusText.innerText = "STANDBY";
+            });
+
+            peer.on('call', (call) => {
+                initAudioContext(); // Pastikan audio aktif
+                navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+                .then((stream) => {
+                    localStream = stream;
+                    muteMicrophone(true);
+                    
+                    call.answer(stream);
+                    handleCallStream(call);
+                    
+                    statusText.innerText = "CONNECTED";
+                    connectPanel.style.display = 'none';
+                    playRogerBeep(); // Bunyi saat koneksi terhubung
+                })
+                .catch((err) => {
+                    console.error('Mic Error:', err);
+                    statusText.innerText = "MIC ERROR";
+                });
+            });
+        }
+
+        function connectToPeer() {
+            const destId = destIdInput.value;
+            if (!destId) return alert("Masukkan ID Teman!");
+
+            initAudioContext(); // Pastikan audio aktif
+            statusText.innerText = "DIALING...";
+
+            navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+            .then((stream) => {
+                localStream = stream;
+                muteMicrophone(true);
+
+                const call = peer.call(destId, stream);
+                handleCallStream(call);
+            })
+            .catch((err) => {
+                console.error('Mic Error:', err);
+                statusText.innerText = "MIC ERROR";
+            });
+        }
+
+        function handleCallStream(call) {
+            currentCall = call;
+
+            call.on('stream', (remoteStream) => {
+                const audioObj = document.getElementById('remoteAudio');
+                audioObj.srcObject = remoteStream;
+                statusText.innerText = "CHANNEL OPEN";
+                connectPanel.style.display = 'none';
+                led.style.backgroundColor = "green"; 
+            });
+
+            call.on('close', () => {
+                statusText.innerText = "LOST SIGNAL";
+                led.style.backgroundColor = "#330000";
+                playSquelchNoise();
+            });
+        }
+
+        function muteMicrophone(isMuted) {
+            if (localStream && localStream.getAudioTracks().length > 0) {
+                localStream.getAudioTracks()[0].enabled = !isMuted;
+            }
+        }
+
+        // Logic Tombol PTT
+        const startTalk = () => {
+            if (!currentCall) return;
+            initAudioContext(); // Jaga-jaga
+            muteMicrophone(false); // Mic ON
+            led.classList.add('on');
+            statusText.innerText = "TRANSMITTING";
+            statusText.style.color = "red";
+        };
+
+        const stopTalk = () => {
+            if (!currentCall) return;
+            muteMicrophone(true); // Mic OFF
+            led.classList.remove('on');
+            statusText.innerText = "CHANNEL OPEN";
+            statusText.style.color = "#2c3e50";
+            
+            // MAINKAN EFEK SUARA RADIO (BIP + KRESEK)
+            playRogerBeep();
+            setTimeout(playSquelchNoise, 100); 
+        };
+
+        // Event Listeners (Mouse & Touch)
+        pttBtn.addEventListener('mousedown', startTalk);
+        window.addEventListener('mouseup', (e) => { 
+            // Cek jika tombol sedang ditekan sebelumnya
+            if(led.classList.contains('on')) stopTalk(); 
+        });
+
+        // Touch support (Mobile)
+        pttBtn.addEventListener('touchstart', (e) => { 
+            e.preventDefault(); 
+            startTalk(); 
+        }, {passive: false});
+        
+        pttBtn.addEventListener('touchend', (e) => { 
+            e.preventDefault(); 
+            stopTalk(); 
+        }, {passive: false});
+
+        initPeer();
+
+    </script>
+</body>
+</html>
