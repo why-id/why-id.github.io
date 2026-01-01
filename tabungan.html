@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TabunganKu - Manajer Tabungan Pribadi</title>
+    <!-- DaisyUI via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jsPDF untuk ekspor PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- Ikon FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --income-color: #10b981;
+            --expense-color: #ef4444;
+        }
+        
+        .stat-card {
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .transaction-row {
+            transition: background-color 0.2s ease;
+        }
+        
+        .transaction-row:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        
+        .print-only {
+            display: none;
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            .print-only {
+                display: block;
+            }
+            
+            body {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <div class="container mx-auto p-4 max-w-6xl">
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="navbar bg-base-100 shadow-lg rounded-box mb-4">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-piggy-bank text-3xl text-primary"></i>
+                        <div>
+                            <h1 class="text-2xl font-bold text-primary">TabunganKu</h1>
+                            <p class="text-sm text-gray-500">Kelola tabungan pribadi dengan mudah</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-none">
+                    <button id="exportPdfBtn" class="btn btn-primary gap-2 no-print">
+                        <i class="fas fa-file-pdf"></i>
+                        Ekspor PDF
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Ringkasan Tabungan -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="stat-card bg-white shadow-md rounded-box p-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-500">Saldo Saat Ini</p>
+                            <h2 class="text-3xl font-bold" id="currentBalance">Rp 0</h2>
+                        </div>
+                        <div class="text-primary">
+                            <i class="fas fa-wallet text-4xl"></i>
+                        </div>
+                    </div>
+                    <div class="divider m-0 mt-2"></div>
+                    <p class="text-sm text-gray-500">Total tabungan Anda saat ini</p>
+                </div>
+                
+                <div class="stat-card bg-white shadow-md rounded-box p-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-500">Total Pemasukan</p>
+                            <h2 class="text-3xl font-bold text-success" id="totalIncome">Rp 0</h2>
+                        </div>
+                        <div class="text-success">
+                            <i class="fas fa-arrow-down text-4xl"></i>
+                        </div>
+                    </div>
+                    <div class="divider m-0 mt-2"></div>
+                    <p class="text-sm text-gray-500">Total uang masuk ke tabungan</p>
+                </div>
+                
+                <div class="stat-card bg-white shadow-md rounded-box p-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-500">Total Pengeluaran</p>
+                            <h2 class="text-3xl font-bold text-error" id="totalExpense">Rp 0</h2>
+                        </div>
+                        <div class="text-error">
+                            <i class="fas fa-arrow-up text-4xl"></i>
+                        </div>
+                    </div>
+                    <div class="divider m-0 mt-2"></div>
+                    <p class="text-sm text-gray-500">Total uang keluar dari tabungan</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Form Transaksi -->
+            <section class="lg:col-span-1">
+                <div class="card bg-white shadow-md">
+                    <div class="card-body">
+                        <h2 class="card-title text-xl font-bold">
+                            <i class="fas fa-plus-circle text-primary"></i>
+                            Catat Transaksi Baru
+                        </h2>
+                        
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Jenis Transaksi</span>
+                            </label>
+                            <div class="flex gap-2 mb-4">
+                                <button id="incomeBtn" class="btn btn-success flex-1 active">
+                                    <i class="fas fa-arrow-down"></i>
+                                    Pemasukan
+                                </button>
+                                <button id="expenseBtn" class="btn btn-error flex-1">
+                                    <i class="fas fa-arrow-up"></i>
+                                    Pengeluaran
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Jumlah (Rp)</span>
+                            </label>
+                            <input type="number" id="amountInput" placeholder="Masukkan jumlah" class="input input-bordered" min="0" step="1000">
+                        </div>
+                        
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Kategori</span>
+                            </label>
+                            <select id="categorySelect" class="select select-bordered">
+                                <option value="Gaji">Gaji</option>
+                                <option value="Bonus">Bonus</option>
+                                <option value="Investasi">Investasi</option>
+                                <option value="Hadiah">Hadiah</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Deskripsi (Opsional)</span>
+                            </label>
+                            <textarea id="descriptionInput" class="textarea textarea-bordered" placeholder="Contoh: Gaji bulan Januari"></textarea>
+                        </div>
+                        
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Tanggal</span>
+                            </label>
+                            <input type="date" id="dateInput" class="input input-bordered" value="">
+                        </div>
+                        
+                        <div class="card-actions justify-end mt-6">
+                            <button id="saveTransactionBtn" class="btn btn-primary gap-2 w-full">
+                                <i class="fas fa-save"></i>
+                                Simpan Transaksi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filter dan Ekspor -->
+                <div class="card bg-white shadow-md mt-6 no-print">
+                    <div class="card-body">
+                        <h2 class="card-title text-xl font-bold">
+                            <i class="fas fa-filter text-primary"></i>
+                            Filter & Ekspor
+                        </h2>
+                        
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Filter Berdasarkan Periode</span>
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="date" id="filterStartDate" class="input input-bordered flex-1">
+                                <span class="self-center">s/d</span>
+                                <input type="date" id="filterEndDate" class="input input-bordered flex-1">
+                            </div>
+                        </div>
+                        
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Filter Berdasarkan Kategori</span>
+                            </label>
+                            <select id="filterCategory" class="select select-bordered">
+                                <option value="semua">Semua Kategori</option>
+                                <option value="Gaji">Gaji</option>
+                                <option value="Bonus">Bonus</option>
+                                <option value="Investasi">Investasi</option>
+                                <option value="Hadiah">Hadiah</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Filter Berdasarkan Jenis</span>
+                            </label>
+                            <select id="filterType" class="select select-bordered">
+                                <option value="semua">Semua Jenis</option>
+                                <option value="pemasukan">Pemasukan</option>
+                                <option value="pengeluaran">Pengeluaran</option>
+                            </select>
+                        </div>
+                        
+                        <div class="card-actions grid grid-cols-2 gap-2 mt-4">
+                            <button id="applyFilterBtn" class="btn btn-outline btn-primary gap-2">
+                                <i class="fas fa-filter"></i>
+                                Terapkan Filter
+                            </button>
+                            <button id="resetFilterBtn" class="btn btn-outline gap-2">
+                                <i class="fas fa-redo"></i>
+                                Reset
+                            </button>
+                        </div>
+                        
+                        <div class="divider"></div>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="exportCsvBtn" class="btn btn-outline btn-success gap-2">
+                                <i class="fas fa-file-csv"></i>
+                                Ekspor CSV
+                            </button>
+                            <button id="printBtn" class="btn btn-outline gap-2">
+                                <i class="fas fa-print"></i>
+                                Cetak
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Daftar Transaksi -->
+            <section class="lg:col-span-2">
+                <div class="card bg-white shadow-md h-full">
+                    <div class="card-body">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="card-title text-xl font-bold">
+                                <i class="fas fa-history text-primary"></i>
+                                Riwayat Transaksi
+                            </h2>
+                            <div class="text-sm text-gray-500">
+                                <span id="transactionCount">0</span> transaksi ditemukan
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="table table-zebra">
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>Kategori</th>
+                                        <th>Deskripsi</th>
+                                        <th class="text-right">Jumlah</th>
+                                        <th class="no-print">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionTable">
+                                    <!-- Data transaksi akan dimasukkan di sini melalui JavaScript -->
+                                    <tr>
+                                        <td colspan="5" class="text-center py-8 text-gray-500">
+                                            <i class="fas fa-inbox text-4xl mb-2"></i>
+                                            <p>Belum ada transaksi. Mulai tambahkan transaksi pertama Anda!</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div class="flex justify-center mt-6 no-print">
+                            <div class="btn-group">
+                                <button class="btn btn-outline btn-sm" id="prevPageBtn">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button class="btn btn-outline btn-sm active" id="page1Btn">1</button>
+                                <button class="btn btn-outline btn-sm" id="page2Btn">2</button>
+                                <button class="btn btn-outline btn-sm" id="nextPageBtn">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="mt-8 text-center text-gray-500 text-sm no-print">
+            <p>© 2023 TabunganKu - Aplikasi Manajemen Tabungan Pribadi. Data disimpan secara lokal di perangkat Anda.</p>
+            <p class="mt-1">Gunakan menu ekspor untuk mencadangkan data Anda secara berkala.</p>
+        </footer>
+    </div>
+    
+    <!-- Modal Konfirmasi Hapus -->
+    <div id="deleteModal" class="modal modal-bottom sm:modal-middle">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Konfirmasi Hapus Transaksi</h3>
+            <p class="py-4">Apakah Anda yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.</p>
+            <div class="modal-action">
+                <button class="btn btn-outline" id="cancelDeleteBtn">Batal</button>
+                <button class="btn btn-error" id="confirmDeleteBtn">Hapus</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Info Ekspor -->
+    <div id="exportModal" class="modal modal-bottom sm:modal-middle">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Ekspor Data Berhasil</h3>
+            <p class="py-4" id="exportMessage">Data telah berhasil diunduh sebagai file PDF.</p>
+            <div class="modal-action">
+                <button class="btn btn-primary" id="closeExportModalBtn">Tutup</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        // Algoritma Penyimpanan Data:
+        // 1. Data disimpan di localStorage dengan key 'savingsTransactions'
+        // 2. Setiap transaksi memiliki ID unik berdasarkan timestamp
+        // 3. Struktur data: array of transaction objects
+        // 4. Setiap perubahan langsung disimpan ke localStorage
+        
+        // Inisialisasi aplikasi
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inisialisasi variabel global
+            let transactions = [];
+            let currentTransactionType = 'pemasukan';
+            let transactionToDelete = null;
+            let currentPage = 1;
+            const transactionsPerPage = 8;
+            
+            // Filter state
+            let filterState = {
+                startDate: '',
+                endDate: '',
+                category: 'semua',
+                type: 'semua'
+            };
+            
+            // Set tanggal default untuk input tanggal
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateInput').value = today;
+            
+            // Inisialisasi jsPDF
+            const { jsPDF } = window.jspdf;
+            
+            // Event Listeners
+            document.getElementById('incomeBtn').addEventListener('click', () => setTransactionType('pemasukan'));
+            document.getElementById('expenseBtn').addEventListener('click', () => setTransactionType('pengeluaran'));
+            document.getElementById('saveTransactionBtn').addEventListener('click', addTransaction);
+            document.getElementById('applyFilterBtn').addEventListener('click', applyFilters);
+            document.getElementById('resetFilterBtn').addEventListener('click', resetFilters);
+            document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
+            document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
+            document.getElementById('printBtn').addEventListener('click', printReport);
+            document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteModal);
+            document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
+            document.getElementById('closeExportModalBtn').addEventListener('click', closeExportModal);
+            
+            // Pagination event listeners
+            document.getElementById('prevPageBtn').addEventListener('click', () => changePage(-1));
+            document.getElementById('nextPageBtn').addEventListener('click', () => changePage(1));
+            document.getElementById('page1Btn').addEventListener('click', () => goToPage(1));
+            document.getElementById('page2Btn').addEventListener('click', () => goToPage(2));
+            
+            // Inisialisasi data dari localStorage
+            loadTransactions();
+            
+            // Fungsi untuk mengatur jenis transaksi
+            function setTransactionType(type) {
+                currentTransactionType = type;
+                const incomeBtn = document.getElementById('incomeBtn');
+                const expenseBtn = document.getElementById('expenseBtn');
+                
+                if (type === 'pemasukan') {
+                    incomeBtn.classList.add('active');
+                    expenseBtn.classList.remove('active');
+                    
+                    // Update kategori untuk pemasukan
+                    const categorySelect = document.getElementById('categorySelect');
+                    categorySelect.innerHTML = `
+                        <option value="Gaji">Gaji</option>
+                        <option value="Bonus">Bonus</option>
+                        <option value="Investasi">Investasi</option>
+                        <option value="Hadiah">Hadiah</option>
+                        <option value="Lainnya">Lainnya</option>
+                    `;
+                } else {
+                    expenseBtn.classList.add('active');
+                    incomeBtn.classList.remove('active');
+                    
+                    // Update kategori untuk pengeluaran
+                    const categorySelect = document.getElementById('categorySelect');
+                    categorySelect.innerHTML = `
+                        <option value="Belanja">Belanja</option>
+                        <option value="Makanan">Makanan</option>
+                        <option value="Transportasi">Transportasi</option>
+                        <option value="Hiburan">Hiburan</option>
+                        <option value="Lainnya">Lainnya</option>
+                    `;
+                }
+            }
+            
+            // Fungsi untuk memuat transaksi dari localStorage
+            function loadTransactions() {
+                const storedTransactions = localStorage.getItem('savingsTransactions');
+                
+                if (storedTransactions) {
+                    transactions = JSON.parse(storedTransactions);
+                } else {
+                    // Data contoh untuk awal
+                    transactions = [
+                        {
+                            id: 1,
+                            date: today,
+                            type: 'pemasukan',
+                            category: 'Gaji',
+                            description: 'Gaji bulan Januari',
+                            amount: 5000000
+                        },
+                        {
+                            id: 2,
+                            date: today,
+                            type: 'pengeluaran',
+                            category: 'Belanja',
+                            description: 'Belanja bulanan',
+                            amount: 1500000
+                        },
+                        {
+                            id: 3,
+                            date: today,
+                            type: 'pemasukan',
+                            category: 'Bonus',
+                            description: 'Bonus proyek',
+                            amount: 1000000
+                        }
+                    ];
+                    saveTransactions();
+                }
+                
+                updateDashboard();
+                renderTransactions();
+            }
+            
+            // Fungsi untuk menyimpan transaksi ke localStorage
+            function saveTransactions() {
+                localStorage.setItem('savingsTransactions', JSON.stringify(transactions));
+            }
+            
+            // Fungsi untuk menambahkan transaksi baru
+            function addTransaction() {
+                const amountInput = document.getElementById('amountInput');
+                const categorySelect = document.getElementById('categorySelect');
+                const descriptionInput = document.getElementById('descriptionInput');
+                const dateInput = document.getElementById('dateInput');
+                
+                // Validasi input
+                if (!amountInput.value || amountInput.value <= 0) {
+                    alert('Masukkan jumlah yang valid!');
+                    amountInput.focus();
+                    return;
+                }
+                
+                if (!dateInput.value) {
+                    alert('Pilih tanggal transaksi!');
+                    dateInput.focus();
+                    return;
+                }
+                
+                // Buat objek transaksi baru
+                const newTransaction = {
+                    id: Date.now(), // ID unik berdasarkan timestamp
+                    date: dateInput.value,
+                    type: currentTransactionType,
+                    category: categorySelect.value,
+                    description: descriptionInput.value || 'Tidak ada deskripsi',
+                    amount: parseFloat(amountInput.value)
+                };
+                
+                // Tambahkan ke array transaksi
+                transactions.unshift(newTransaction);
+                
+                // Simpan ke localStorage
+                saveTransactions();
+                
+                // Update tampilan
+                updateDashboard();
+                renderTransactions();
+                
+                // Reset form
+                amountInput.value = '';
+                descriptionInput.value = '';
+                dateInput.value = today;
+                
+                // Tampilkan notifikasi sukses
+                showSuccessNotification('Transaksi berhasil disimpan!');
+            }
+            
+            // Fungsi untuk menghapus transaksi
+            function deleteTransaction(id) {
+                // Buka modal konfirmasi
+                transactionToDelete = id;
+                document.getElementById('deleteModal').classList.add('modal-open');
+            }
+            
+            function confirmDelete() {
+                if (transactionToDelete) {
+                    // Hapus transaksi dari array
+                    transactions = transactions.filter(transaction => transaction.id !== transactionToDelete);
+                    
+                    // Simpan ke localStorage
+                    saveTransactions();
+                    
+                    // Update tampilan
+                    updateDashboard();
+                    renderTransactions();
+                    
+                    // Reset variabel
+                    transactionToDelete = null;
+                    
+                    // Tutup modal
+                    closeDeleteModal();
+                    
+                    // Tampilkan notifikasi
+                    showSuccessNotification('Transaksi berhasil dihapus!');
+                }
+            }
+            
+            function closeDeleteModal() {
+                document.getElementById('deleteModal').classList.remove('modal-open');
+                transactionToDelete = null;
+            }
+            
+            // Fungsi untuk memperbarui dashboard (saldo, pemasukan, pengeluaran)
+            function updateDashboard() {
+                let totalIncome = 0;
+                let totalExpense = 0;
+                
+                // Filter transaksi berdasarkan filter yang aktif
+                const filteredTransactions = filterTransactions(transactions);
+                
+                filteredTransactions.forEach(transaction => {
+                    if (transaction.type === 'pemasukan') {
+                        totalIncome += transaction.amount;
+                    } else {
+                        totalExpense += transaction.amount;
+                    }
+                });
+                
+                const currentBalance = totalIncome - totalExpense;
+                
+                // Format angka ke Rupiah
+                const formatter = new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                });
+                
+                // Update tampilan
+                document.getElementById('currentBalance').textContent = formatter.format(currentBalance);
+                document.getElementById('totalIncome').textContent = formatter.format(totalIncome);
+                document.getElementById('totalExpense').textContent = formatter.format(totalExpense);
+                
+                // Update jumlah transaksi
+                document.getElementById('transactionCount').textContent = filteredTransactions.length;
+            }
+            
+            // Fungsi untuk merender transaksi ke tabel
+            function renderTransactions() {
+                const tableBody = document.getElementById('transactionTable');
+                
+                // Filter transaksi berdasarkan filter yang aktif
+                let filteredTransactions = filterTransactions(transactions);
+                
+                // Hitung total halaman
+                const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
+                
+                // Tentukan transaksi untuk halaman saat ini
+                const startIndex = (currentPage - 1) * transactionsPerPage;
+                const endIndex = startIndex + transactionsPerPage;
+                const transactionsToShow = filteredTransactions.slice(startIndex, endIndex);
+                
+                // Kosongkan tabel
+                tableBody.innerHTML = '';
+                
+                // Jika tidak ada transaksi
+                if (transactionsToShow.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="text-center py-8 text-gray-500">
+                                <i class="fas fa-inbox text-4xl mb-2"></i>
+                                <p>Tidak ada transaksi yang sesuai dengan filter.</p>
+                            </td>
+                        </tr>
+                    `;
+                    updatePaginationControls(totalPages);
+                    return;
+                }
+                
+                // Tambahkan setiap transaksi ke tabel
+                transactionsToShow.forEach(transaction => {
+                    const row = document.createElement('tr');
+                    row.className = 'transaction-row';
+                    
+                    // Format tanggal
+                    const dateObj = new Date(transaction.date);
+                    const formattedDate = dateObj.toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    });
+                    
+                    // Format jumlah
+                    const formatter = new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                        minimumFractionDigits: 0
+                    });
+                    
+                    const amountFormatted = formatter.format(transaction.amount);
+                    const amountClass = transaction.type === 'pemasukan' ? 'text-success font-semibold' : 'text-error font-semibold';
+                    
+                    row.innerHTML = `
+                        <td>${formattedDate}</td>
+                        <td>
+                            <span class="badge ${transaction.type === 'pemasukan' ? 'badge-success' : 'badge-error'}">
+                                ${transaction.category}
+                            </span>
+                        </td>
+                        <td class="max-w-xs truncate">${transaction.description}</td>
+                        <td class="text-right ${amountClass}">
+                            ${transaction.type === 'pemasukan' ? '+' : '-'} ${amountFormatted}
+                        </td>
+                        <td class="no-print">
+                            <button class="btn btn-error btn-xs" onclick="app.deleteTransaction(${transaction.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+                
+                // Update kontrol pagination
+                updatePaginationControls(totalPages);
+            }
+            
+            // Fungsi untuk memperbarui kontrol pagination
+            function updatePaginationControls(totalPages) {
+                const page1Btn = document.getElementById('page1Btn');
+                const page2Btn = document.getElementById('page2Btn');
+                const prevPageBtn = document.getElementById('prevPageBtn');
+                const nextPageBtn = document.getElementById('nextPageBtn');
+                
+                // Reset semua tombol
+                page1Btn.classList.remove('hidden');
+                page2Btn.classList.remove('hidden');
+                page1Btn.classList.remove('active');
+                page2Btn.classList.remove('active');
+                
+                // Sembunyikan tombol halaman 2 jika hanya ada 1 halaman
+                if (totalPages <= 1) {
+                    page2Btn.classList.add('hidden');
+                }
+                
+                // Atur tombol aktif berdasarkan halaman saat ini
+                if (currentPage === 1) {
+                    page1Btn.classList.add('active');
+                } else if (currentPage === 2) {
+                    page2Btn.classList.add('active');
+                }
+                
+                // Nonaktifkan tombol previous jika di halaman pertama
+                prevPageBtn.disabled = currentPage === 1;
+                
+                // Nonaktifkan tombol next jika di halaman terakhir
+                nextPageBtn.disabled = currentPage === totalPages;
+            }
+            
+            // Fungsi untuk mengubah halaman
+            function changePage(direction) {
+                const filteredTransactions = filterTransactions(transactions);
+                const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
+                
+                const newPage = currentPage + direction;
+                
+                if (newPage >= 1 && newPage <= totalPages) {
+                    currentPage = newPage;
+                    renderTransactions();
+                }
+            }
+            
+            // Fungsi untuk langsung ke halaman tertentu
+            function goToPage(page) {
+                const filteredTransactions = filterTransactions(transactions);
+                const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
+                
+                if (page >= 1 && page <= totalPages) {
+                    currentPage = page;
+                    renderTransactions();
+                }
+            }
+            
+            // Fungsi untuk menerapkan filter
+            function applyFilters() {
+                filterState.startDate = document.getElementById('filterStartDate').value;
+                filterState.endDate = document.getElementById('filterEndDate').value;
+                filterState.category = document.getElementById('filterCategory').value;
+                filterState.type = document.getElementById('filterType').value;
+                
+                // Reset ke halaman pertama
+                currentPage = 1;
+                
+                // Update dashboard dan tabel
+                updateDashboard();
+                renderTransactions();
+            }
+            
+            // Fungsi untuk mereset filter
+            function resetFilters() {
+                document.getElementById('filterStartDate').value = '';
+                document.getElementById('filterEndDate').value = '';
+                document.getElementById('filterCategory').value = 'semua';
+                document.getElementById('filterType').value = 'semua';
+                
+                filterState = {
+                    startDate: '',
+                    endDate: '',
+                    category: 'semua',
+                    type: 'semua'
+                };
+                
+                // Reset ke halaman pertama
+                currentPage = 1;
+                
+                // Update dashboard dan tabel
+                updateDashboard();
+                renderTransactions();
+            }
+            
+            // Fungsi untuk memfilter transaksi
+            function filterTransactions(transactionsList) {
+                return transactionsList.filter(transaction => {
+                    // Filter berdasarkan tanggal
+                    if (filterState.startDate && transaction.date < filterState.startDate) {
+                        return false;
+                    }
+                    
+                    if (filterState.endDate && transaction.date > filterState.endDate) {
+                        return false;
+                    }
+                    
+                    // Filter berdasarkan kategori
+                    if (filterState.category !== 'semua' && transaction.category !== filterState.category) {
+                        return false;
+                    }
+                    
+                    // Filter berdasarkan jenis
+                    if (filterState.type !== 'semua' && transaction.type !== filterState.type) {
+                        return false;
+                    }
+                    
+                    return true;
+                });
+            }
+            
+            // Fungsi untuk mengekspor ke PDF
+            function exportToPDF() {
+                // Filter transaksi
+                const filteredTransactions = filterTransactions(transactions);
+                
+                if (filteredTransactions.length === 0) {
+                    showExportModal('Tidak ada data untuk diekspor. Silakan tambahkan transaksi terlebih dahulu.', false);
+                    return;
+                }
+                
+                // Buat dokumen PDF
+                const doc = new jsPDF();
+                
+                // Tambahkan judul
+                doc.setFontSize(18);
+                doc.text('LAPORAN TABUNGAN PRIBADI', 105, 15, { align: 'center' });
+                
+                // Tambahkan informasi periode
+                doc.setFontSize(11);
+                let periodText = 'Periode: Semua Data';
+                
+                if (filterState.startDate || filterState.endDate) {
+                    const start = filterState.startDate || 'Awal';
+                    const end = filterState.endDate || 'Sekarang';
+                    periodText = `Periode: ${start} s/d ${end}`;
+                }
+                
+                doc.text(periodText, 105, 25, { align: 'center' });
+                
+                // Hitung total
+                let totalIncome = 0;
+                let totalExpense = 0;
+                
+                filteredTransactions.forEach(transaction => {
+                    if (transaction.type === 'pemasukan') {
+                        totalIncome += transaction.amount;
+                    } else {
+                        totalExpense += transaction.amount;
+                    }
+                });
+                
+                const currentBalance = totalIncome - totalExpense;
+                
+                // Format angka ke Rupiah
+                const formatter = new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                });
+                
+                // Tambahkan ringkasan
+                doc.setFontSize(12);
+                doc.text(`Saldo Saat Ini: ${formatter.format(currentBalance)}`, 14, 35);
+                doc.text(`Total Pemasukan: ${formatter.format(totalIncome)}`, 14, 42);
+                doc.text(`Total Pengeluaran: ${formatter.format(totalExpense)}`, 14, 49);
+                
+                // Siapkan data untuk tabel
+                const tableData = filteredTransactions.map(transaction => {
+                    const dateObj = new Date(transaction.date);
+                    const formattedDate = dateObj.toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    });
+                    
+                    const amountFormatted = formatter.format(transaction.amount);
+                    const signedAmount = transaction.type === 'pemasukan' ? `+${amountFormatted}` : `-${amountFormatted}`;
+                    
+                    return [
+                        formattedDate,
+                        transaction.category,
+                        transaction.description,
+                        signedAmount
+                    ];
+                });
+                
+                // Tambahkan tabel
+                doc.autoTable({
+                    head: [['Tanggal', 'Kategori', 'Deskripsi', 'Jumlah']],
+                    body: tableData,
+                    startY: 60,
+                    theme: 'striped',
+                    headStyles: { fillColor: [59, 130, 246] },
+                    columnStyles: {
+                        3: { halign: 'right' }
+                    }
+                });
+                
+                // Tambahkan timestamp
+                const generatedDate = new Date().toLocaleString('id-ID');
+                doc.setFontSize(10);
+                doc.text(`Dibuat pada: ${generatedDate}`, 14, doc.lastAutoTable.finalY + 10);
+                
+                // Simpan PDF
+                doc.save(`Laporan_Tabungan_${new Date().toISOString().slice(0, 10)}.pdf`);
+                
+                // Tampilkan modal konfirmasi
+                showExportModal(`Data berhasil diekspor ke PDF. File berisi ${filteredTransactions.length} transaksi.`);
+            }
+            
+            // Fungsi untuk mengekspor ke CSV
+            function exportToCSV() {
+                // Filter transaksi
+                const filteredTransactions = filterTransactions(transactions);
+                
+                if (filteredTransactions.length === 0) {
+                    showExportModal('Tidak ada data untuk diekspor. Silakan tambahkan transaksi terlebih dahulu.', false);
+                    return;
+                }
+                
+                // Buat header CSV
+                let csvContent = "Tanggal,Jenis,Kategori,Deskripsi,Jumlah\n";
+                
+                // Tambahkan setiap transaksi
+                filteredTransactions.forEach(transaction => {
+                    const dateObj = new Date(transaction.date);
+                    const formattedDate = dateObj.toLocaleDateString('id-ID');
+                    
+                    const row = [
+                        formattedDate,
+                        transaction.type === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran',
+                        transaction.category,
+                        `"${transaction.description.replace(/"/g, '""')}"`,
+                        transaction.amount
+                    ];
+                    
+                    csvContent += row.join(",") + "\n";
+                });
+                
+                // Buat blob dan unduh
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `Tabungan_${new Date().toISOString().slice(0, 10)}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Tampilkan modal konfirmasi
+                showExportModal(`Data berhasil diekspor ke CSV. File berisi ${filteredTransactions.length} transaksi.`);
+            }
+            
+            // Fungsi untuk mencetak laporan
+            function printReport() {
+                window.print();
+            }
+            
+            // Fungsi untuk menampilkan modal ekspor
+            function showExportModal(message, isSuccess = true) {
+                document.getElementById('exportMessage').textContent = message;
+                document.getElementById('exportModal').classList.add('modal-open');
+            }
+            
+            function closeExportModal() {
+                document.getElementById('exportModal').classList.remove('modal-open');
+            }
+            
+            // Fungsi untuk menampilkan notifikasi sukses
+            function showSuccessNotification(message) {
+                // Buat elemen notifikasi
+                const notification = document.createElement('div');
+                notification.className = 'toast toast-top toast-center';
+                notification.innerHTML = `
+                    <div class="alert alert-success">
+                        <div>
+                            <i class="fas fa-check-circle"></i>
+                            <span>${message}</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Tambahkan ke body
+                document.body.appendChild(notification);
+                
+                // Hapus setelah 3 detik
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+            
+            // Ekspor fungsi yang diperlukan ke global scope
+            window.app = {
+                deleteTransaction,
+                showSuccessNotification
+            };
+        });
+    </script>
+</body>
+</html>
