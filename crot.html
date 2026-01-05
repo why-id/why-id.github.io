@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CROT.COM</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-100 flex justify-center">
+
+<!-- APP -->
+<div class="w-full max-w-md bg-white min-h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <div class="px-4 py-4 border-b">
+    <h1
+      class="text-2xl font-extrabold tracking-widest text-blue-600"
+      style="font-family:'Poppins',sans-serif;"
+    >
+      CROT.COM
+    </h1>
+    <p class="text-sm text-gray-500">
+      Crowd Talk <span class="text-gray-400">( Obrolan Publik )</span>
+    </p>
+  </div>
+
+  <!-- COMPOSER -->
+  <div class="px-4 py-4 border-b space-y-3">
+
+    <textarea
+      id="content"
+      rows="3"
+      placeholder="Apa yang sedang Anda pikirkan..."
+      class="w-full resize-none border border-gray-200 rounded-xl px-3 py-3 text-sm
+             focus:outline-none focus:ring-2 focus:ring-blue-500"
+    ></textarea>
+
+    <div class="flex justify-between items-center">
+      <div class="flex items-center gap-1 text-sm text-gray-500">
+        <span class="material-icons-outlined text-base">public</span>
+        Public
+      </div>
+
+      <button
+        onclick="post()"
+        class="bg-blue-600 text-white text-sm font-semibold
+               px-5 py-2 rounded-full hover:bg-blue-700 transition"
+      >
+        Post
+      </button>
+    </div>
+  </div>
+
+  <!-- FEED -->
+  <div id="feed" class="flex-1"></div>
+
+  <!-- FOOTER -->
+  <div class="text-center text-xs text-gray-400 py-6 border-t">
+    © 2025 by <span class="font-medium text-gray-500">why.id</span>
+  </div>
+
+</div>
+
+<!-- SCROLL TO TOP BUTTON -->
+<button
+  id="toTop"
+  onclick="scrollToTop()"
+  class="hidden fixed bottom-6 right-6 bg-blue-600 text-white
+         p-3 rounded-full shadow-lg hover:bg-blue-700 transition"
+>
+  <span class="material-icons-outlined">arrow_upward</span>
+</button>
+
+<script>
+let posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+function timeAgo(time){
+  const seconds = Math.floor((Date.now() - time) / 1000);
+  if (seconds < 60) return "Baru saja";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return minutes + " menit";
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return hours + " jam";
+  const days = Math.floor(hours / 24);
+  return days + " hari";
+}
+
+function load(){
+  const feed = document.getElementById("feed");
+  feed.innerHTML = "";
+
+  posts.slice().reverse().forEach(p => {
+    feed.innerHTML += `
+      <div class="px-4 py-4 border-b flex gap-3">
+        <div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center">
+          <span class="material-icons-outlined text-gray-400">person</span>
+        </div>
+
+        <div class="flex-1">
+          <div class="text-sm">
+            <div class="font-semibold">Anonymous</div>
+            <div class="text-xs text-gray-500">@anonymous · ${timeAgo(p.time)}</div>
+          </div>
+
+          <div class="mt-2 text-sm leading-relaxed break-words">
+            ${p.content}
+          </div>
+
+          <button onclick="like(${p.id})"
+            class="flex items-center gap-1 mt-3 text-sm text-gray-500">
+            <span class="material-icons-outlined text-base">favorite_border</span>
+            ${p.likes}
+          </button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function post(){
+  if(!content.value.trim()) return;
+
+  posts.push({
+    id: Date.now(),
+    content: content.value,
+    likes: 0,
+    time: Date.now()
+  });
+
+  localStorage.setItem("posts", JSON.stringify(posts));
+  content.value = "";
+  load();
+}
+
+function like(id){
+  const post = posts.find(p => p.id === id);
+  if(post){
+    post.likes++;
+    localStorage.setItem("posts", JSON.stringify(posts));
+    load();
+  }
+}
+
+/* Scroll to top */
+const toTop = document.getElementById("toTop");
+window.addEventListener("scroll", () => {
+  window.scrollY > 300
+    ? toTop.classList.remove("hidden")
+    : toTop.classList.add("hidden");
+});
+
+function scrollToTop(){
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+load();
+</script>
+
+</body>
+</html>
