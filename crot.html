@@ -26,10 +26,8 @@
 
   <!-- HEADER -->
   <div class="px-4 py-4 border-b">
-    <h1
-      class="text-2xl font-extrabold tracking-widest text-blue-600"
-      style="font-family:'Poppins',sans-serif;"
-    >
+    <h1 class="text-2xl font-extrabold tracking-widest text-blue-600"
+        style="font-family:'Poppins',sans-serif;">
       CROT.COM
     </h1>
     <p class="text-sm text-gray-500">
@@ -39,7 +37,6 @@
 
   <!-- COMPOSER -->
   <div class="px-4 py-4 border-b space-y-3">
-
     <textarea
       id="content"
       rows="3"
@@ -57,8 +54,7 @@
       <button
         onclick="post()"
         class="bg-blue-600 text-white text-sm font-semibold
-               px-5 py-2 rounded-full hover:bg-blue-700 transition"
-      >
+               px-5 py-2 rounded-full hover:bg-blue-700 transition">
         Post
       </button>
     </div>
@@ -71,90 +67,110 @@
   <div class="text-center text-xs text-gray-400 py-6 border-t">
     © 2025 by <span class="font-medium text-gray-500">why.id</span>
   </div>
-
 </div>
 
-<!-- SCROLL TO TOP BUTTON -->
+<!-- SCROLL TO TOP -->
 <button
   id="toTop"
   onclick="scrollToTop()"
   class="hidden fixed bottom-6 right-6 bg-blue-600 text-white
-         p-3 rounded-full shadow-lg hover:bg-blue-700 transition"
->
+         p-3 rounded-full shadow-lg hover:bg-blue-700 transition">
   <span class="material-icons-outlined">arrow_upward</span>
 </button>
 
-<script>
-let posts = JSON.parse(localStorage.getItem("posts")) || [];
+<!-- ================= FIREBASE + APP LOGIC ================= -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    orderBy,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-function timeAgo(time){
-  const seconds = Math.floor((Date.now() - time) / 1000);
-  if (seconds < 60) return "Baru saja";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return minutes + " menit";
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return hours + " jam";
-  const days = Math.floor(hours / 24);
-  return days + " hari";
-}
+  const firebaseConfig = {
+    apiKey: "AIzaSyBQ8JxN15lYecVlB7ewmH5CDJWT7H86kRI",
+    authDomain: "whyid-5a5bc.firebaseapp.com",
+    projectId: "whyid-5a5bc",
+    storageBucket: "whyid-5a5bc.firebasestorage.app",
+    messagingSenderId: "379223608500",
+    appId: "1:379223608500:web:ed1dfb3e7775766ecd1be1"
+  };
 
-function load(){
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
   const feed = document.getElementById("feed");
-  feed.innerHTML = "";
+  const content = document.getElementById("content");
 
-  posts.slice().reverse().forEach(p => {
-    feed.innerHTML += `
-      <div class="px-4 py-4 border-b flex gap-3">
-        <div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center">
-          <span class="material-icons-outlined text-gray-400">person</span>
-        </div>
-
-        <div class="flex-1">
-          <div class="text-sm">
-            <div class="font-semibold">Anonymous</div>
-            <div class="text-xs text-gray-500">@anonymous · ${timeAgo(p.time)}</div>
-          </div>
-
-          <div class="mt-2 text-sm leading-relaxed break-words">
-            ${p.content}
-          </div>
-
-          <button onclick="like(${p.id})"
-            class="flex items-center gap-1 mt-3 text-sm text-gray-500">
-            <span class="material-icons-outlined text-base">favorite_border</span>
-            ${p.likes}
-          </button>
-        </div>
-      </div>
-    `;
-  });
-}
-
-function post(){
-  if(!content.value.trim()) return;
-
-  posts.push({
-    id: Date.now(),
-    content: content.value,
-    likes: 0,
-    time: Date.now()
-  });
-
-  localStorage.setItem("posts", JSON.stringify(posts));
-  content.value = "";
-  load();
-}
-
-function like(id){
-  const post = posts.find(p => p.id === id);
-  if(post){
-    post.likes++;
-    localStorage.setItem("posts", JSON.stringify(posts));
-    load();
+  function timeAgo(time){
+    const seconds = Math.floor((Date.now() - time) / 1000);
+    if (seconds < 60) return "Baru saja";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return minutes + " menit";
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return hours + " jam";
+    return Math.floor(hours / 24) + " hari";
   }
-}
 
-/* Scroll to top */
+  async function load(){
+    feed.innerHTML = "";
+
+    const q = query(collection(db, "posts"), orderBy("time", "desc"));
+    const snapshot = await getDocs(q);
+
+    snapshot.forEach(doc => {
+      const p = doc.data();
+      const time = p.time?.toMillis ? p.time.toMillis() : Date.now();
+
+      feed.innerHTML += `
+        <div class="px-4 py-4 border-b flex gap-3">
+          <div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center">
+            <span class="material-icons-outlined text-gray-400">person</span>
+          </div>
+
+          <div class="flex-1">
+            <div class="text-sm">
+              <div class="font-semibold">Anonymous</div>
+              <div class="text-xs text-gray-500">
+                @anonymous · ${timeAgo(time)}
+              </div>
+            </div>
+
+            <div class="mt-2 text-sm leading-relaxed break-words">
+              ${p.content}
+            </div>
+
+            <div class="mt-3 text-sm text-gray-400">
+              ❤️ ${p.likes || 0}
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  window.post = async function(){
+    if(!content.value.trim()) return;
+
+    await addDoc(collection(db, "posts"), {
+      content: content.value,
+      likes: 0,
+      time: serverTimestamp()
+    });
+
+    content.value = "";
+    load();
+  };
+
+  load();
+</script>
+
+<!-- SCROLL TO TOP LOGIC -->
+<script>
 const toTop = document.getElementById("toTop");
 window.addEventListener("scroll", () => {
   window.scrollY > 300
@@ -165,8 +181,6 @@ window.addEventListener("scroll", () => {
 function scrollToTop(){
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
-
-load();
 </script>
 
 </body>
