@@ -21,7 +21,6 @@
 </head>
 <body class="bg-gray-100 flex justify-center">
 
-<!-- APP -->
 <div class="w-full max-w-md bg-white min-h-screen flex flex-col">
 
   <!-- HEADER -->
@@ -69,7 +68,7 @@
   </div>
 </div>
 
-<!-- SCROLL TO TOP -->
+<!-- TO TOP -->
 <button
   id="toTop"
   onclick="scrollToTop()"
@@ -78,7 +77,7 @@
   <span class="material-icons-outlined">arrow_upward</span>
 </button>
 
-<!-- ================= FIREBASE + APP LOGIC ================= -->
+<!-- ================= FIREBASE + LOGIC ================= -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
   import {
@@ -107,69 +106,97 @@
   const content = document.getElementById("content");
 
   function timeAgo(time){
-    const seconds = Math.floor((Date.now() - time) / 1000);
-    if (seconds < 60) return "Baru saja";
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return minutes + " menit";
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return hours + " jam";
-    return Math.floor(hours / 24) + " hari";
+    const s = Math.floor((Date.now() - time) / 1000);
+    if (s < 60) return "Baru saja";
+    const m = Math.floor(s / 60);
+    if (m < 60) return m + " menit";
+    const h = Math.floor(m / 60);
+    if (h < 24) return h + " jam";
+    return Math.floor(h / 24) + " hari";
   }
 
   async function load(){
     feed.innerHTML = "";
-
     const q = query(collection(db, "posts"), orderBy("time", "desc"));
-    const snapshot = await getDocs(q);
+    const snap = await getDocs(q);
 
-    snapshot.forEach(doc => {
+    snap.forEach(doc => {
       const p = doc.data();
-      const time = p.time?.toMillis ? p.time.toMillis() : Date.now();
+      const t = p.time?.toMillis ? p.time.toMillis() : Date.now();
 
       feed.innerHTML += `
-        <div class="px-4 py-4 border-b flex gap-3">
-          <div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center">
-            <span class="material-icons-outlined text-gray-400">person</span>
-          </div>
+      <div class="px-4 py-4 border-b flex gap-3 relative post">
+        <div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center">
+          <span class="material-icons-outlined text-gray-400">person</span>
+        </div>
 
-          <div class="flex-1">
-            <div class="text-sm">
-              <div class="font-semibold">Anonymous</div>
-              <div class="text-xs text-gray-500">
-                @anonymous · ${timeAgo(time)}
+        <div class="flex-1">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="font-semibold text-sm">Anonymous</div>
+              <div class="text-xs text-gray-500">@anonymous · ${timeAgo(t)}</div>
+            </div>
+
+            <!-- MENU -->
+            <div class="relative">
+              <button onclick="toggleMenu(this)">
+                <span class="material-icons-outlined text-gray-500">more_vert</span>
+              </button>
+
+              <div class="hidden absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-md z-10">
+                <button onclick="hidePost(this)"
+                  class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                  Sembunyikan
+                </button>
               </div>
             </div>
-
-            <div class="mt-2 text-sm leading-relaxed break-words">
-              ${p.content}
-            </div>
-
-            <div class="mt-3 text-sm text-gray-400">
-              ❤️ ${p.likes || 0}
-            </div>
           </div>
+
+          <div class="mt-2 text-sm leading-relaxed break-words">
+            ${p.content}
+          </div>
+
+          <!-- LIKE -->
+          <button class="flex items-center gap-1 mt-3 text-sm text-gray-500">
+            <span class="material-icons-outlined text-base">favorite_border</span>
+            ${p.likes || 0}
+          </button>
         </div>
+      </div>
       `;
     });
   }
 
   window.post = async function(){
     if(!content.value.trim()) return;
-
     await addDoc(collection(db, "posts"), {
       content: content.value,
       likes: 0,
       time: serverTimestamp()
     });
-
     content.value = "";
     load();
   };
 
+  window.toggleMenu = function(btn){
+    document.querySelectorAll(".post .absolute").forEach(m => m.classList.add("hidden"));
+    btn.nextElementSibling.classList.toggle("hidden");
+  };
+
+  window.hidePost = function(btn){
+    btn.closest(".post").remove();
+  };
+
+  document.addEventListener("click", e => {
+    if(!e.target.closest(".relative")){
+      document.querySelectorAll(".post .absolute").forEach(m => m.classList.add("hidden"));
+    }
+  });
+
   load();
 </script>
 
-<!-- SCROLL TO TOP LOGIC -->
+<!-- SCROLL -->
 <script>
 const toTop = document.getElementById("toTop");
 window.addEventListener("scroll", () => {
@@ -177,7 +204,6 @@ window.addEventListener("scroll", () => {
     ? toTop.classList.remove("hidden")
     : toTop.classList.add("hidden");
 });
-
 function scrollToTop(){
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
