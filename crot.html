@@ -37,23 +37,35 @@ body { font-family: 'Inter', sans-serif; }
 
 <!-- HEADER -->
 <div class="px-4 py-4 border-b">
-  <h1 class="text-2xl font-extrabold tracking-widest text-blue-600" style="font-family:'Poppins'">CROT.COM</h1>
-  <p class="text-sm text-gray-500">Crowd Talk <span class="text-gray-400">( Obrolan Publik )</span></p>
+  <h1 class="text-2xl font-extrabold tracking-widest text-blue-600" style="font-family:'Poppins'">
+    CROT.COM
+  </h1>
+  <p class="text-sm text-gray-500">
+    Crowd Talk <span class="text-gray-400">( Obrolan Publik )</span>
+  </p>
 </div>
 
 <!-- COMPOSER -->
 <div class="px-4 py-4 border-b space-y-3">
-  <textarea id="content" rows="3" placeholder="Apa yang sedang Anda pikirkan..."
-    class="w-full resize-none border rounded-xl px-3 py-3 text-sm focus:ring-2 focus:ring-blue-500"></textarea>
 
-  <div class="flex justify-between items-center">
-    <div class="flex items-center gap-1 text-sm text-gray-500">
-      <span class="material-icons-outlined">public</span> Public
-    </div>
-    <button onclick="post()" class="bg-blue-600 text-white text-sm font-semibold px-5 py-2 rounded-full">
-      Post
-    </button>
+<textarea id="content" rows="3"
+  placeholder="Apa yang sedang Anda pikirkan..."
+  class="w-full resize-none border border-gray-200 rounded-xl px-3 py-3 text-sm
+         focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+
+<div class="flex justify-between items-center">
+  <div class="flex items-center gap-1 text-sm text-gray-500">
+    <span class="material-icons-outlined">public</span>
+    Public
   </div>
+
+  <button onclick="post()"
+    class="bg-blue-600 text-white text-sm font-semibold
+           px-5 py-2 rounded-full hover:bg-blue-700 transition">
+    Post
+  </button>
+</div>
+
 </div>
 
 <!-- FEED -->
@@ -61,14 +73,15 @@ body { font-family: 'Inter', sans-serif; }
 
 <!-- FOOTER -->
 <div class="text-center text-xs text-gray-400 py-6 border-t">
-© 2025 by <span class="font-medium text-gray-500">why.id</span>
+  © 2025 by <span class="font-medium text-gray-500">why.id</span>
 </div>
 
 </div>
 
-<!-- SCROLL TOP -->
+<!-- SCROLL TO TOP -->
 <button id="toTop" onclick="scrollToTop()"
-class="hidden fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg">
+class="hidden fixed bottom-6 right-6 bg-blue-600 text-white
+       p-3 rounded-full shadow-lg hover:bg-blue-700 transition">
 <span class="material-icons-outlined">arrow_upward</span>
 </button>
 
@@ -81,6 +94,7 @@ import {
   doc, updateDoc, arrayUnion, arrayRemove, increment, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
+/* FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyBQ8JxN15lYecVlB7ewmH5CDJWT7H86kRI",
   authDomain: "whyid-5a5bc.firebaseapp.com",
@@ -93,8 +107,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const overlay = document.getElementById("loginOverlay");
+/* STATE */
 const feed = document.getElementById("feed");
+const overlay = document.getElementById("loginOverlay");
 const content = document.getElementById("content");
 
 let currentUser = localStorage.getItem("username");
@@ -103,7 +118,7 @@ localStorage.setItem("uid", userId);
 
 if(!currentUser) overlay.classList.remove("hidden");
 
-/* ================= TIME AGO ================= */
+/* TIME AGO */
 function timeAgo(time){
   const s = Math.floor((Date.now() - time) / 1000);
   if (s < 60) return "Baru saja";
@@ -114,7 +129,7 @@ function timeAgo(time){
   return Math.floor(h / 24) + " hari";
 }
 
-/* ================= REGISTER ================= */
+/* REGISTER */
 window.register = async ()=>{
   const u = username.value.trim();
   const p = password.value.trim();
@@ -128,7 +143,7 @@ window.register = async ()=>{
   msg.textContent="Daftar berhasil";
 };
 
-/* ================= LOGIN ================= */
+/* LOGIN */
 window.login = async ()=>{
   const snap = await getDocs(collection(db,"users"));
   const u = username.value.trim();
@@ -141,7 +156,7 @@ window.login = async ()=>{
   location.reload();
 };
 
-/* ================= POST ================= */
+/* POST */
 window.post = async ()=>{
   if(!content.value.trim()) return;
   await addDoc(collection(db,"posts"),{
@@ -154,7 +169,7 @@ window.post = async ()=>{
   content.value="";
 };
 
-/* ================= LOAD FEED ================= */
+/* LOAD FEED */
 const q = query(collection(db,"posts"), orderBy("time","desc"));
 onSnapshot(q, snap=>{
   feed.innerHTML="";
@@ -164,46 +179,79 @@ onSnapshot(q, snap=>{
     const liked = p.likedBy?.includes(userId);
 
     feed.innerHTML += `
-    <div class="px-4 py-4 border-b flex gap-3">
-      <div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center">
-        <span class="material-icons-outlined">person</span>
-      </div>
+<div class="px-4 py-4 border-b flex gap-3">
+  <div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center">
+    <span class="material-icons-outlined text-gray-400">person</span>
+  </div>
 
-      <div class="flex-1">
-        <div class="flex justify-between">
-          <div>
-            <div class="font-semibold">${p.username}</div>
-            <div class="text-xs text-gray-500">@${p.username} · ${timeAgo(t)}</div>
-          </div>
-          <span class="material-icons-outlined text-gray-400">more_vert</span>
+  <div class="flex-1">
+    <div class="flex justify-between">
+      <div>
+        <div class="font-semibold">${p.username}</div>
+        <div class="text-xs text-gray-500">
+          @${p.username} · ${timeAgo(t)}
         </div>
-
-        <div class="mt-2 text-sm">${p.content}</div>
-
-        <button onclick="likePost('${d.id}', ${liked})"
-          class="flex items-center gap-1 mt-3 text-sm ${liked?'text-red-500':'text-gray-500'}">
-          <span class="material-icons-outlined">
-            ${liked?'favorite':'favorite_border'}
-          </span>
-          ${p.likes || 0}
-        </button>
       </div>
-    </div>`;
+
+      <!-- MENU -->
+      <div class="relative">
+        <button onclick="toggleMenu(this)">
+          <span class="material-icons-outlined text-gray-500">more_vert</span>
+        </button>
+
+        <div class="hidden absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-md z-10">
+          <button onclick="hidePost(this)"
+            class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+            Sembunyikan
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-2 text-sm leading-relaxed break-words">
+      ${p.content}
+    </div>
+
+    <button onclick="likePost('${d.id}', ${liked})"
+      class="flex items-center gap-1 mt-3 text-sm ${liked?'text-red-500':'text-gray-500'}">
+      <span class="material-icons-outlined">
+        ${liked?'favorite':'favorite_border'}
+      </span>
+      ${p.likes || 0}
+    </button>
+  </div>
+</div>`;
   });
 });
 
-/* ================= LIKE / UNLIKE ================= */
+/* LIKE / UNLIKE */
 window.likePost = async (id, liked)=>{
   const ref = doc(db,"posts",id);
   await updateDoc(ref,{
-    likes: increment(liked?-1:1),
+    likes: increment(liked ? -1 : 1),
     likedBy: liked ? arrayRemove(userId) : arrayUnion(userId)
   });
 };
 
-/* ================= SCROLL ================= */
+/* MENU */
+window.toggleMenu = (btn)=>{
+  const menu = btn.nextElementSibling;
+  document.querySelectorAll(".relative .absolute")
+    .forEach(m => m !== menu && m.classList.add("hidden"));
+  menu.classList.toggle("hidden");
+};
+
+window.hidePost = (btn)=>{
+  btn.closest(".px-4").style.display="none";
+};
+
+/* SCROLL */
 const toTop=document.getElementById("toTop");
-window.addEventListener("scroll",()=>window.scrollY>300?toTop.classList.remove("hidden"):toTop.classList.add("hidden"));
+window.addEventListener("scroll",()=>{
+  window.scrollY>300
+    ? toTop.classList.remove("hidden")
+    : toTop.classList.add("hidden");
+});
 window.scrollToTop=()=>window.scrollTo({top:0,behavior:"smooth"});
 </script>
 
