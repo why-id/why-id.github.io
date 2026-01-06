@@ -7,100 +7,81 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 body { font-family: 'Inter', sans-serif; }
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-.loader {
-  width:18px;
-  height:18px;
-  border:3px solid rgba(255,255,255,.4);
-  border-top-color:#fff;
-  border-radius:50%;
-  animation: spin .8s linear infinite;
-}
+.icon { font-size:20px }
 </style>
 </head>
 
-<body class="bg-gray-100 flex justify-center">
+<body class="bg-black text-white flex justify-center">
 
 <!-- APP -->
-<div class="w-full max-w-md bg-white min-h-screen flex flex-col">
+<div class="w-full max-w-xl min-h-screen border-x border-gray-800 flex flex-col">
 
 <!-- HEADER -->
-<div class="px-4 py-4 border-b flex justify-between items-center">
-  <div>
-    <h1 class="text-2xl font-extrabold tracking-widest text-blue-600"
-      style="font-family:'Poppins',sans-serif;">CROT.COM</h1>
-    <p class="text-sm text-gray-500">
-      Crowd Talk <span class="text-gray-400">( Obrolan Publik )</span>
-    </p>
-  </div>
-  <button onclick="logout()" class="text-sm text-red-500">Logout</button>
-</div>
+<header class="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-gray-800 px-4 py-3">
+  <h1 class="text-xl font-extrabold tracking-tight">Home</h1>
+</header>
 
 <!-- COMPOSER -->
-<div class="px-4 py-4 border-b space-y-3">
-<textarea id="content" rows="3"
-placeholder="Apa yang sedang Anda pikirkan..."
-class="w-full resize-none border border-gray-200 rounded-xl px-3 py-3 text-sm
-focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-
-<div class="flex justify-between items-center">
-  <div class="flex items-center gap-1 text-sm text-gray-500">
-    <span class="material-icons-outlined text-base">public</span>
-    Public
+<div class="flex gap-3 px-4 py-4 border-b border-gray-800">
+  <div class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
+    <span class="material-icons-outlined text-gray-300">person</span>
   </div>
-  <button onclick="post()"
-    class="bg-blue-600 text-white text-sm font-semibold
-           px-5 py-2 rounded-full hover:bg-blue-700 transition">
-    Post
-  </button>
-</div>
+
+  <div class="flex-1">
+    <textarea id="content"
+      placeholder="What's happening?"
+      rows="2"
+      class="w-full bg-black text-lg resize-none placeholder-gray-500 focus:outline-none"></textarea>
+
+    <div class="flex justify-between items-center mt-3">
+      <div class="flex items-center gap-2 text-blue-500 text-sm">
+        <span class="material-icons-outlined icon">public</span>
+        Everyone
+      </div>
+
+      <button onclick="post()"
+        class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-full font-bold">
+        Post
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- FEED -->
 <div id="feed" class="flex-1"></div>
 
-<!-- FOOTER -->
-<div class="text-center text-xs text-gray-400 py-6 border-t">
-© 2025 by <span class="font-medium text-gray-500">why.id</span>
-</div>
 </div>
 
 <!-- LOGIN -->
 <div id="loginBox"
-class="fixed inset-0 z-50 flex items-center justify-center bg-gray-100">
+class="fixed inset-0 z-50 flex items-center justify-center bg-black">
 
-<div class="bg-white w-80 rounded-2xl shadow-xl p-6 text-center space-y-4">
+<div class="bg-black border border-gray-800 w-80 rounded-2xl p-6 space-y-4 text-center">
 
-  <h2 class="text-2xl font-extrabold text-blue-600"
-    style="font-family:'Poppins',sans-serif;">CROT.COM</h2>
-
-  <p class="text-sm text-gray-500">Masukkan nama unik Anda</p>
+  <h2 class="text-2xl font-extrabold">CROT.COM</h2>
+  <p class="text-gray-400 text-sm">Enter a unique name</p>
 
   <input id="usernameInput"
-    placeholder="Nama"
-    class="w-full border border-gray-200 px-4 py-2 rounded-xl
-           focus:outline-none focus:ring-2 focus:ring-blue-500">
+    placeholder="Name"
+    class="w-full bg-black border border-gray-700 px-4 py-3 rounded-xl
+           focus:outline-none focus:border-blue-500">
 
   <button onclick="login()"
     id="loginBtn"
-    class="w-full bg-blue-600 text-white py-2 rounded-xl
-           font-semibold hover:bg-blue-700 transition
+    class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-full font-bold
            flex justify-center items-center gap-2">
 
-    <span id="loginText">Masuk</span>
-    <div id="loginLoader" class="hidden loader"></div>
+    <span id="loginText">Enter</span>
+    <span id="loginLoader"
+      class="hidden w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin">
+    </span>
   </button>
 
   <p id="errorMsg" class="text-sm text-red-500 hidden"></p>
-
 </div>
 </div>
 
@@ -136,39 +117,34 @@ if(currentUser){
 
 window.login = async ()=>{
   const name = usernameInput.value.trim();
-
   errorMsg.classList.add("hidden");
 
   if(!name){
-    errorMsg.textContent="Nama tidak boleh kosong";
+    errorMsg.textContent="Name required";
     errorMsg.classList.remove("hidden");
     return;
   }
 
-  loginText.textContent="Memeriksa...";
+  loginText.textContent="Checking";
   loginLoader.classList.remove("hidden");
   loginBtn.disabled=true;
 
-  const userRef = doc(db,"users",name.toLowerCase());
-  const snap = await getDoc(userRef);
+  const ref = doc(db,"users",name.toLowerCase());
+  const snap = await getDoc(ref);
 
   if(snap.exists()){
-    errorMsg.textContent="Nama sudah digunakan";
+    errorMsg.textContent="Name already used";
     errorMsg.classList.remove("hidden");
-    loginText.textContent="Masuk";
+    loginText.textContent="Enter";
     loginLoader.classList.add("hidden");
     loginBtn.disabled=false;
     return;
   }
 
-  await setDoc(userRef,{
-    username:name,
-    createdAt:serverTimestamp()
-  });
+  await setDoc(ref,{username:name,createdAt:serverTimestamp()});
 
   userId = name.toLowerCase();
   currentUser = name;
-
   localStorage.setItem("user",name);
   localStorage.setItem("uid",userId);
 
@@ -176,19 +152,14 @@ window.login = async ()=>{
   load();
 };
 
-window.logout = ()=>{
-  localStorage.clear();
-  location.reload();
-};
-
 function timeAgo(time){
   const s=Math.floor((Date.now()-time)/1000);
-  if(s<60)return"Baru saja";
+  if(s<60)return"now";
   const m=Math.floor(s/60);
-  if(m<60)return m+" menit";
+  if(m<60)return m+"m";
   const h=Math.floor(m/60);
-  if(h<24)return h+" jam";
-  return Math.floor(h/24)+" hari";
+  if(h<24)return h+"h";
+  return Math.floor(h/24)+"d";
 }
 
 async function load(){
@@ -202,48 +173,53 @@ async function load(){
     const liked=p.likedBy?.includes(userId);
 
     feed.innerHTML+=`
-<div class="px-4 py-4 border-b flex gap-3">
-  <div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center">
-    <span class="material-icons-outlined text-gray-400">person</span>
+<div class="flex gap-3 px-4 py-4 border-b border-gray-800 hover:bg-white/5 transition">
+
+  <div class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
+    <span class="material-icons-outlined text-gray-300">person</span>
   </div>
 
   <div class="flex-1">
+
     <div class="flex justify-between">
-      <div class="text-sm">
-        <div class="font-semibold">${p.username}</div>
-        <div class="text-xs text-gray-500">@${p.username} · ${timeAgo(t)}</div>
+      <div class="flex items-center gap-1 text-sm">
+        <span class="font-bold">${p.username}</span>
+        <span class="text-gray-500">@${p.username}</span>
+        <span class="text-gray-500">· ${timeAgo(t)}</span>
       </div>
 
       <div class="relative">
         <button onclick="this.nextElementSibling.classList.toggle('hidden')">
-          <span class="material-icons-outlined text-gray-500">more_vert</span>
+          <span class="material-icons-outlined text-gray-500">more_horiz</span>
         </button>
 
-        <div class="hidden absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-md z-10">
+        <div class="hidden absolute right-0 mt-2 w-40 bg-black border border-gray-700 rounded-xl">
           <button onclick="this.closest('.border-b').remove()"
-            class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
-            Sembunyikan
+            class="w-full text-left px-4 py-2 text-sm hover:bg-white/10">
+            Hide
           </button>
 
           ${p.uid===userId?`
           <button onclick="deletePost('${d.id}')"
-            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-            Hapus
+            class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-500/10">
+            Delete
           </button>`:""}
         </div>
       </div>
     </div>
 
-    <div class="mt-2 text-sm leading-relaxed break-words">
+    <div class="mt-2 text-base leading-relaxed break-words">
       ${p.content}
     </div>
 
     <button onclick="like('${d.id}',${liked})"
-      class="flex items-center gap-1 mt-3 text-sm text-gray-500">
-      <span class="material-icons-outlined text-base">
+      class="flex items-center gap-1 mt-3 text-sm text-gray-500 hover:text-pink-500 transition">
+      <span class="material-icons-outlined icon">
         ${liked?"favorite":"favorite_border"}
-      </span>${p.likes||0}
+      </span>
+      ${p.likes||0}
     </button>
+
   </div>
 </div>`;
   });
@@ -273,7 +249,7 @@ window.like=async(id,liked)=>{
 };
 
 window.deletePost=async(id)=>{
-  if(confirm("Hapus postingan ini?")){
+  if(confirm("Delete this post?")){
     await deleteDoc(doc(db,"posts",id));
     load();
   }
