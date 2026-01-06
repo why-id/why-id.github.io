@@ -1,260 +1,115 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CROT.COM</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
+<title>CROT</title>
+
+<!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Google Icons -->
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-body { font-family: 'Inter', sans-serif; }
-.icon { font-size:20px }
+body { font-family: system-ui, -apple-system, BlinkMacSystemFont; }
 </style>
 </head>
 
-<body class="bg-black text-white flex justify-center">
-
-<!-- APP -->
-<div class="w-full max-w-xl min-h-screen border-x border-gray-800 flex flex-col">
+<body class="bg-white text-gray-900">
 
 <!-- HEADER -->
-<header class="sticky top-0 z-10 bg-black/80 backdrop-blur border-b border-gray-800 px-4 py-3">
-  <h1 class="text-xl font-extrabold tracking-tight">Home</h1>
+<header class="sticky top-0 bg-white border-b z-30">
+  <div class="flex items-center justify-between px-4 h-14">
+    <span class="material-icons-outlined text-2xl">menu</span>
+    <span class="material-icons-outlined text-blue-500 text-3xl">flutter_dash</span>
+    <span class="material-icons-outlined text-2xl">auto_awesome</span>
+  </div>
 </header>
 
-<!-- COMPOSER -->
-<div class="flex gap-3 px-4 py-4 border-b border-gray-800">
-  <div class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
-    <span class="material-icons-outlined text-gray-300">person</span>
-  </div>
-
-  <div class="flex-1">
-    <textarea id="content"
-      placeholder="What's happening?"
-      rows="2"
-      class="w-full bg-black text-lg resize-none placeholder-gray-500 focus:outline-none"></textarea>
-
-    <div class="flex justify-between items-center mt-3">
-      <div class="flex items-center gap-2 text-blue-500 text-sm">
-        <span class="material-icons-outlined icon">public</span>
-        Everyone
-      </div>
-
-      <button onclick="post()"
-        class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-full font-bold">
-        Post
-      </button>
+<!-- STORIES -->
+<div class="flex gap-4 px-4 py-3 overflow-x-auto border-b">
+  <div class="flex flex-col items-center text-xs">
+    <div class="w-14 h-14 rounded-full border-2 border-blue-400 flex items-center justify-center">
+      <span class="material-icons-outlined text-gray-400">add</span>
     </div>
+    Add
+  </div>
+  <div class="flex flex-col items-center text-xs">
+    <div class="w-14 h-14 rounded-full border-2 border-blue-400"></div>
+    User
   </div>
 </div>
 
 <!-- FEED -->
-<div id="feed" class="flex-1"></div>
+<main id="feed" class="pb-24">
 
-</div>
+  <!-- POST -->
+  <div class="border-b px-4 py-4 flex gap-3">
+    <div class="w-12 h-12 rounded-full bg-gray-300"></div>
 
-<!-- LOGIN -->
-<div id="loginBox"
-class="fixed inset-0 z-50 flex items-center justify-center bg-black">
+    <div class="flex-1">
+      <div class="flex justify-between">
+        <div class="text-sm">
+          <span class="font-semibold">Wahyu</span>
+          <span class="text-gray-500">@wahyu · 1m</span>
+        </div>
 
-<div class="bg-black border border-gray-800 w-80 rounded-2xl p-6 space-y-4 text-center">
-
-  <h2 class="text-2xl font-extrabold">CROT.COM</h2>
-  <p class="text-gray-400 text-sm">Enter a unique name</p>
-
-  <input id="usernameInput"
-    placeholder="Name"
-    class="w-full bg-black border border-gray-700 px-4 py-3 rounded-xl
-           focus:outline-none focus:border-blue-500">
-
-  <button onclick="login()"
-    id="loginBtn"
-    class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-full font-bold
-           flex justify-center items-center gap-2">
-
-    <span id="loginText">Enter</span>
-    <span id="loginLoader"
-      class="hidden w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin">
-    </span>
-  </button>
-
-  <p id="errorMsg" class="text-sm text-red-500 hidden"></p>
-</div>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import {
-  getFirestore, collection, addDoc, getDocs,
-  query, orderBy, doc, setDoc, getDoc,
-  updateDoc, deleteDoc,
-  arrayUnion, arrayRemove, increment, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBQ8JxN15lYecVlB7ewmH5CDJWT7H86kRI",
-  authDomain: "whyid-5a5bc.firebaseapp.com",
-  projectId: "whyid-5a5bc",
-  storageBucket: "whyid-5a5bc.appspot.com",
-  messagingSenderId: "379223608500",
-  appId: "1:379223608500:web:ed1dfb3e7775766ecd1be1"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-let currentUser = localStorage.getItem("user");
-let userId = localStorage.getItem("uid");
-const feed = document.getElementById("feed");
-
-if(currentUser){
-  loginBox.style.display="none";
-  load();
-}
-
-window.login = async ()=>{
-  const name = usernameInput.value.trim();
-  errorMsg.classList.add("hidden");
-
-  if(!name){
-    errorMsg.textContent="Name required";
-    errorMsg.classList.remove("hidden");
-    return;
-  }
-
-  loginText.textContent="Checking";
-  loginLoader.classList.remove("hidden");
-  loginBtn.disabled=true;
-
-  const ref = doc(db,"users",name.toLowerCase());
-  const snap = await getDoc(ref);
-
-  if(snap.exists()){
-    errorMsg.textContent="Name already used";
-    errorMsg.classList.remove("hidden");
-    loginText.textContent="Enter";
-    loginLoader.classList.add("hidden");
-    loginBtn.disabled=false;
-    return;
-  }
-
-  await setDoc(ref,{username:name,createdAt:serverTimestamp()});
-
-  userId = name.toLowerCase();
-  currentUser = name;
-  localStorage.setItem("user",name);
-  localStorage.setItem("uid",userId);
-
-  loginBox.style.display="none";
-  load();
-};
-
-function timeAgo(time){
-  const s=Math.floor((Date.now()-time)/1000);
-  if(s<60)return"now";
-  const m=Math.floor(s/60);
-  if(m<60)return m+"m";
-  const h=Math.floor(m/60);
-  if(h<24)return h+"h";
-  return Math.floor(h/24)+"d";
-}
-
-async function load(){
-  feed.innerHTML="";
-  const q=query(collection(db,"posts"),orderBy("time","desc"));
-  const snap=await getDocs(q);
-
-  snap.forEach(d=>{
-    const p=d.data();
-    const t=p.time?.toMillis?p.time.toMillis():Date.now();
-    const liked=p.likedBy?.includes(userId);
-
-    feed.innerHTML+=`
-<div class="flex gap-3 px-4 py-4 border-b border-gray-800 hover:bg-white/5 transition">
-
-  <div class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
-    <span class="material-icons-outlined text-gray-300">person</span>
-  </div>
-
-  <div class="flex-1">
-
-    <div class="flex justify-between">
-      <div class="flex items-center gap-1 text-sm">
-        <span class="font-bold">${p.username}</span>
-        <span class="text-gray-500">@${p.username}</span>
-        <span class="text-gray-500">· ${timeAgo(t)}</span>
-      </div>
-
-      <div class="relative">
-        <button onclick="this.nextElementSibling.classList.toggle('hidden')">
-          <span class="material-icons-outlined text-gray-500">more_horiz</span>
-        </button>
-
-        <div class="hidden absolute right-0 mt-2 w-40 bg-black border border-gray-700 rounded-xl">
-          <button onclick="this.closest('.border-b').remove()"
-            class="w-full text-left px-4 py-2 text-sm hover:bg-white/10">
-            Hide
+        <!-- MENU -->
+        <div class="relative">
+          <button onclick="this.nextElementSibling.classList.toggle('hidden')">
+            <span class="material-icons-outlined text-gray-500">more_vert</span>
           </button>
 
-          ${p.uid===userId?`
-          <button onclick="deletePost('${d.id}')"
-            class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-500/10">
-            Delete
-          </button>`:""}
+          <div class="hidden absolute right-0 mt-2 w-40 bg-white border rounded-xl shadow z-10">
+            <button class="w-full text-left px-4 py-2 hover:bg-gray-100">
+              Sembunyikan
+            </button>
+            <button class="w-full text-left px-4 py-2 text-red-500 hover:bg-red-50">
+              Hapus
+            </button>
+          </div>
         </div>
       </div>
+
+      <div class="mt-2 text-sm leading-relaxed">
+        Ini contoh tampilan feed yang sangat mirip X / Twitter 🔥
+      </div>
+
+      <div class="flex justify-between mt-3 text-gray-500 text-sm max-w-md">
+        <button class="flex items-center gap-1">
+          <span class="material-icons-outlined text-base">chat_bubble_outline</span> 3
+        </button>
+        <button class="flex items-center gap-1">
+          <span class="material-icons-outlined text-base">repeat</span> 2
+        </button>
+        <button class="flex items-center gap-1">
+          <span class="material-icons-outlined text-base">favorite_border</span> 9
+        </button>
+        <button>
+          <span class="material-icons-outlined text-base">share</span>
+        </button>
+      </div>
     </div>
-
-    <div class="mt-2 text-base leading-relaxed break-words">
-      ${p.content}
-    </div>
-
-    <button onclick="like('${d.id}',${liked})"
-      class="flex items-center gap-1 mt-3 text-sm text-gray-500 hover:text-pink-500 transition">
-      <span class="material-icons-outlined icon">
-        ${liked?"favorite":"favorite_border"}
-      </span>
-      ${p.likes||0}
-    </button>
-
   </div>
-</div>`;
-  });
-}
 
-window.post=async()=>{
-  if(!content.value.trim())return;
-  await addDoc(collection(db,"posts"),{
-    uid:userId,
-    username:currentUser,
-    content:content.value,
-    likes:0,
-    likedBy:[],
-    time:serverTimestamp()
-  });
-  content.value="";
-  load();
-};
+</main>
 
-window.like=async(id,liked)=>{
-  const ref=doc(db,"posts",id);
-  await updateDoc(ref,{
-    likes:increment(liked?-1:1),
-    likedBy:liked?arrayRemove(userId):arrayUnion(userId)
-  });
-  load();
-};
+<!-- FLOATING BUTTON -->
+<button class="fixed bottom-20 right-4 bg-blue-500 w-14 h-14 rounded-full flex items-center justify-center shadow-lg">
+  <span class="material-icons-outlined text-white text-2xl">add</span>
+</button>
 
-window.deletePost=async(id)=>{
-  if(confirm("Delete this post?")){
-    await deleteDoc(doc(db,"posts",id));
-    load();
-  }
-};
-</script>
+<!-- BOTTOM NAV -->
+<nav class="fixed bottom-0 w-full bg-white border-t">
+  <div class="flex justify-around py-2">
+    <span class="material-icons-outlined text-blue-500">home</span>
+    <span class="material-icons-outlined">search</span>
+    <span class="material-icons-outlined">notifications_none</span>
+    <span class="material-icons-outlined">mail_outline</span>
+  </div>
+</nav>
 
 </body>
 </html>
