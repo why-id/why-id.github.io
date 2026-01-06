@@ -5,13 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CROT.COM</title>
 
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Google Material Icons -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
 
@@ -26,9 +21,7 @@
   <!-- HEADER -->
   <div class="px-4 py-4 border-b">
     <h1 class="text-2xl font-extrabold tracking-widest text-blue-600"
-        style="font-family:'Poppins',sans-serif;">
-      CROT.COM
-    </h1>
+        style="font-family:'Poppins',sans-serif;">CROT.COM</h1>
     <p class="text-sm text-gray-500">
       Crowd Talk <span class="text-gray-400">( Obrolan Publik )</span>
     </p>
@@ -36,22 +29,16 @@
 
   <!-- COMPOSER -->
   <div class="px-4 py-4 border-b space-y-3">
-    <textarea
-      id="content"
-      rows="3"
+    <textarea id="content" rows="3"
       placeholder="Apa yang sedang Anda pikirkan..."
       class="w-full resize-none border border-gray-200 rounded-xl px-3 py-3 text-sm
-             focus:outline-none focus:ring-2 focus:ring-blue-500"
-    ></textarea>
+             focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
 
     <div class="flex justify-between items-center">
       <div class="flex items-center gap-1 text-sm text-gray-500">
-        <span class="material-icons-outlined text-base">public</span>
-        Public
+        <span class="material-icons-outlined text-base">public</span> Public
       </div>
-
-      <button
-        onclick="post()"
+      <button onclick="post()"
         class="bg-blue-600 text-white text-sm font-semibold
                px-5 py-2 rounded-full hover:bg-blue-700 transition">
         Post
@@ -62,16 +49,13 @@
   <!-- FEED -->
   <div id="feed" class="flex-1"></div>
 
-  <!-- FOOTER -->
   <div class="text-center text-xs text-gray-400 py-6 border-t">
     © 2025 by <span class="font-medium text-gray-500">why.id</span>
   </div>
 </div>
 
 <!-- TO TOP -->
-<button
-  id="toTop"
-  onclick="scrollToTop()"
+<button id="toTop" onclick="scrollToTop()"
   class="hidden fixed bottom-6 right-6 bg-blue-600 text-white
          p-3 rounded-full shadow-lg hover:bg-blue-700 transition">
   <span class="material-icons-outlined">arrow_upward</span>
@@ -87,7 +71,10 @@
     getDocs,
     query,
     orderBy,
-    serverTimestamp
+    serverTimestamp,
+    doc,
+    updateDoc,
+    arrayUnion
   } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -105,6 +92,13 @@
   const feed = document.getElementById("feed");
   const content = document.getElementById("content");
 
+  // USER ID UNIK PER BROWSER
+  let userId = localStorage.getItem("userId");
+  if (!userId) {
+    userId = crypto.randomUUID();
+    localStorage.setItem("userId", userId);
+  }
+
   function timeAgo(time){
     const s = Math.floor((Date.now() - time) / 1000);
     if (s < 60) return "Baru saja";
@@ -120,9 +114,10 @@
     const q = query(collection(db, "posts"), orderBy("time", "desc"));
     const snap = await getDocs(q);
 
-    snap.forEach(doc => {
-      const p = doc.data();
+    snap.forEach(d => {
+      const p = d.data();
       const t = p.time?.toMillis ? p.time.toMillis() : Date.now();
+      const liked = p.likedBy?.includes(userId);
 
       feed.innerHTML += `
       <div class="px-4 py-4 border-b flex gap-3 relative post">
@@ -131,19 +126,17 @@
         </div>
 
         <div class="flex-1">
-          <div class="flex justify-between items-start">
+          <div class="flex justify-between">
             <div>
               <div class="font-semibold text-sm">Anonymous</div>
               <div class="text-xs text-gray-500">@anonymous · ${timeAgo(t)}</div>
             </div>
 
-            <!-- MENU -->
             <div class="relative">
               <button onclick="toggleMenu(this)">
                 <span class="material-icons-outlined text-gray-500">more_vert</span>
               </button>
-
-              <div class="hidden absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-md z-10">
+              <div class="hidden absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-md">
                 <button onclick="hidePost(this)"
                   class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
                   Sembunyikan
@@ -152,18 +145,17 @@
             </div>
           </div>
 
-          <div class="mt-2 text-sm leading-relaxed break-words">
-            ${p.content}
-          </div>
+          <div class="mt-2 text-sm">${p.content}</div>
 
-          <!-- LIKE -->
-          <button class="flex items-center gap-1 mt-3 text-sm text-gray-500">
-            <span class="material-icons-outlined text-base">favorite_border</span>
+          <button onclick="likePost('${d.id}', ${liked})"
+            class="flex items-center gap-1 mt-3 text-sm ${liked ? 'text-red-500' : 'text-gray-500'}">
+            <span class="material-icons-outlined text-base">
+              ${liked ? 'favorite' : 'favorite_border'}
+            </span>
             ${p.likes || 0}
           </button>
         </div>
-      </div>
-      `;
+      </div>`;
     });
   }
 
@@ -172,20 +164,39 @@
     await addDoc(collection(db, "posts"), {
       content: content.value,
       likes: 0,
+      likedBy: [],
       time: serverTimestamp()
     });
     content.value = "";
     load();
   };
 
-  window.toggleMenu = function(btn){
+  window.likePost = async function(id, alreadyLiked){
+    if (alreadyLiked) return;
+
+    const ref = doc(db, "posts", id);
+    await updateDoc(ref, {
+      likes: (await getDocs(query(collection(db,"posts")))) && undefined,
+      likedBy: arrayUnion(userId)
+    });
+
+    // increment manual
+    const snap = await getDocs(query(collection(db, "posts")));
+    snap.forEach(async d => {
+      if(d.id === id){
+        await updateDoc(ref, { likes: (d.data().likes || 0) + 1 });
+      }
+    });
+
+    load();
+  };
+
+  window.toggleMenu = btn => {
     document.querySelectorAll(".post .absolute").forEach(m => m.classList.add("hidden"));
     btn.nextElementSibling.classList.toggle("hidden");
   };
 
-  window.hidePost = function(btn){
-    btn.closest(".post").remove();
-  };
+  window.hidePost = btn => btn.closest(".post").remove();
 
   document.addEventListener("click", e => {
     if(!e.target.closest(".relative")){
@@ -196,13 +207,10 @@
   load();
 </script>
 
-<!-- SCROLL -->
 <script>
 const toTop = document.getElementById("toTop");
 window.addEventListener("scroll", () => {
-  window.scrollY > 300
-    ? toTop.classList.remove("hidden")
-    : toTop.classList.add("hidden");
+  window.scrollY > 300 ? toTop.classList.remove("hidden") : toTop.classList.add("hidden");
 });
 function scrollToTop(){
   window.scrollTo({ top: 0, behavior: "smooth" });
