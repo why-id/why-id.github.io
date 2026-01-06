@@ -1,72 +1,65 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CROT.COM</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
 
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-  </style>
 </head>
 <body class="bg-gray-100 flex justify-center">
 
-<div class="w-full max-w-md bg-white min-h-screen flex flex-col">
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="w-full max-w-md min-h-screen bg-white flex flex-col justify-center items-center gap-6 hidden">
+  <h1 class="text-3xl font-extrabold text-blue-600">CROT.COM</h1>
+  <button onclick="login()"
+    class="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-full">
+    <span class="material-icons-outlined">login</span>
+    Login dengan Google
+  </button>
+</div>
+
+<!-- APP -->
+<div id="app" class="w-full max-w-md bg-white min-h-screen flex flex-col hidden">
 
   <!-- HEADER -->
-  <div class="px-4 py-4 border-b">
-    <h1 class="text-2xl font-extrabold tracking-widest text-blue-600"
-        style="font-family:'Poppins',sans-serif;">CROT.COM</h1>
-    <p class="text-sm text-gray-500">
-      Crowd Talk <span class="text-gray-400">( Obrolan Publik )</span>
-    </p>
+  <div class="px-4 py-4 border-b flex items-center gap-3">
+    <img id="avatar" class="w-10 h-10 rounded-full">
+    <div>
+      <div id="username" class="font-semibold text-sm"></div>
+      <button onclick="logout()" class="text-xs text-red-500">Logout</button>
+    </div>
   </div>
 
   <!-- COMPOSER -->
   <div class="px-4 py-4 border-b space-y-3">
     <textarea id="content" rows="3"
       placeholder="Apa yang sedang Anda pikirkan..."
-      class="w-full resize-none border border-gray-200 rounded-xl px-3 py-3 text-sm
-             focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+      class="w-full resize-none border rounded-xl px-3 py-3"></textarea>
 
-    <div class="flex justify-between items-center">
-      <div class="flex items-center gap-1 text-sm text-gray-500">
-        <span class="material-icons-outlined text-base">public</span>
-        Public
-      </div>
-
-      <button onclick="post()"
-        class="bg-blue-600 text-white text-sm font-semibold
-               px-5 py-2 rounded-full hover:bg-blue-700 transition">
-        Post
-      </button>
-    </div>
+    <button onclick="post()"
+      class="bg-blue-600 text-white px-5 py-2 rounded-full">
+      Post
+    </button>
   </div>
 
   <!-- FEED -->
   <div id="feed" class="flex-1"></div>
 
-  <!-- FOOTER -->
-  <div class="text-center text-xs text-gray-400 py-6 border-t">
-    © 2025 by <span class="font-medium text-gray-500">why.id</span>
-  </div>
 </div>
 
-<!-- TO TOP -->
-<button id="toTop" onclick="scrollToTop()"
-  class="hidden fixed bottom-6 right-6 bg-blue-600 text-white
-         p-3 rounded-full shadow-lg hover:bg-blue-700 transition">
-  <span class="material-icons-outlined">arrow_upward</span>
-</button>
-
-<!-- ================= FIREBASE + LOGIC ================= -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    onAuthStateChanged,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
   import {
     getFirestore,
     collection,
@@ -77,9 +70,9 @@
     serverTimestamp,
     doc,
     updateDoc,
+    increment,
     arrayUnion,
-    arrayRemove,
-    increment
+    arrayRemove
   } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -92,27 +85,32 @@
   };
 
   const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
   const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
 
+  const loginScreen = document.getElementById("loginScreen");
+  const appUI = document.getElementById("app");
   const feed = document.getElementById("feed");
-  const content = document.getElementById("content");
 
-  // USER ID UNIK PER BROWSER
-  let userId = localStorage.getItem("userId");
-  if (!userId) {
-    userId = crypto.randomUUID();
-    localStorage.setItem("userId", userId);
-  }
+  let currentUser = null;
 
-  function timeAgo(time){
-    const s = Math.floor((Date.now() - time) / 1000);
-    if (s < 60) return "Baru saja";
-    const m = Math.floor(s / 60);
-    if (m < 60) return m + " menit";
-    const h = Math.floor(m / 60);
-    if (h < 24) return h + " jam";
-    return Math.floor(h / 24) + " hari";
-  }
+  window.login = () => signInWithPopup(auth, provider);
+  window.logout = () => signOut(auth);
+
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      currentUser = user;
+      loginScreen.classList.add("hidden");
+      appUI.classList.remove("hidden");
+      document.getElementById("username").textContent = user.displayName;
+      document.getElementById("avatar").src = user.photoURL;
+      load();
+    } else {
+      appUI.classList.add("hidden");
+      loginScreen.classList.remove("hidden");
+    }
+  });
 
   async function load(){
     feed.innerHTML = "";
@@ -121,58 +119,32 @@
 
     snap.forEach(d => {
       const p = d.data();
-      const t = p.time?.toMillis ? p.time.toMillis() : Date.now();
-      const liked = p.likedBy?.includes(userId);
+      const liked = p.likedBy?.includes(currentUser.uid);
 
       feed.innerHTML += `
-      <div class="px-4 py-4 border-b flex gap-3 relative post">
-        <div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center">
-          <span class="material-icons-outlined text-gray-400">person</span>
-        </div>
-
-        <div class="flex-1">
-          <div class="flex justify-between">
-            <div>
-              <div class="font-semibold text-sm">Anonymous</div>
-              <div class="text-xs text-gray-500">
-                @anonymous · ${timeAgo(t)}
-              </div>
-            </div>
-
-            <div class="relative">
-              <button onclick="toggleMenu(this)">
-                <span class="material-icons-outlined text-gray-500">more_vert</span>
-              </button>
-              <div class="hidden absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-md">
-                <button onclick="hidePost(this)"
-                  class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
-                  Sembunyikan
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-2 text-sm break-words">
-            ${p.content}
-          </div>
+        <div class="px-4 py-4 border-b">
+          <div class="font-semibold">${p.name}</div>
+          <div class="text-sm">${p.content}</div>
 
           <button onclick="likePost('${d.id}', ${liked})"
-            class="flex items-center gap-1 mt-3 text-sm
-            ${liked ? 'text-red-500' : 'text-gray-500'}">
-            <span class="material-icons-outlined text-base">
+            class="flex gap-1 text-sm ${liked ? 'text-red-500' : ''}">
+            <span class="material-icons-outlined">
               ${liked ? 'favorite' : 'favorite_border'}
             </span>
             ${p.likes || 0}
           </button>
         </div>
-      </div>`;
+      `;
     });
   }
 
-  window.post = async function(){
-    if(!content.value.trim()) return;
+  window.post = async () => {
+    if (!content.value.trim()) return;
 
     await addDoc(collection(db, "posts"), {
+      uid: currentUser.uid,
+      name: currentUser.displayName,
+      photo: currentUser.photoURL,
       content: content.value,
       likes: 0,
       likedBy: [],
@@ -183,54 +155,17 @@
     load();
   };
 
-  // ✅ LIKE & UNLIKE (TOGGLE)
-  window.likePost = async function(postId, alreadyLiked){
-    const ref = doc(db, "posts", postId);
-
-    if(alreadyLiked){
-      await updateDoc(ref, {
-        likes: increment(-1),
-        likedBy: arrayRemove(userId)
-      });
-    } else {
-      await updateDoc(ref, {
-        likes: increment(1),
-        likedBy: arrayUnion(userId)
-      });
-    }
-
+  window.likePost = async (id, liked) => {
+    const ref = doc(db, "posts", id);
+    await updateDoc(ref, liked ? {
+      likes: increment(-1),
+      likedBy: arrayRemove(currentUser.uid)
+    } : {
+      likes: increment(1),
+      likedBy: arrayUnion(currentUser.uid)
+    });
     load();
   };
-
-  window.toggleMenu = btn => {
-    document.querySelectorAll(".post .absolute")
-      .forEach(m => m.classList.add("hidden"));
-    btn.nextElementSibling.classList.toggle("hidden");
-  };
-
-  window.hidePost = btn => btn.closest(".post").remove();
-
-  document.addEventListener("click", e => {
-    if(!e.target.closest(".relative")){
-      document.querySelectorAll(".post .absolute")
-        .forEach(m => m.classList.add("hidden"));
-    }
-  });
-
-  load();
-</script>
-
-<!-- SCROLL -->
-<script>
-const toTop = document.getElementById("toTop");
-window.addEventListener("scroll", () => {
-  window.scrollY > 300
-    ? toTop.classList.remove("hidden")
-    : toTop.classList.add("hidden");
-});
-function scrollToTop(){
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
 </script>
 
 </body>
