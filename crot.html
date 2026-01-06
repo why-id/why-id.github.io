@@ -13,11 +13,17 @@
 <style>
 body { font-family: 'Inter', sans-serif; }
 
-@keyframes fade {
-  from { opacity:0; transform: translateY(10px); }
-  to { opacity:1; transform: translateY(0); }
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
-.animate-fade { animation: fade .3s ease; }
+.loader {
+  width:18px;
+  height:18px;
+  border:3px solid rgba(255,255,255,.4);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation: spin .8s linear infinite;
+}
 </style>
 </head>
 
@@ -67,55 +73,33 @@ focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
 </div>
 </div>
 
-<!-- LOGIN / REGISTER -->
+<!-- LOGIN -->
 <div id="loginBox"
-class="fixed inset-0 z-50 flex items-center justify-center
-bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600">
+class="fixed inset-0 z-50 flex items-center justify-center bg-gray-100">
 
-<div class="bg-white w-80 rounded-2xl shadow-2xl p-6">
+<div class="bg-white w-80 rounded-2xl shadow-xl p-6 text-center space-y-4">
 
-  <div class="text-center mb-6">
-    <h2 class="text-2xl font-extrabold text-blue-600"
-      style="font-family:'Poppins',sans-serif;">CROT.COM</h2>
-    <p class="text-sm text-gray-500">Masuk atau buat akun</p>
-  </div>
+  <h2 class="text-2xl font-extrabold text-blue-600"
+    style="font-family:'Poppins',sans-serif;">CROT.COM</h2>
 
-  <!-- TOGGLE -->
-  <div class="flex bg-gray-100 rounded-full mb-5">
-    <button id="btnLogin"
-      onclick="switchAuth('login')"
-      class="flex-1 py-2 text-sm font-semibold rounded-full
-             bg-blue-600 text-white transition">
-      Masuk
-    </button>
-    <button id="btnRegister"
-      onclick="switchAuth('register')"
-      class="flex-1 py-2 text-sm font-semibold rounded-full
-             text-gray-500 transition">
-      Daftar
-    </button>
-  </div>
+  <p class="text-sm text-gray-500">Masukkan nama unik Anda</p>
 
-  <!-- FORM -->
-  <div class="space-y-3 animate-fade">
-    <input id="user" placeholder="Nama Pengguna"
-      class="w-full border border-gray-200 px-4 py-2 rounded-xl
-             focus:outline-none focus:ring-2 focus:ring-blue-500">
+  <input id="usernameInput"
+    placeholder="Nama"
+    class="w-full border border-gray-200 px-4 py-2 rounded-xl
+           focus:outline-none focus:ring-2 focus:ring-blue-500">
 
-    <input id="pass" type="password" placeholder="Password"
-      class="w-full border border-gray-200 px-4 py-2 rounded-xl
-             focus:outline-none focus:ring-2 focus:ring-blue-500">
+  <button onclick="login()"
+    id="loginBtn"
+    class="w-full bg-blue-600 text-white py-2 rounded-xl
+           font-semibold hover:bg-blue-700 transition
+           flex justify-center items-center gap-2">
 
-    <button onclick="login()"
-      class="w-full bg-blue-600 text-white py-2 rounded-xl font-semibold
-             hover:bg-blue-700 transition flex items-center justify-center gap-2">
-      <span id="btnText">Masuk</span>
-      <span id="loader"
-        class="hidden animate-spin material-icons-outlined text-sm">
-        progress_activity
-      </span>
-    </button>
-  </div>
+    <span id="loginText">Masuk</span>
+    <div id="loginLoader" class="hidden loader"></div>
+  </button>
+
+  <p id="errorMsg" class="text-sm text-red-500 hidden"></p>
 
 </div>
 </div>
@@ -124,7 +108,8 @@ bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import {
   getFirestore, collection, addDoc, getDocs,
-  query, orderBy, doc, updateDoc, deleteDoc,
+  query, orderBy, doc, setDoc, getDoc,
+  updateDoc, deleteDoc,
   arrayUnion, arrayRemove, increment, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
@@ -149,20 +134,46 @@ if(currentUser){
   load();
 }
 
-window.login = ()=>{
-  if(!user.value || !pass.value) return;
-  loader.classList.remove("hidden");
-  btnText.textContent="Memproses...";
-  setTimeout(()=>{
-    userId=btoa(user.value+pass.value);
-    currentUser=user.value;
-    localStorage.setItem("user",currentUser);
-    localStorage.setItem("uid",userId);
-    loginBox.style.display="none";
-    load();
-    loader.classList.add("hidden");
-    btnText.textContent="Masuk";
-  },700);
+window.login = async ()=>{
+  const name = usernameInput.value.trim();
+
+  errorMsg.classList.add("hidden");
+
+  if(!name){
+    errorMsg.textContent="Nama tidak boleh kosong";
+    errorMsg.classList.remove("hidden");
+    return;
+  }
+
+  loginText.textContent="Memeriksa...";
+  loginLoader.classList.remove("hidden");
+  loginBtn.disabled=true;
+
+  const userRef = doc(db,"users",name.toLowerCase());
+  const snap = await getDoc(userRef);
+
+  if(snap.exists()){
+    errorMsg.textContent="Nama sudah digunakan";
+    errorMsg.classList.remove("hidden");
+    loginText.textContent="Masuk";
+    loginLoader.classList.add("hidden");
+    loginBtn.disabled=false;
+    return;
+  }
+
+  await setDoc(userRef,{
+    username:name,
+    createdAt:serverTimestamp()
+  });
+
+  userId = name.toLowerCase();
+  currentUser = name;
+
+  localStorage.setItem("user",name);
+  localStorage.setItem("uid",userId);
+
+  loginBox.style.display="none";
+  load();
 };
 
 window.logout = ()=>{
@@ -203,7 +214,6 @@ async function load(){
         <div class="text-xs text-gray-500">@${p.username} · ${timeAgo(t)}</div>
       </div>
 
-      <!-- MENU -->
       <div class="relative">
         <button onclick="this.nextElementSibling.classList.toggle('hidden')">
           <span class="material-icons-outlined text-gray-500">more_vert</span>
@@ -215,11 +225,11 @@ async function load(){
             Sembunyikan
           </button>
 
-          ${p.uid===userId ? `
+          ${p.uid===userId?`
           <button onclick="deletePost('${d.id}')"
             class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
             Hapus
-          </button>` : ""}
+          </button>`:""}
         </div>
       </div>
     </div>
@@ -242,9 +252,11 @@ async function load(){
 window.post=async()=>{
   if(!content.value.trim())return;
   await addDoc(collection(db,"posts"),{
-    uid:userId,username:currentUser,
+    uid:userId,
+    username:currentUser,
     content:content.value,
-    likes:0,likedBy:[],
+    likes:0,
+    likedBy:[],
     time:serverTimestamp()
   });
   content.value="";
@@ -265,16 +277,6 @@ window.deletePost=async(id)=>{
     await deleteDoc(doc(db,"posts",id));
     load();
   }
-};
-
-window.switchAuth=(t)=>{
-  btnLogin.classList.toggle("bg-blue-600",t==="login");
-  btnLogin.classList.toggle("text-white",t==="login");
-  btnRegister.classList.toggle("bg-blue-600",t==="register");
-  btnRegister.classList.toggle("text-white",t==="register");
-  btnLogin.classList.toggle("text-gray-500",t!=="login");
-  btnRegister.classList.toggle("text-gray-500",t!=="register");
-  btnText.textContent=t==="login"?"Masuk":"Daftar";
 };
 </script>
 
