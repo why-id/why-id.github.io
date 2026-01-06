@@ -36,8 +36,10 @@
 
     <div class="flex justify-between items-center">
       <div class="flex items-center gap-1 text-sm text-gray-500">
-        <span class="material-icons-outlined text-base">public</span> Public
+        <span class="material-icons-outlined text-base">public</span>
+        Public
       </div>
+
       <button onclick="post()"
         class="bg-blue-600 text-white text-sm font-semibold
                px-5 py-2 rounded-full hover:bg-blue-700 transition">
@@ -49,6 +51,7 @@
   <!-- FEED -->
   <div id="feed" class="flex-1"></div>
 
+  <!-- FOOTER -->
   <div class="text-center text-xs text-gray-400 py-6 border-t">
     © 2025 by <span class="font-medium text-gray-500">why.id</span>
   </div>
@@ -74,7 +77,9 @@
     serverTimestamp,
     doc,
     updateDoc,
-    arrayUnion
+    arrayUnion,
+    arrayRemove,
+    increment
   } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -129,7 +134,9 @@
           <div class="flex justify-between">
             <div>
               <div class="font-semibold text-sm">Anonymous</div>
-              <div class="text-xs text-gray-500">@anonymous · ${timeAgo(t)}</div>
+              <div class="text-xs text-gray-500">
+                @anonymous · ${timeAgo(t)}
+              </div>
             </div>
 
             <div class="relative">
@@ -145,10 +152,13 @@
             </div>
           </div>
 
-          <div class="mt-2 text-sm">${p.content}</div>
+          <div class="mt-2 text-sm break-words">
+            ${p.content}
+          </div>
 
           <button onclick="likePost('${d.id}', ${liked})"
-            class="flex items-center gap-1 mt-3 text-sm ${liked ? 'text-red-500' : 'text-gray-500'}">
+            class="flex items-center gap-1 mt-3 text-sm
+            ${liked ? 'text-red-500' : 'text-gray-500'}">
             <span class="material-icons-outlined text-base">
               ${liked ? 'favorite' : 'favorite_border'}
             </span>
@@ -161,38 +171,40 @@
 
   window.post = async function(){
     if(!content.value.trim()) return;
+
     await addDoc(collection(db, "posts"), {
       content: content.value,
       likes: 0,
       likedBy: [],
       time: serverTimestamp()
     });
+
     content.value = "";
     load();
   };
 
-  window.likePost = async function(id, alreadyLiked){
-    if (alreadyLiked) return;
+  // ✅ LIKE & UNLIKE (TOGGLE)
+  window.likePost = async function(postId, alreadyLiked){
+    const ref = doc(db, "posts", postId);
 
-    const ref = doc(db, "posts", id);
-    await updateDoc(ref, {
-      likes: (await getDocs(query(collection(db,"posts")))) && undefined,
-      likedBy: arrayUnion(userId)
-    });
-
-    // increment manual
-    const snap = await getDocs(query(collection(db, "posts")));
-    snap.forEach(async d => {
-      if(d.id === id){
-        await updateDoc(ref, { likes: (d.data().likes || 0) + 1 });
-      }
-    });
+    if(alreadyLiked){
+      await updateDoc(ref, {
+        likes: increment(-1),
+        likedBy: arrayRemove(userId)
+      });
+    } else {
+      await updateDoc(ref, {
+        likes: increment(1),
+        likedBy: arrayUnion(userId)
+      });
+    }
 
     load();
   };
 
   window.toggleMenu = btn => {
-    document.querySelectorAll(".post .absolute").forEach(m => m.classList.add("hidden"));
+    document.querySelectorAll(".post .absolute")
+      .forEach(m => m.classList.add("hidden"));
     btn.nextElementSibling.classList.toggle("hidden");
   };
 
@@ -200,17 +212,21 @@
 
   document.addEventListener("click", e => {
     if(!e.target.closest(".relative")){
-      document.querySelectorAll(".post .absolute").forEach(m => m.classList.add("hidden"));
+      document.querySelectorAll(".post .absolute")
+        .forEach(m => m.classList.add("hidden"));
     }
   });
 
   load();
 </script>
 
+<!-- SCROLL -->
 <script>
 const toTop = document.getElementById("toTop");
 window.addEventListener("scroll", () => {
-  window.scrollY > 300 ? toTop.classList.remove("hidden") : toTop.classList.add("hidden");
+  window.scrollY > 300
+    ? toTop.classList.remove("hidden")
+    : toTop.classList.add("hidden");
 });
 function scrollToTop(){
   window.scrollTo({ top: 0, behavior: "smooth" });
