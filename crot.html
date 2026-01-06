@@ -16,6 +16,7 @@ body { font-family: 'Inter', sans-serif; }
 </head>
 <body class="bg-gray-100 flex justify-center">
 
+<!-- APP -->
 <div class="w-full max-w-md bg-white min-h-screen flex flex-col">
 
 <!-- HEADER -->
@@ -23,7 +24,9 @@ body { font-family: 'Inter', sans-serif; }
   <div>
     <h1 class="text-2xl font-extrabold tracking-widest text-blue-600"
       style="font-family:'Poppins',sans-serif;">CROT.COM</h1>
-    <p class="text-sm text-gray-500">Crowd Talk</p>
+    <p class="text-sm text-gray-500">
+      Crowd Talk <span class="text-gray-400">( Obrolan Publik )</span>
+    </p>
   </div>
   <button onclick="logout()" class="text-sm text-red-500">Logout</button>
 </div>
@@ -35,10 +38,16 @@ placeholder="Apa yang sedang Anda pikirkan..."
 class="w-full resize-none border border-gray-200 rounded-xl px-3 py-3 text-sm
 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
 
-<div class="flex justify-end">
-<button onclick="post()"
-class="bg-blue-600 text-white text-sm font-semibold px-5 py-2 rounded-full">
-Post</button>
+<div class="flex justify-between items-center">
+  <div class="flex items-center gap-1 text-sm text-gray-500">
+    <span class="material-icons-outlined text-base">public</span>
+    Public
+  </div>
+  <button onclick="post()"
+    class="bg-blue-600 text-white text-sm font-semibold
+           px-5 py-2 rounded-full hover:bg-blue-700 transition">
+    Post
+  </button>
 </div>
 </div>
 
@@ -47,35 +56,37 @@ Post</button>
 
 <!-- FOOTER -->
 <div class="text-center text-xs text-gray-400 py-6 border-t">
-© 2025 by why.id
+© 2025 by <span class="font-medium text-gray-500">why.id</span>
 </div>
 </div>
 
 <!-- LOGIN -->
-<div id="loginBox" class="fixed inset-0 bg-white flex items-center justify-center">
+<div id="loginBox" class="fixed inset-0 bg-white flex items-center justify-center z-50">
 <div class="w-80 space-y-3">
-<h2 class="text-xl font-bold text-center">Login</h2>
+<h2 class="text-xl font-bold text-center">Masuk / Daftar</h2>
 <input id="user" placeholder="Nama Pengguna" class="w-full border px-3 py-2 rounded">
 <input id="pass" type="password" placeholder="Password" class="w-full border px-3 py-2 rounded">
-<button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded">Masuk / Daftar</button>
+<button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded">
+Masuk
+</button>
 </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import {
-getFirestore, collection, addDoc, getDocs,
-query, orderBy, doc, updateDoc, deleteDoc,
-arrayUnion, arrayRemove, increment, serverTimestamp
+  getFirestore, collection, addDoc, getDocs,
+  query, orderBy, doc, updateDoc, deleteDoc,
+  arrayUnion, arrayRemove, increment, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyBQ8JxN15lYecVlB7ewmH5CDJWT7H86kRI",
-authDomain: "whyid-5a5bc.firebaseapp.com",
-projectId: "whyid-5a5bc",
-storageBucket: "whyid-5a5bc.appspot.com",
-messagingSenderId: "379223608500",
-appId: "1:379223608500:web:ed1dfb3e7775766ecd1be1"
+  apiKey: "AIzaSyBQ8JxN15lYecVlB7ewmH5CDJWT7H86kRI",
+  authDomain: "whyid-5a5bc.firebaseapp.com",
+  projectId: "whyid-5a5bc",
+  storageBucket: "whyid-5a5bc.appspot.com",
+  messagingSenderId: "379223608500",
+  appId: "1:379223608500:web:ed1dfb3e7775766ecd1be1"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -86,113 +97,124 @@ let userId = localStorage.getItem("uid");
 const feed = document.getElementById("feed");
 
 if(currentUser){
-loginBox.style.display="none";
-load();
+  loginBox.style.display="none";
+  load();
 }
 
-window.login=()=>{
-if(!user.value||!pass.value) return;
-userId = btoa(user.value+pass.value);
-currentUser = user.value;
-localStorage.setItem("user",currentUser);
-localStorage.setItem("uid",userId);
-loginBox.style.display="none";
-load();
+window.login = ()=>{
+  if(!user.value || !pass.value) return;
+  userId = btoa(user.value + pass.value);
+  currentUser = user.value;
+  localStorage.setItem("user", currentUser);
+  localStorage.setItem("uid", userId);
+  loginBox.style.display="none";
+  load();
 };
 
-window.logout=()=>{
-localStorage.clear();
-location.reload();
+window.logout = ()=>{
+  localStorage.clear();
+  location.reload();
 };
 
 function timeAgo(time){
-const s=Math.floor((Date.now()-time)/1000);
-if(s<60) return "Baru saja";
-const m=Math.floor(s/60);
-if(m<60) return m+" menit";
-const h=Math.floor(m/60);
-if(h<24) return h+" jam";
-return Math.floor(h/24)+" hari";
+  const s = Math.floor((Date.now() - time) / 1000);
+  if (s < 60) return "Baru saja";
+  const m = Math.floor(s / 60);
+  if (m < 60) return m + " menit";
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + " jam";
+  return Math.floor(h / 24) + " hari";
 }
 
 async function load(){
-feed.innerHTML="";
-const q=query(collection(db,"posts"),orderBy("time","desc"));
-const snap=await getDocs(q);
+  feed.innerHTML = "";
+  const q = query(collection(db,"posts"), orderBy("time","desc"));
+  const snap = await getDocs(q);
 
-snap.forEach(d=>{
-const p=d.data();
-const t=p.time?.toMillis?p.time.toMillis():Date.now();
-const liked=p.likedBy?.includes(userId);
+  snap.forEach(d=>{
+    const p = d.data();
+    const t = p.time?.toMillis ? p.time.toMillis() : Date.now();
+    const liked = p.likedBy?.includes(userId);
 
-feed.innerHTML+=`
-<div class="px-4 py-4 border-b">
-<div class="flex justify-between">
-<div>
-<div class="font-semibold">${p.username}</div>
-<div class="text-xs text-gray-500">${timeAgo(t)}</div>
-</div>
+    feed.innerHTML += `
+<div class="px-4 py-4 border-b flex gap-3">
+  <!-- AVATAR (TIDAK DIUBAH) -->
+  <div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center">
+    <span class="material-icons-outlined text-gray-400">person</span>
+  </div>
 
-<div class="relative">
-<button onclick="this.nextElementSibling.classList.toggle('hidden')">
-<span class="material-icons-outlined text-gray-500">more_vert</span>
-</button>
+  <div class="flex-1">
+    <div class="flex justify-between">
+      <div class="text-sm">
+        <div class="font-semibold">${p.username}</div>
+        <div class="text-xs text-gray-500">@${p.username} · ${timeAgo(t)}</div>
+      </div>
 
-<div class="hidden absolute right-0 mt-2 w-40 bg-white border rounded shadow">
-<button onclick="hidePost('${d.id}')" class="w-full px-4 py-2 text-sm hover:bg-gray-100">
-Sembunyikan
-</button>
-${p.uid===userId?`
-<button onclick="deletePost('${d.id}')" class="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-Hapus
-</button>`:""}
-</div>
-</div>
-</div>
+      <!-- MENU -->
+      <div class="relative">
+        <button onclick="this.nextElementSibling.classList.toggle('hidden')">
+          <span class="material-icons-outlined text-gray-500">more_vert</span>
+        </button>
 
-<div class="mt-2 text-sm">${p.content}</div>
+        <div class="hidden absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-md z-10">
+          <button onclick="this.closest('.border-b').remove()"
+            class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+            Sembunyikan
+          </button>
 
-<button onclick="like('${d.id}',${liked})"
-class="flex items-center gap-1 mt-2 text-sm text-gray-500">
-<span class="material-icons-outlined">${liked?"favorite":"favorite_border"}</span>
-${p.likes||0}
-</button>
+          ${p.uid===userId ? `
+          <button onclick="deletePost('${d.id}')"
+            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+            Hapus
+          </button>` : ""}
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-2 text-sm leading-relaxed break-words">
+      ${p.content}
+    </div>
+
+    <button onclick="like('${d.id}', ${liked})"
+      class="flex items-center gap-1 mt-3 text-sm text-gray-500">
+      <span class="material-icons-outlined text-base">
+        ${liked ? "favorite" : "favorite_border"}
+      </span>
+      ${p.likes || 0}
+    </button>
+  </div>
 </div>`;
-});
+  });
 }
 
-window.post=async()=>{
-if(!content.value.trim())return;
-await addDoc(collection(db,"posts"),{
-uid:userId,
-username:currentUser,
-content:content.value,
-likes:0,
-likedBy:[],
-time:serverTimestamp()
-});
-content.value="";
-load();
+window.post = async ()=>{
+  if(!content.value.trim()) return;
+  await addDoc(collection(db,"posts"),{
+    uid: userId,
+    username: currentUser,
+    content: content.value,
+    likes: 0,
+    likedBy: [],
+    time: serverTimestamp()
+  });
+  content.value = "";
+  load();
 };
 
-window.like=async(id,liked)=>{
-const ref=doc(db,"posts",id);
-await updateDoc(ref,{
-likes:increment(liked?-1:1),
-likedBy:liked?arrayRemove(userId):arrayUnion(userId)
-});
-load();
+window.like = async (id, liked)=>{
+  const ref = doc(db,"posts",id);
+  await updateDoc(ref,{
+    likes: increment(liked ? -1 : 1),
+    likedBy: liked ? arrayRemove(userId) : arrayUnion(userId)
+  });
+  load();
 };
 
-window.deletePost=async(id)=>{
-if(confirm("Hapus postingan ini?")){
-await deleteDoc(doc(db,"posts",id));
-load();
-}
-};
-
-window.hidePost=id=>{
-document.querySelector(`[onclick*="${id}"]`)?.closest(".border-b")?.remove();
+window.deletePost = async (id)=>{
+  if(confirm("Hapus postingan ini?")){
+    await deleteDoc(doc(db,"posts",id));
+    load();
+  }
 };
 </script>
 </body>
