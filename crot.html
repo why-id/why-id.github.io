@@ -6,19 +6,40 @@
 <title>CROT</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
+
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
 
 <style>
 body{
-  font-family: system-ui,-apple-system,BlinkMacSystemFont;
-  background: linear-gradient(180deg,#f8fafc,#eef2f7);
+  font-family:'Varela Round',Arial,sans-serif;
+  background:linear-gradient(180deg,#f8fafc,#eef2f7);
 }
+
 .card{
   background:#fff;
   border-radius:18px;
   box-shadow:
     0 12px 30px rgba(0,0,0,.08),
     0 4px 10px rgba(0,0,0,.05);
+}
+
+/* LIKE ANIMATION */
+.like-btn span{
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),
+             color .2s ease;
+}
+.like-btn.liked span{
+  color:#ef4444;
+  transform:scale(1.4) rotate(-8deg);
+}
+.like-btn.liked{
+  animation:pop .35s ease-out;
+}
+@keyframes pop{
+  0%{transform:scale(1)}
+  50%{transform:scale(1.15)}
+  100%{transform:scale(1)}
 }
 </style>
 </head>
@@ -30,15 +51,12 @@ body{
   <div class="w-80 card p-6 space-y-4">
     <h2 class="text-xl font-bold text-center text-blue-500">Masuk</h2>
     <input id="user" placeholder="Nama (unik)"
-      class="w-full border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+      class="w-full border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500">
     <button onclick="login()"
       class="w-full bg-blue-500 text-white py-3 rounded-xl font-semibold flex justify-center items-center gap-2">
       <span id="loginText">Masuk</span>
       <span id="loginLoad" class="hidden animate-spin material-icons-outlined">autorenew</span>
     </button>
-    <p class="text-xs text-center text-gray-400">
-      Nama tidak boleh kosong & tidak boleh sama
-    </p>
   </div>
 </div>
 
@@ -72,7 +90,7 @@ body{
 <!-- FEED -->
 <main id="feed" class="max-w-xl mx-auto px-3 space-y-4 pb-28"></main>
 
-<!-- FLOAT BUTTON -->
+<!-- FLOAT -->
 <button onclick="content.focus()"
   class="fixed bottom-20 right-5 w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 shadow-xl flex items-center justify-center">
   <span class="material-icons-outlined text-white text-2xl">edit</span>
@@ -127,21 +145,18 @@ window.login = async ()=>{
   loginLoad.classList.remove("hidden");
 
   const userRef = doc(db,"users",name.toLowerCase());
-  const userSnap = await getDoc(userRef);
-
-  if(userSnap.exists()){
+  const snap = await getDoc(userRef);
+  if(snap.exists()){
     loginText.classList.remove("hidden");
     loginLoad.classList.add("hidden");
-    return alert("Nama sudah digunakan");
+    return alert("Nama sudah dipakai");
   }
 
-  await setDoc(userRef,{ name, created: serverTimestamp() });
-
-  currentUser = name;
-  userId = name.toLowerCase();
+  await setDoc(userRef,{name,created:serverTimestamp()});
+  currentUser=name;
+  userId=name.toLowerCase();
   localStorage.setItem("user",currentUser);
   localStorage.setItem("uid",userId);
-
   loginBox.style.display="none";
   load();
 };
@@ -191,24 +206,20 @@ async function load(){
           </button>
           <div class="hidden absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg overflow-hidden z-10">
             <button onclick="this.closest('.card').remove()"
-              class="w-full px-4 py-2 text-sm hover:bg-gray-100">
-              Sembunyikan
-            </button>
+              class="w-full px-4 py-2 text-sm hover:bg-gray-100">Sembunyikan</button>
             ${p.uid===userId?`
             <button onclick="deletePost('${d.id}')"
-              class="w-full px-4 py-2 text-sm text-red-500 hover:bg-red-50">
-              Hapus
-            </button>`:""}
+              class="w-full px-4 py-2 text-sm text-red-500 hover:bg-red-50">Hapus</button>`:""}
           </div>
         </div>
       </div>
 
       <div class="mt-2 text-sm leading-relaxed break-words">${p.content}</div>
 
-      <button onclick="like('${d.id}',${liked})"
-        class="flex items-center gap-1 mt-4 text-sm text-gray-500">
+      <button onclick="like('${d.id}',${liked},this)"
+        class="like-btn ${liked?'liked':''} flex items-center gap-1 mt-4 text-sm">
         <span class="material-icons-outlined text-base">
-          ${liked?"favorite":"favorite_border"}
+          ${liked?'favorite':'favorite_border'}
         </span>
         ${p.likes||0}
       </button>
@@ -232,7 +243,8 @@ window.post = async ()=>{
   load();
 };
 
-window.like = async(id,liked)=>{
+window.like = async(id,liked,btn)=>{
+  btn.classList.toggle("liked");
   const ref=doc(db,"posts",id);
   await updateDoc(ref,{
     likes:increment(liked?-1:1),
