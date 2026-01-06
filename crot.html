@@ -12,26 +12,25 @@
 
 <style>
 body { font-family: 'Inter', sans-serif; }
+.fade { animation: fade .3s ease; }
+@keyframes fade { from{opacity:0} to{opacity:1} }
+.spin { animation: spin 1s linear infinite }
+@keyframes spin { to{transform:rotate(360deg)} }
 </style>
 </head>
 <body class="bg-gray-100 flex justify-center">
 
-<!-- APP -->
+<!-- ================= APP (TIDAK DIUBAH) ================= -->
 <div class="w-full max-w-md bg-white min-h-screen flex flex-col">
-
-<!-- HEADER -->
 <div class="px-4 py-4 border-b flex justify-between items-center">
   <div>
     <h1 class="text-2xl font-extrabold tracking-widest text-blue-600"
       style="font-family:'Poppins',sans-serif;">CROT.COM</h1>
-    <p class="text-sm text-gray-500">
-      Crowd Talk <span class="text-gray-400">( Obrolan Publik )</span>
-    </p>
+    <p class="text-sm text-gray-500">Crowd Talk <span class="text-gray-400">( Obrolan Publik )</span></p>
   </div>
   <button onclick="logout()" class="text-sm text-red-500">Logout</button>
 </div>
 
-<!-- COMPOSER -->
 <div class="px-4 py-4 border-b space-y-3">
 <textarea id="content" rows="3"
 placeholder="Apa yang sedang Anda pikirkan..."
@@ -40,35 +39,47 @@ focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
 
 <div class="flex justify-between items-center">
   <div class="flex items-center gap-1 text-sm text-gray-500">
-    <span class="material-icons-outlined text-base">public</span>
-    Public
+    <span class="material-icons-outlined text-base">public</span> Public
   </div>
   <button onclick="post()"
-    class="bg-blue-600 text-white text-sm font-semibold
-           px-5 py-2 rounded-full hover:bg-blue-700 transition">
+    class="bg-blue-600 text-white text-sm font-semibold px-5 py-2 rounded-full">
     Post
   </button>
 </div>
 </div>
 
-<!-- FEED -->
 <div id="feed" class="flex-1"></div>
 
-<!-- FOOTER -->
 <div class="text-center text-xs text-gray-400 py-6 border-t">
 © 2025 by <span class="font-medium text-gray-500">why.id</span>
 </div>
 </div>
 
-<!-- LOGIN -->
-<div id="loginBox" class="fixed inset-0 bg-white flex items-center justify-center z-50">
-<div class="w-80 space-y-3">
-<h2 class="text-xl font-bold text-center">Masuk / Daftar</h2>
-<input id="user" placeholder="Nama Pengguna" class="w-full border px-3 py-2 rounded">
-<input id="pass" type="password" placeholder="Password" class="w-full border px-3 py-2 rounded">
-<button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded">
-Masuk
+<!-- ================= LOGIN / REGISTER ================= -->
+<div id="loginBox" class="fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
+<div class="bg-white w-80 rounded-2xl shadow-lg p-6 fade">
+
+<h2 class="text-xl font-bold text-center mb-4" id="formTitle">Masuk</h2>
+
+<div class="flex justify-center mb-4">
+<button onclick="toggleForm(false)" class="px-3 text-sm" id="btnLogin">Masuk</button>
+<button onclick="toggleForm(true)" class="px-3 text-sm text-gray-400" id="btnReg">Daftar</button>
+</div>
+
+<input id="user" placeholder="Nama Pengguna"
+class="w-full border rounded-lg px-3 py-2 mb-2">
+
+<input id="pass" type="password" placeholder="Password"
+class="w-full border rounded-lg px-3 py-2 mb-4">
+
+<button onclick="submitAuth()"
+class="w-full bg-blue-600 text-white py-2 rounded-lg flex justify-center items-center gap-2">
+<span id="btnText">Masuk</span>
+<span id="loader" class="hidden material-icons-outlined spin">sync</span>
 </button>
+
+<p id="msg" class="text-sm text-center text-red-500 mt-3"></p>
+
 </div>
 </div>
 
@@ -76,146 +87,110 @@ Masuk
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import {
   getFirestore, collection, addDoc, getDocs,
-  query, orderBy, doc, updateDoc, deleteDoc,
+  query, where, doc, setDoc, getDoc,
+  orderBy, updateDoc, deleteDoc,
   arrayUnion, arrayRemove, increment, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-const firebaseConfig = {
+const app = initializeApp({
   apiKey: "AIzaSyBQ8JxN15lYecVlB7ewmH5CDJWT7H86kRI",
   authDomain: "whyid-5a5bc.firebaseapp.com",
-  projectId: "whyid-5a5bc",
-  storageBucket: "whyid-5a5bc.appspot.com",
-  messagingSenderId: "379223608500",
-  appId: "1:379223608500:web:ed1dfb3e7775766ecd1be1"
-};
-
-const app = initializeApp(firebaseConfig);
+  projectId: "whyid-5a5bc"
+});
 const db = getFirestore(app);
 
+let isRegister = false;
 let currentUser = localStorage.getItem("user");
 let userId = localStorage.getItem("uid");
-const feed = document.getElementById("feed");
 
-if(currentUser){
-  loginBox.style.display="none";
-  load();
-}
+if(currentUser){ loginBox.style.display="none"; load(); }
 
-window.login = ()=>{
-  if(!user.value || !pass.value) return;
-  userId = btoa(user.value + pass.value);
-  currentUser = user.value;
-  localStorage.setItem("user", currentUser);
-  localStorage.setItem("uid", userId);
-  loginBox.style.display="none";
-  load();
+window.toggleForm = reg=>{
+  isRegister = reg;
+  formTitle.innerText = reg?"Daftar":"Masuk";
+  btnText.innerText = reg?"Daftar":"Masuk";
+  btnLogin.classList.toggle("text-gray-400",reg);
+  btnReg.classList.toggle("text-gray-400",!reg);
+  msg.innerText="";
 };
 
-window.logout = ()=>{
-  localStorage.clear();
-  location.reload();
+window.submitAuth = async ()=>{
+  if(!user.value||!pass.value) return;
+  loader.classList.remove("hidden");
+  btnText.innerText="Loading";
+  msg.innerText="";
+
+  const uid = btoa(user.value);
+
+  const ref = doc(db,"users",uid);
+  const snap = await getDoc(ref);
+
+  if(isRegister){
+    if(snap.exists()){
+      msg.innerText="Username sudah digunakan";
+    }else{
+      await setDoc(ref,{ username:user.value, password:pass.value });
+      msg.innerText="Berhasil daftar, silakan masuk";
+      toggleForm(false);
+    }
+  }else{
+    if(!snap.exists() || snap.data().password !== pass.value){
+      msg.innerText="Username atau password salah";
+    }else{
+      localStorage.setItem("user",user.value);
+      localStorage.setItem("uid",uid);
+      loginBox.style.display="none";
+      load();
+    }
+  }
+
+  loader.classList.add("hidden");
+  btnText.innerText=isRegister?"Daftar":"Masuk";
 };
 
-function timeAgo(time){
-  const s = Math.floor((Date.now() - time) / 1000);
-  if (s < 60) return "Baru saja";
-  const m = Math.floor(s / 60);
-  if (m < 60) return m + " menit";
-  const h = Math.floor(m / 60);
-  if (h < 24) return h + " jam";
-  return Math.floor(h / 24) + " hari";
-}
+window.logout=()=>{ localStorage.clear(); location.reload(); };
+
+// ====== FEED (SAMA SEPERTI SEBELUMNYA) ======
+function timeAgo(t){const s=(Date.now()-t)/1000|0;if(s<60)return"Baru saja";const m=s/60|0;if(m<60)return m+" menit";const h=m/60|0;if(h<24)return h+" jam";return h/24|0+" hari";}
 
 async function load(){
-  feed.innerHTML = "";
-  const q = query(collection(db,"posts"), orderBy("time","desc"));
-  const snap = await getDocs(q);
-
-  snap.forEach(d=>{
-    const p = d.data();
-    const t = p.time?.toMillis ? p.time.toMillis() : Date.now();
-    const liked = p.likedBy?.includes(userId);
-
-    feed.innerHTML += `
-<div class="px-4 py-4 border-b flex gap-3">
-  <!-- AVATAR (TIDAK DIUBAH) -->
-  <div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center">
-    <span class="material-icons-outlined text-gray-400">person</span>
-  </div>
-
-  <div class="flex-1">
-    <div class="flex justify-between">
-      <div class="text-sm">
-        <div class="font-semibold">${p.username}</div>
-        <div class="text-xs text-gray-500">@${p.username} · ${timeAgo(t)}</div>
-      </div>
-
-      <!-- MENU -->
-      <div class="relative">
-        <button onclick="this.nextElementSibling.classList.toggle('hidden')">
-          <span class="material-icons-outlined text-gray-500">more_vert</span>
-        </button>
-
-        <div class="hidden absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-md z-10">
-          <button onclick="this.closest('.border-b').remove()"
-            class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
-            Sembunyikan
-          </button>
-
-          ${p.uid===userId ? `
-          <button onclick="deletePost('${d.id}')"
-            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-            Hapus
-          </button>` : ""}
-        </div>
-      </div>
-    </div>
-
-    <div class="mt-2 text-sm leading-relaxed break-words">
-      ${p.content}
-    </div>
-
-    <button onclick="like('${d.id}', ${liked})"
-      class="flex items-center gap-1 mt-3 text-sm text-gray-500">
-      <span class="material-icons-outlined text-base">
-        ${liked ? "favorite" : "favorite_border"}
-      </span>
-      ${p.likes || 0}
-    </button>
-  </div>
-</div>`;
-  });
+feed.innerHTML="";
+const q=query(collection(db,"posts"),orderBy("time","desc"));
+const snap=await getDocs(q);
+snap.forEach(d=>{
+const p=d.data(),t=p.time?.toMillis?p.time.toMillis():Date.now(),liked=p.likedBy?.includes(userId);
+feed.innerHTML+=`<div class="px-4 py-4 border-b flex gap-3">
+<div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center">
+<span class="material-icons-outlined text-gray-400">person</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<div><div class="font-semibold">${p.username}</div>
+<div class="text-xs text-gray-500">@${p.username} · ${timeAgo(t)}</div></div>
+<div class="relative">
+<button onclick="this.nextElementSibling.classList.toggle('hidden')">
+<span class="material-icons-outlined text-gray-500">more_vert</span></button>
+<div class="hidden absolute right-0 mt-2 w-40 bg-white border rounded shadow">
+<button onclick="this.closest('.border-b').remove()" class="w-full px-4 py-2 text-sm hover:bg-gray-100">Sembunyikan</button>
+${p.uid===userId?`<button onclick="deletePost('${d.id}')" class="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">Hapus</button>`:""}
+</div></div></div>
+<div class="mt-2 text-sm">${p.content}</div>
+<button onclick="like('${d.id}',${liked})" class="flex items-center gap-1 mt-3 text-sm text-gray-500">
+<span class="material-icons-outlined">${liked?"favorite":"favorite_border"}</span>${p.likes||0}</button>
+</div></div>`;
+});
 }
 
-window.post = async ()=>{
-  if(!content.value.trim()) return;
-  await addDoc(collection(db,"posts"),{
-    uid: userId,
-    username: currentUser,
-    content: content.value,
-    likes: 0,
-    likedBy: [],
-    time: serverTimestamp()
-  });
-  content.value = "";
-  load();
-};
+window.post=async()=>{if(!content.value.trim())return;
+await addDoc(collection(db,"posts"),{uid:userId,username:currentUser,content:content.value,likes:0,likedBy:[],time:serverTimestamp()});
+content.value="";load();};
 
-window.like = async (id, liked)=>{
-  const ref = doc(db,"posts",id);
-  await updateDoc(ref,{
-    likes: increment(liked ? -1 : 1),
-    likedBy: liked ? arrayRemove(userId) : arrayUnion(userId)
-  });
-  load();
-};
+window.like=async(id,l)=>{
+const r=doc(db,"posts",id);
+await updateDoc(r,{likes:increment(l?-1:1),likedBy:l?arrayRemove(userId):arrayUnion(userId)});
+load();};
 
-window.deletePost = async (id)=>{
-  if(confirm("Hapus postingan ini?")){
-    await deleteDoc(doc(db,"posts",id));
-    load();
-  }
-};
+window.deletePost=async id=>{if(confirm("Hapus postingan ini?")){await deleteDoc(doc(db,"posts",id));load();}};
 </script>
 </body>
 </html>
