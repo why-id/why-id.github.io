@@ -37,7 +37,7 @@ body{
       <span id="loginLoad" class="hidden animate-spin material-icons-outlined">autorenew</span>
     </button>
     <p class="text-xs text-center text-gray-400">
-      Nama tidak boleh sama & tidak boleh kosong
+      Nama tidak boleh kosong & tidak boleh sama
     </p>
   </div>
 </div>
@@ -72,7 +72,7 @@ body{
 <!-- FEED -->
 <main id="feed" class="max-w-xl mx-auto px-3 space-y-4 pb-28"></main>
 
-<!-- FLOATING POST -->
+<!-- FLOAT BUTTON -->
 <button onclick="content.focus()"
   class="fixed bottom-20 right-5 w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 shadow-xl flex items-center justify-center">
   <span class="material-icons-outlined text-white text-2xl">edit</span>
@@ -93,17 +93,18 @@ body{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import {
   getFirestore, collection, addDoc, getDocs,
-  query, orderBy, doc, updateDoc, deleteDoc,
+  query, orderBy, doc, setDoc, getDoc,
+  updateDoc, deleteDoc,
   arrayUnion, arrayRemove, increment, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "API_KEY",
-  authDomain: "PROJECT.firebaseapp.com",
-  projectId: "PROJECT",
-  storageBucket: "PROJECT.appspot.com",
-  messagingSenderId: "ID",
-  appId: "APP_ID"
+  apiKey: "AIzaSyBQ8JxN15lYecVlB7ewmH5CDJWT7H86kRI",
+  authDomain: "whyid-5a5bc.firebaseapp.com",
+  projectId: "whyid-5a5bc",
+  storageBucket: "whyid-5a5bc.appspot.com",
+  messagingSenderId: "379223608500",
+  appId: "1:379223608500:web:ed1dfb3e7775766ecd1be1"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -119,24 +120,28 @@ if(currentUser){
 }
 
 window.login = async ()=>{
-  if(!user.value.trim()) return alert("Nama wajib diisi");
+  const name = user.value.trim();
+  if(!name) return alert("Nama wajib diisi");
 
   loginText.classList.add("hidden");
   loginLoad.classList.remove("hidden");
 
-  const snap = await getDocs(collection(db,"posts"));
-  const exists = snap.docs.some(d=>d.data().username===user.value.trim());
+  const userRef = doc(db,"users",name.toLowerCase());
+  const userSnap = await getDoc(userRef);
 
-  if(exists){
+  if(userSnap.exists()){
     loginText.classList.remove("hidden");
     loginLoad.classList.add("hidden");
     return alert("Nama sudah digunakan");
   }
 
-  currentUser = user.value.trim();
-  userId = btoa(currentUser);
+  await setDoc(userRef,{ name, created: serverTimestamp() });
+
+  currentUser = name;
+  userId = name.toLowerCase();
   localStorage.setItem("user",currentUser);
   localStorage.setItem("uid",userId);
+
   loginBox.style.display="none";
   load();
 };
