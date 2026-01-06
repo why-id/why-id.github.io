@@ -1,171 +1,158 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CROT.COM</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CROT.COM</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 </head>
+
 <body class="bg-gray-100 flex justify-center">
 
-<!-- LOGIN SCREEN -->
-<div id="loginScreen" class="w-full max-w-md min-h-screen bg-white flex flex-col justify-center items-center gap-6 hidden">
-  <h1 class="text-3xl font-extrabold text-blue-600">CROT.COM</h1>
+<!-- LOGIN -->
+<div id="loginBox" class="w-full max-w-md bg-white min-h-screen p-6 flex flex-col gap-4">
+  <h1 class="text-3xl font-bold text-blue-600 text-center">CROT.COM</h1>
+
+  <input id="username" placeholder="Nama Pengguna"
+    class="border px-4 py-3 rounded-xl">
+
+  <input id="password" type="password" placeholder="Password"
+    class="border px-4 py-3 rounded-xl">
+
   <button onclick="login()"
-    class="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-full">
-    <span class="material-icons-outlined">login</span>
-    Login dengan Google
-  </button>
+    class="bg-blue-600 text-white py-3 rounded-xl">Masuk</button>
+
+  <button onclick="register()"
+    class="border py-3 rounded-xl">Daftar</button>
+
+  <p id="msg" class="text-center text-red-500 text-sm"></p>
 </div>
 
 <!-- APP -->
-<div id="app" class="w-full max-w-md bg-white min-h-screen flex flex-col hidden">
+<div id="app" class="hidden w-full max-w-md bg-white min-h-screen flex flex-col">
 
-  <!-- HEADER -->
-  <div class="px-4 py-4 border-b flex items-center gap-3">
-    <img id="avatar" class="w-10 h-10 rounded-full">
-    <div>
-      <div id="username" class="font-semibold text-sm"></div>
-      <button onclick="logout()" class="text-xs text-red-500">Logout</button>
-    </div>
+  <div class="px-4 py-4 border-b flex justify-between items-center">
+    <div id="userLabel" class="font-semibold"></div>
+    <button onclick="logout()" class="text-red-500 text-sm">Logout</button>
   </div>
 
-  <!-- COMPOSER -->
   <div class="px-4 py-4 border-b space-y-3">
     <textarea id="content" rows="3"
       placeholder="Apa yang sedang Anda pikirkan..."
-      class="w-full resize-none border rounded-xl px-3 py-3"></textarea>
+      class="w-full border rounded-xl px-3 py-3"></textarea>
 
     <button onclick="post()"
-      class="bg-blue-600 text-white px-5 py-2 rounded-full">
-      Post
-    </button>
+      class="bg-blue-600 text-white px-5 py-2 rounded-full">Post</button>
   </div>
 
-  <!-- FEED -->
   <div id="feed" class="flex-1"></div>
-
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-  import {
-    getAuth,
-    GoogleAuthProvider,
-    signInWithPopup,
-    onAuthStateChanged,
-    signOut
-  } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, getDocs, query,
+  orderBy, serverTimestamp, updateDoc, doc,
+  arrayUnion, arrayRemove, increment
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-  import {
-    getFirestore,
-    collection,
-    addDoc,
-    getDocs,
-    query,
-    orderBy,
-    serverTimestamp,
-    doc,
-    updateDoc,
-    increment,
-    arrayUnion,
-    arrayRemove
-  } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyBQ8JxN15lYecVlB7ewmH5CDJWT7H86kRI",
+  authDomain: "whyid-5a5bc.firebaseapp.com",
+  projectId: "whyid-5a5bc",
+};
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBQ8JxN15lYecVlB7ewmH5CDJWT7H86kRI",
-    authDomain: "whyid-5a5bc.firebaseapp.com",
-    projectId: "whyid-5a5bc",
-    storageBucket: "whyid-5a5bc.firebasestorage.app",
-    messagingSenderId: "379223608500",
-    appId: "1:379223608500:web:ed1dfb3e7775766ecd1be1"
-  };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const provider = new GoogleAuthProvider();
+let currentUser = localStorage.getItem("user");
 
-  const loginScreen = document.getElementById("loginScreen");
-  const appUI = document.getElementById("app");
-  const feed = document.getElementById("feed");
+const loginBox = document.getElementById("loginBox");
+const appBox = document.getElementById("app");
+const feed = document.getElementById("feed");
 
-  let currentUser = null;
+if(currentUser){
+  loginBox.classList.add("hidden");
+  appBox.classList.remove("hidden");
+  userLabel.textContent = "@" + currentUser;
+  load();
+}
 
-  window.login = () => signInWithPopup(auth, provider);
-  window.logout = () => signOut(auth);
+window.register = async () => {
+  const u = username.value.trim();
+  const p = password.value.trim();
+  if(!u || !p) return msg.textContent = "Isi semua field";
 
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      currentUser = user;
-      loginScreen.classList.add("hidden");
-      appUI.classList.remove("hidden");
-      document.getElementById("username").textContent = user.displayName;
-      document.getElementById("avatar").src = user.photoURL;
-      load();
-    } else {
-      appUI.classList.add("hidden");
-      loginScreen.classList.remove("hidden");
-    }
+  const snap = await getDocs(collection(db,"users"));
+  if(snap.docs.some(d=>d.data().username===u))
+    return msg.textContent="Username sudah ada";
+
+  await addDoc(collection(db,"users"),{username:u,password:p});
+  msg.textContent="Daftar berhasil, silakan masuk";
+};
+
+window.login = async () => {
+  const u = username.value.trim();
+  const p = password.value.trim();
+  const snap = await getDocs(collection(db,"users"));
+
+  const user = snap.docs.find(d=>d.data().username===u && d.data().password===p);
+  if(!user) return msg.textContent="Login gagal";
+
+  localStorage.setItem("user",u);
+  location.reload();
+};
+
+window.logout = ()=>{
+  localStorage.removeItem("user");
+  location.reload();
+};
+
+async function load(){
+  feed.innerHTML="";
+  const q=query(collection(db,"posts"),orderBy("time","desc"));
+  const snap=await getDocs(q);
+
+  snap.forEach(d=>{
+    const p=d.data();
+    const liked=p.likedBy?.includes(currentUser);
+    feed.innerHTML+=`
+      <div class="px-4 py-4 border-b">
+        <div class="font-semibold">@${p.username}</div>
+        <div class="text-sm">${p.content}</div>
+        <button onclick="likePost('${d.id}',${liked})"
+          class="flex gap-1 text-sm ${liked?'text-red-500':''}">
+          <span class="material-icons-outlined">
+            ${liked?'favorite':'favorite_border'}
+          </span>${p.likes||0}
+        </button>
+      </div>`;
   });
+}
 
-  async function load(){
-    feed.innerHTML = "";
-    const q = query(collection(db, "posts"), orderBy("time", "desc"));
-    const snap = await getDocs(q);
+window.post=async()=>{
+  if(!content.value.trim())return;
+  await addDoc(collection(db,"posts"),{
+    username:currentUser,
+    content:content.value,
+    likes:0,
+    likedBy:[],
+    time:serverTimestamp()
+  });
+  content.value="";
+  load();
+};
 
-    snap.forEach(d => {
-      const p = d.data();
-      const liked = p.likedBy?.includes(currentUser.uid);
-
-      feed.innerHTML += `
-        <div class="px-4 py-4 border-b">
-          <div class="font-semibold">${p.name}</div>
-          <div class="text-sm">${p.content}</div>
-
-          <button onclick="likePost('${d.id}', ${liked})"
-            class="flex gap-1 text-sm ${liked ? 'text-red-500' : ''}">
-            <span class="material-icons-outlined">
-              ${liked ? 'favorite' : 'favorite_border'}
-            </span>
-            ${p.likes || 0}
-          </button>
-        </div>
-      `;
-    });
-  }
-
-  window.post = async () => {
-    if (!content.value.trim()) return;
-
-    await addDoc(collection(db, "posts"), {
-      uid: currentUser.uid,
-      name: currentUser.displayName,
-      photo: currentUser.photoURL,
-      content: content.value,
-      likes: 0,
-      likedBy: [],
-      time: serverTimestamp()
-    });
-
-    content.value = "";
-    load();
-  };
-
-  window.likePost = async (id, liked) => {
-    const ref = doc(db, "posts", id);
-    await updateDoc(ref, liked ? {
-      likes: increment(-1),
-      likedBy: arrayRemove(currentUser.uid)
-    } : {
-      likes: increment(1),
-      likedBy: arrayUnion(currentUser.uid)
-    });
-    load();
-  };
+window.likePost=async(id,liked)=>{
+  const ref=doc(db,"posts",id);
+  await updateDoc(ref,liked?
+    {likes:increment(-1),likedBy:arrayRemove(currentUser)}:
+    {likes:increment(1),likedBy:arrayUnion(currentUser)}
+  );
+  load();
+};
 </script>
 
 </body>
