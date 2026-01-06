@@ -17,9 +17,7 @@ body { font-family: 'Inter', sans-serif; }
   from { opacity:0; transform: translateY(10px); }
   to { opacity:1; transform: translateY(0); }
 }
-.animate-fade {
-  animation: fade .3s ease;
-}
+.animate-fade { animation: fade .3s ease; }
 </style>
 </head>
 
@@ -100,7 +98,6 @@ bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600">
 
   <!-- FORM -->
   <div class="space-y-3 animate-fade">
-
     <input id="user" placeholder="Nama Pengguna"
       class="w-full border border-gray-200 px-4 py-2 rounded-xl
              focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -112,14 +109,12 @@ bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600">
     <button onclick="login()"
       class="w-full bg-blue-600 text-white py-2 rounded-xl font-semibold
              hover:bg-blue-700 transition flex items-center justify-center gap-2">
-
       <span id="btnText">Masuk</span>
       <span id="loader"
         class="hidden animate-spin material-icons-outlined text-sm">
         progress_activity
       </span>
     </button>
-
   </div>
 
 </div>
@@ -156,19 +151,17 @@ if(currentUser){
 
 window.login = ()=>{
   if(!user.value || !pass.value) return;
-
   loader.classList.remove("hidden");
-  btnText.textContent = "Memproses...";
-
+  btnText.textContent="Memproses...";
   setTimeout(()=>{
-    userId = btoa(user.value + pass.value);
-    currentUser = user.value;
-    localStorage.setItem("user", currentUser);
-    localStorage.setItem("uid", userId);
+    userId=btoa(user.value+pass.value);
+    currentUser=user.value;
+    localStorage.setItem("user",currentUser);
+    localStorage.setItem("uid",userId);
     loginBox.style.display="none";
     load();
     loader.classList.add("hidden");
-    btnText.textContent = "Masuk";
+    btnText.textContent="Masuk";
   },700);
 };
 
@@ -178,13 +171,13 @@ window.logout = ()=>{
 };
 
 function timeAgo(time){
-  const s = Math.floor((Date.now() - time) / 1000);
-  if (s < 60) return "Baru saja";
-  const m = Math.floor(s / 60);
-  if (m < 60) return m + " menit";
-  const h = Math.floor(m / 60);
-  if (h < 24) return h + " jam";
-  return Math.floor(h / 24) + " hari";
+  const s=Math.floor((Date.now()-time)/1000);
+  if(s<60)return"Baru saja";
+  const m=Math.floor(s/60);
+  if(m<60)return m+" menit";
+  const h=Math.floor(m/60);
+  if(h<24)return h+" jam";
+  return Math.floor(h/24)+" hari";
 }
 
 async function load(){
@@ -202,12 +195,41 @@ async function load(){
   <div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center">
     <span class="material-icons-outlined text-gray-400">person</span>
   </div>
+
   <div class="flex-1">
-    <div class="font-semibold text-sm">${p.username}</div>
-    <div class="text-xs text-gray-500">${timeAgo(t)}</div>
-    <div class="mt-2 text-sm">${p.content}</div>
+    <div class="flex justify-between">
+      <div class="text-sm">
+        <div class="font-semibold">${p.username}</div>
+        <div class="text-xs text-gray-500">@${p.username} · ${timeAgo(t)}</div>
+      </div>
+
+      <!-- MENU -->
+      <div class="relative">
+        <button onclick="this.nextElementSibling.classList.toggle('hidden')">
+          <span class="material-icons-outlined text-gray-500">more_vert</span>
+        </button>
+
+        <div class="hidden absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-md z-10">
+          <button onclick="this.closest('.border-b').remove()"
+            class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+            Sembunyikan
+          </button>
+
+          ${p.uid===userId ? `
+          <button onclick="deletePost('${d.id}')"
+            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+            Hapus
+          </button>` : ""}
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-2 text-sm leading-relaxed break-words">
+      ${p.content}
+    </div>
+
     <button onclick="like('${d.id}',${liked})"
-      class="mt-2 text-sm text-gray-500 flex gap-1">
+      class="flex items-center gap-1 mt-3 text-sm text-gray-500">
       <span class="material-icons-outlined text-base">
         ${liked?"favorite":"favorite_border"}
       </span>${p.likes||0}
@@ -236,6 +258,13 @@ window.like=async(id,liked)=>{
     likedBy:liked?arrayRemove(userId):arrayUnion(userId)
   });
   load();
+};
+
+window.deletePost=async(id)=>{
+  if(confirm("Hapus postingan ini?")){
+    await deleteDoc(doc(db,"posts",id));
+    load();
+  }
 };
 
 window.switchAuth=(t)=>{
