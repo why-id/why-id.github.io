@@ -7,152 +7,184 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-</head>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
 
+<style>
+body { font-family: 'Inter', sans-serif; }
+</style>
+</head>
 <body class="bg-gray-100 flex justify-center">
 
-<!-- LOGIN -->
-<div id="loginBox" class="w-full max-w-md bg-white min-h-screen p-6 flex flex-col gap-4">
-  <h1 class="text-3xl font-bold text-blue-600 text-center">CROT.COM</h1>
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white w-full max-w-sm rounded-xl p-6 space-y-4">
+    <h2 class="text-xl font-bold text-center">Masuk ke CROT.COM</h2>
 
-  <input id="username" placeholder="Nama Pengguna"
-    class="border px-4 py-3 rounded-xl">
+    <input id="username" class="w-full border px-4 py-3 rounded-lg" placeholder="Nama pengguna">
+    <input id="password" type="password" class="w-full border px-4 py-3 rounded-lg" placeholder="Password">
 
-  <input id="password" type="password" placeholder="Password"
-    class="border px-4 py-3 rounded-xl">
+    <button onclick="login()" class="w-full bg-blue-600 text-white py-3 rounded-lg">Masuk</button>
+    <button onclick="register()" class="w-full border py-3 rounded-lg">Daftar</button>
 
-  <button onclick="login()"
-    class="bg-blue-600 text-white py-3 rounded-xl">Masuk</button>
-
-  <button onclick="register()"
-    class="border py-3 rounded-xl">Daftar</button>
-
-  <p id="msg" class="text-center text-red-500 text-sm"></p>
+    <p id="msg" class="text-center text-sm text-red-500"></p>
+  </div>
 </div>
 
 <!-- APP -->
-<div id="app" class="hidden w-full max-w-md bg-white min-h-screen flex flex-col">
+<div class="w-full max-w-md bg-white min-h-screen flex flex-col">
 
-  <div class="px-4 py-4 border-b flex justify-between items-center">
-    <div id="userLabel" class="font-semibold"></div>
-    <button onclick="logout()" class="text-red-500 text-sm">Logout</button>
-  </div>
-
-  <div class="px-4 py-4 border-b space-y-3">
-    <textarea id="content" rows="3"
-      placeholder="Apa yang sedang Anda pikirkan..."
-      class="w-full border rounded-xl px-3 py-3"></textarea>
-
-    <button onclick="post()"
-      class="bg-blue-600 text-white px-5 py-2 rounded-full">Post</button>
-  </div>
-
-  <div id="feed" class="flex-1"></div>
+<!-- HEADER -->
+<div class="px-4 py-4 border-b">
+<h1 class="text-2xl font-extrabold tracking-widest text-blue-600" style="font-family:'Poppins'">CROT.COM</h1>
+<p class="text-sm text-gray-500">Crowd Talk <span class="text-gray-400">( Obrolan Publik )</span></p>
 </div>
 
+<!-- COMPOSER -->
+<div class="px-4 py-4 border-b space-y-3">
+<textarea id="content" rows="3" placeholder="Apa yang sedang Anda pikirkan..."
+class="w-full resize-none border rounded-xl px-3 py-3 text-sm focus:ring-2 focus:ring-blue-500"></textarea>
+
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-1 text-sm text-gray-500">
+<span class="material-icons-outlined">public</span> Public
+</div>
+<button onclick="post()" class="bg-blue-600 text-white text-sm font-semibold px-5 py-2 rounded-full">
+Post
+</button>
+</div>
+</div>
+
+<!-- FEED -->
+<div id="feed" class="flex-1"></div>
+
+<!-- FOOTER -->
+<div class="text-center text-xs text-gray-400 py-6 border-t">
+© 2025 by <span class="font-medium text-gray-500">why.id</span>
+</div>
+</div>
+
+<!-- SCROLL TOP -->
+<button id="toTop" onclick="scrollToTop()"
+class="hidden fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg">
+<span class="material-icons-outlined">arrow_upward</span>
+</button>
+
+<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import {
-  getFirestore, collection, addDoc, getDocs, query,
-  orderBy, serverTimestamp, updateDoc, doc,
-  arrayUnion, arrayRemove, increment
+getFirestore, collection, addDoc, getDocs, onSnapshot,
+doc, updateDoc, arrayUnion, arrayRemove, increment, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBQ8JxN15lYecVlB7ewmH5CDJWT7H86kRI",
-  authDomain: "whyid-5a5bc.firebaseapp.com",
-  projectId: "whyid-5a5bc",
+apiKey: "AIzaSyBQ8JxN15lYecVlB7ewmH5CDJWT7H86kRI",
+authDomain: "whyid-5a5bc.firebaseapp.com",
+projectId: "whyid-5a5bc",
+storageBucket: "whyid-5a5bc.firebasestorage.app",
+messagingSenderId: "379223608500",
+appId: "1:379223608500:web:ed1dfb3e7775766ecd1be1"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let currentUser = localStorage.getItem("user");
+const overlay = document.getElementById("loginOverlay");
+let currentUser = localStorage.getItem("username");
+const userId = localStorage.getItem("uid") || crypto.randomUUID();
+localStorage.setItem("uid", userId);
 
-const loginBox = document.getElementById("loginBox");
-const appBox = document.getElementById("app");
-const feed = document.getElementById("feed");
+if(!currentUser) overlay.classList.remove("hidden");
 
-if(currentUser){
-  loginBox.classList.add("hidden");
-  appBox.classList.remove("hidden");
-  userLabel.textContent = "@" + currentUser;
-  load();
-}
+/* REGISTER */
+window.register = async ()=>{
+const u = username.value.trim();
+const p = password.value.trim();
+if(!u || !p) return msg.textContent="Lengkapi data";
 
-window.register = async () => {
-  const u = username.value.trim();
-  const p = password.value.trim();
-  if(!u || !p) return msg.textContent = "Isi semua field";
+const snap = await getDocs(collection(db,"users"));
+if(snap.docs.some(d=>d.data().username===u))
+return msg.textContent="Username sudah dipakai";
 
-  const snap = await getDocs(collection(db,"users"));
-  if(snap.docs.some(d=>d.data().username===u))
-    return msg.textContent="Username sudah ada";
-
-  await addDoc(collection(db,"users"),{username:u,password:p});
-  msg.textContent="Daftar berhasil, silakan masuk";
+await addDoc(collection(db,"users"),{username:u,password:p});
+msg.textContent="Daftar berhasil";
 };
 
-window.login = async () => {
-  const u = username.value.trim();
-  const p = password.value.trim();
-  const snap = await getDocs(collection(db,"users"));
+/* LOGIN */
+window.login = async ()=>{
+const snap = await getDocs(collection(db,"users"));
+const u = username.value.trim();
+const p = password.value.trim();
 
-  const user = snap.docs.find(d=>d.data().username===u && d.data().password===p);
-  if(!user) return msg.textContent="Login gagal";
+const found = snap.docs.find(d=>d.data().username===u && d.data().password===p);
+if(!found) return msg.textContent="Login gagal";
 
-  localStorage.setItem("user",u);
-  location.reload();
+localStorage.setItem("username",u);
+location.reload();
 };
 
-window.logout = ()=>{
-  localStorage.removeItem("user");
-  location.reload();
+/* POST */
+window.post = async ()=>{
+if(!content.value.trim()) return;
+await addDoc(collection(db,"posts"),{
+username: currentUser,
+content: content.value,
+likes: 0,
+likedBy: [],
+time: serverTimestamp()
+});
+content.value="";
 };
 
-async function load(){
-  feed.innerHTML="";
-  const q=query(collection(db,"posts"),orderBy("time","desc"));
-  const snap=await getDocs(q);
+/* LOAD FEED */
+onSnapshot(collection(db,"posts"),snap=>{
+feed.innerHTML="";
+snap.docs.reverse().forEach(d=>{
+const p = d.data();
+const liked = p.likedBy?.includes(userId);
+feed.innerHTML+=`
+<div class="px-4 py-4 border-b flex gap-3">
+<div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center">
+<span class="material-icons-outlined">person</span>
+</div>
 
-  snap.forEach(d=>{
-    const p=d.data();
-    const liked=p.likedBy?.includes(currentUser);
-    feed.innerHTML+=`
-      <div class="px-4 py-4 border-b">
-        <div class="font-semibold">@${p.username}</div>
-        <div class="text-sm">${p.content}</div>
-        <button onclick="likePost('${d.id}',${liked})"
-          class="flex gap-1 text-sm ${liked?'text-red-500':''}">
-          <span class="material-icons-outlined">
-            ${liked?'favorite':'favorite_border'}
-          </span>${p.likes||0}
-        </button>
-      </div>`;
-  });
-}
+<div class="flex-1">
+<div class="flex justify-between">
+<div>
+<div class="font-semibold">${p.username}</div>
+<div class="text-xs text-gray-500">@${p.username}</div>
+</div>
+<span class="material-icons-outlined text-gray-400">more_vert</span>
+</div>
 
-window.post=async()=>{
-  if(!content.value.trim())return;
-  await addDoc(collection(db,"posts"),{
-    username:currentUser,
-    content:content.value,
-    likes:0,
-    likedBy:[],
-    time:serverTimestamp()
-  });
-  content.value="";
-  load();
+<div class="mt-2 text-sm">${p.content}</div>
+
+<button onclick="likePost('${d.id}',${liked})"
+class="flex items-center gap-1 mt-3 text-sm ${liked?'text-red-500':'text-gray-500'}">
+<span class="material-icons-outlined">
+${liked?'favorite':'favorite_border'}
+</span>
+${p.likes||0}
+</button>
+</div>
+</div>`;
+});
+});
+
+/* LIKE / UNLIKE */
+window.likePost = async (id, liked)=>{
+const ref = doc(db,"posts",id);
+await updateDoc(ref,{
+likes: increment(liked?-1:1),
+likedBy: liked?arrayRemove(userId):arrayUnion(userId)
+});
 };
 
-window.likePost=async(id,liked)=>{
-  const ref=doc(db,"posts",id);
-  await updateDoc(ref,liked?
-    {likes:increment(-1),likedBy:arrayRemove(currentUser)}:
-    {likes:increment(1),likedBy:arrayUnion(currentUser)}
-  );
-  load();
-};
+/* SCROLL */
+const toTop=document.getElementById("toTop");
+window.addEventListener("scroll",()=>window.scrollY>300?toTop.classList.remove("hidden"):toTop.classList.add("hidden"));
+window.scrollToTop=()=>window.scrollTo({top:0,behavior:"smooth"});
 </script>
 
 </body>
