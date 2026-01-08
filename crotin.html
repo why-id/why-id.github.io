@@ -17,7 +17,9 @@ body{
 .card{
   background:#fff;
   border-radius:18px;
-  box-shadow:0 12px 30px rgba(0,0,0,.08),0 4px 10px rgba(0,0,0,.05);
+  box-shadow:
+    0 12px 30px rgba(0,0,0,.08),
+    0 4px 10px rgba(0,0,0,.05);
 }
 .like-btn span{
   transition:transform .25s cubic-bezier(.34,1.56,.64,1),color .2s ease;
@@ -25,6 +27,12 @@ body{
 .like-btn.liked span{
   color:#ef4444;
   transform:scale(1.4) rotate(-8deg);
+}
+.like-btn.liked{animation:pop .35s ease-out}
+@keyframes pop{
+  0%{transform:scale(1)}
+  50%{transform:scale(1.15)}
+  100%{transform:scale(1)}
 }
 </style>
 </head>
@@ -36,9 +44,9 @@ body{
   <div class="w-80 card p-6 space-y-4">
     <h2 class="text-xl font-bold text-center text-blue-500">Masuk</h2>
     <input id="user" placeholder="Nama (unik)"
-      class="w-full border rounded-xl px-4 py-3 text-sm outline-none">
+      class="w-full border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500">
     <button onclick="login()"
-      class="w-full bg-blue-500 text-white py-3 rounded-xl font-semibold flex justify-center gap-2">
+      class="w-full bg-blue-500 text-white py-3 rounded-xl font-semibold flex justify-center items-center gap-2">
       <span id="loginText">Masuk</span>
       <span id="loginLoad" class="hidden animate-spin material-icons-outlined">autorenew</span>
     </button>
@@ -49,7 +57,7 @@ body{
 <header class="sticky top-0 z-40 backdrop-blur bg-white/80 border-b">
   <div class="h-14 px-4 flex justify-between items-center max-w-xl mx-auto">
     <span class="material-icons-outlined">menu</span>
-    <span class="font-bold text-blue-500">CROT</span>
+    <span class="font-bold text-blue-500 tracking-wide">CROT</span>
     <button onclick="logout()" class="text-sm text-red-500">Keluar</button>
   </div>
 </header>
@@ -60,8 +68,8 @@ body{
     <textarea id="content" rows="3"
       placeholder="Apa yang sedang kamu pikirkan?"
       class="w-full resize-none text-sm outline-none"></textarea>
-    <div class="flex justify-between mt-3">
-      <span class="text-xs text-gray-400 flex gap-1">
+    <div class="flex justify-between items-center mt-3">
+      <span class="text-xs text-gray-400 flex items-center gap-1">
         <span class="material-icons-outlined text-sm">public</span> Public
       </span>
       <button onclick="post()"
@@ -107,26 +115,29 @@ if(currentUser){
 }
 
 window.login = async ()=>{
-  if(!user.value.trim()) return alert("Nama wajib diisi");
+  const name=user.value.trim();
+  if(!name) return alert("Nama wajib diisi");
+
   loginText.classList.add("hidden");
   loginLoad.classList.remove("hidden");
 
-  const ref = doc(db,"users",user.value.toLowerCase());
-  if((await getDoc(ref)).exists()) return alert("Nama sudah dipakai");
+  const ref=doc(db,"users",name.toLowerCase());
+  if((await getDoc(ref)).exists()){
+    loginText.classList.remove("hidden");
+    loginLoad.classList.add("hidden");
+    return alert("Nama sudah dipakai");
+  }
 
-  await setDoc(ref,{name:user.value,time:serverTimestamp()});
-  currentUser=user.value;
-  userId=user.value.toLowerCase();
+  await setDoc(ref,{name,created:serverTimestamp()});
+  currentUser=name;
+  userId=name.toLowerCase();
   localStorage.setItem("user",currentUser);
   localStorage.setItem("uid",userId);
   loginBox.style.display="none";
   load();
 };
 
-window.logout = ()=>{
-  localStorage.clear();
-  location.reload();
-};
+window.logout=()=>{localStorage.clear();location.reload()};
 
 function timeAgo(t){
   const s=Math.floor((Date.now()-t)/1000);
@@ -149,49 +160,57 @@ async function load(){
     const liked=p.likedBy?.includes(userId);
 
     feed.innerHTML+=`
-    <div class="card p-4">
-      <div class="font-semibold text-sm">${p.username}</div>
-      <div class="text-xs text-gray-500">@${p.username} · ${timeAgo(t)}</div>
+<div class="card p-4">
+  <div class="flex gap-3">
+    <div class="w-11 h-11 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white">
+      <span class="material-icons-outlined">person</span>
+    </div>
+
+    <div class="flex-1">
+      <div class="flex justify-between">
+        <div>
+          <div class="font-semibold text-sm">${p.username}</div>
+          <div class="text-xs text-gray-500">@${p.username} · ${timeAgo(t)}</div>
+        </div>
+      </div>
 
       <div class="mt-2 text-sm">${p.content}</div>
 
-      <button onclick="like('${d.id}',${liked})"
-        class="like-btn ${liked?'liked':''} flex gap-1 mt-3 text-sm">
-        <span class="material-icons-outlined">
+      <button onclick="like('${d.id}',${liked},this)"
+        class="like-btn ${liked?'liked':''} flex items-center gap-1 mt-4 text-sm">
+        <span class="material-icons-outlined text-base">
           ${liked?'favorite':'favorite_border'}
-        </span> ${p.likes||0}
+        </span>
+        ${p.likes||0}
       </button>
 
-      <!-- COMMENTS -->
+      <!-- KOMENTAR (TAMBAHAN SAJA) -->
       <div id="comments-${d.id}" class="mt-3 space-y-1 text-xs"></div>
 
       <div class="flex gap-2 mt-2">
-        <input id="comment-${d.id}"
-          placeholder="Tulis komentar..."
+        <input id="comment-${d.id}" placeholder="Tulis komentar..."
           class="flex-1 border rounded-full px-3 py-2 text-xs outline-none">
         <button onclick="addComment('${d.id}')"
           class="text-blue-500 text-xs font-semibold">Kirim</button>
       </div>
-    </div>`;
+    </div>
+  </div>
+</div>`;
     loadComments(d.id);
   });
 }
 
-window.post = async ()=>{
-  if(!content.value.trim()) return;
+window.post=async()=>{
+  if(!content.value.trim())return;
   await addDoc(collection(db,"posts"),{
-    uid:userId,
-    username:currentUser,
-    content:content.value,
-    likes:0,
-    likedBy:[],
-    time:serverTimestamp()
+    uid:userId,username:currentUser,content:content.value,
+    likes:0,likedBy:[],time:serverTimestamp()
   });
   content.value="";
   load();
 };
 
-window.like = async(id,liked)=>{
+window.like=async(id,liked)=>{
   await updateDoc(doc(db,"posts",id),{
     likes:increment(liked?-1:1),
     likedBy:liked?arrayRemove(userId):arrayUnion(userId)
@@ -202,30 +221,21 @@ window.like = async(id,liked)=>{
 async function loadComments(postId){
   const wrap=document.getElementById("comments-"+postId);
   wrap.innerHTML="";
-  const q=query(collection(db,"posts",postId,"comments"),orderBy("time"));
+  const q=query(collection(db,"posts",postId,"comments"),orderBy("time","asc"));
   const snap=await getDocs(q);
-
   snap.forEach(d=>{
     const c=d.data();
     wrap.innerHTML+=`
-      <div>
-        <span class="font-semibold">@${c.username}</span>
-        ${c.text}
-      </div>`;
+<div><span class="font-semibold">@${c.username}</span> ${c.text}</div>`;
   });
 }
 
-window.addComment = async(postId)=>{
+window.addComment=async(postId)=>{
   const input=document.getElementById("comment-"+postId);
-  if(!input.value.trim()) return;
-
+  if(!input.value.trim())return;
   await addDoc(collection(db,"posts",postId,"comments"),{
-    uid:userId,
-    username:currentUser,
-    text:input.value,
-    time:serverTimestamp()
+    uid:userId,username:currentUser,text:input.value,time:serverTimestamp()
   });
-
   input.value="";
   loadComments(postId);
 };
