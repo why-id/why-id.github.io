@@ -41,8 +41,7 @@ body{
       class="w-full border rounded-xl px-4 py-3 outline-none">
     <button onclick="login()"
       class="w-full bg-blue-500 text-white py-3 rounded-xl font-semibold flex justify-center items-center gap-2">
-      <span id="loginText">Masuk</span>
-      <span id="loginLoad" class="hidden animate-spin material-icons-outlined">autorenew</span>
+      Masuk
     </button>
   </div>
 </div>
@@ -177,10 +176,7 @@ async function load(){
 
       <!-- COMMENT BOX -->
       <div id="c-${d.id}" class="hidden mt-3 space-y-2">
-        <!-- komentar -->
         <div id="cl-${d.id}" class="space-y-2 text-sm"></div>
-
-        <!-- input -->
         <input placeholder="Tulis komentar..."
           onkeydown="if(event.key==='Enter')sendComment('${d.id}',this)"
           class="w-full border rounded-xl px-3 py-2 text-sm outline-none">
@@ -189,6 +185,7 @@ async function load(){
   </div>
 </div>`;
 
+    // 🔥 PENTING: load komentar DI SINI
     loadComments(d.id);
   }
 }
@@ -201,8 +198,11 @@ async function loadComments(id){
   const list=document.getElementById("cl-"+id);
   const count=document.getElementById("cc-"+id);
   list.innerHTML="";
+
   const q=query(collection(db,"posts",id,"comments"),orderBy("time","asc"));
   const snap=await getDocs(q);
+
+  // ✅ jumlah komentar langsung tampil
   count.textContent=snap.size;
 
   snap.forEach(c=>{
@@ -230,8 +230,12 @@ window.sendComment=async(id,input)=>{
 window.post=async()=>{
   if(!content.value.trim())return;
   await addDoc(collection(db,"posts"),{
-    uid:userId,username:currentUser,content:content.value,
-    likes:0,likedBy:[],time:serverTimestamp()
+    uid:userId,
+    username:currentUser,
+    content:content.value,
+    likes:0,
+    likedBy:[],
+    time:serverTimestamp()
   });
   content.value="";
   load();
