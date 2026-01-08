@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CROT</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+
+<style>
+body{
+  font-family:'Varela Round',Arial,sans-serif;
+  background:linear-gradient(180deg,#f8fafc,#eef2f7);
+}
+.card{
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08),0 4px 10px rgba(0,0,0,.05);
+}
+
+/* like anim */
+.like-btn span{
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),color .2s;
+}
+.like-btn.liked span{
+  color:#ef4444;
+  transform:scale(1.4);
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginBox" class="fixed inset-0 z-50 flex items-center justify-center bg-white">
+  <div class="w-80 card p-6 space-y-4">
+    <h2 class="text-xl font-bold text-center text-blue-500">Masuk</h2>
+    <input id="user" placeholder="Nama (unik)"
+      class="w-full border rounded-xl px-4 py-3 outline-none">
+    <button onclick="login()"
+      class="w-full bg-blue-500 text-white py-3 rounded-xl font-semibold flex justify-center items-center gap-2">
+      <span id="loginText">Masuk</span>
+      <span id="loginLoad" class="hidden animate-spin material-icons-outlined">autorenew</span>
+    </button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b">
+  <div class="h-14 max-w-xl mx-auto px-4 flex justify-between items-center">
+    <span class="material-icons-outlined">menu</span>
+    <span class="font-bold text-blue-500">CROT</span>
+    <button onclick="logout()" class="text-sm text-red-500">Keluar</button>
+  </div>
+</header>
+
+<!-- COMPOSER -->
+<div class="max-w-xl mx-auto px-3 py-4">
+  <div class="card p-4">
+    <textarea id="content" rows="3" placeholder="Apa yang sedang kamu pikirkan?"
+      class="w-full resize-none outline-none"></textarea>
+    <div class="flex justify-between items-center mt-3">
+      <span class="text-xs text-gray-400 flex items-center gap-1">
+        <span class="material-icons-outlined text-sm">public</span> Public
+      </span>
+      <button onclick="post()"
+        class="bg-blue-500 text-white px-5 py-2 rounded-full text-sm font-semibold">
+        Post
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- FEED -->
+<main id="feed" class="max-w-xl mx-auto px-3 space-y-4 pb-28"></main>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, getDocs,
+  query, orderBy, doc, setDoc, getDoc,
+  updateDoc, deleteDoc,
+  arrayUnion, arrayRemove, increment, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBQ8JxN15lYecVlB7ewmH5CDJWT7H86kRI",
+  authDomain: "whyid-5a5bc.firebaseapp.com",
+  projectId: "whyid-5a5bc",
+  storageBucket: "whyid-5a5bc.appspot.com",
+  messagingSenderId: "379223608500",
+  appId: "1:379223608500:web:ed1dfb3e7775766ecd1be1"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let currentUser = localStorage.getItem("user");
+let userId = localStorage.getItem("uid");
+const feed = document.getElementById("feed");
+
+if(currentUser){
+  loginBox.style.display="none";
+  load();
+}
+
+window.login = async ()=>{
+  const name=user.value.trim();
+  if(!name) return alert("Nama wajib");
+  const ref=doc(db,"users",name.toLowerCase());
+  if((await getDoc(ref)).exists()) return alert("Nama dipakai");
+  await setDoc(ref,{name,created:serverTimestamp()});
+  currentUser=name;
+  userId=name.toLowerCase();
+  localStorage.setItem("user",name);
+  localStorage.setItem("uid",userId);
+  loginBox.style.display="none";
+  load();
+};
+
+window.logout=()=>{localStorage.clear();location.reload();};
+
+function timeAgo(t){
+  const s=Math.floor((Date.now()-t)/1000);
+  if(s<60)return"Baru saja";
+  const m=Math.floor(s/60);
+  if(m<60)return m+" menit";
+  const h=Math.floor(m/60);
+  if(h<24)return h+" jam";
+  return Math.floor(h/24)+" hari";
+}
+
+async function load(){
+  feed.innerHTML="";
+  const q=query(collection(db,"posts"),orderBy("time","desc"));
+  const snap=await getDocs(q);
+
+  for(const d of snap.docs){
+    const p=d.data();
+    const liked=p.likedBy?.includes(userId);
+
+    feed.innerHTML+=`
+<div class="card p-4">
+  <div class="flex gap-3">
+    <div class="w-11 h-11 rounded-full bg-blue-500 flex items-center justify-center text-white">
+      <span class="material-icons-outlined">person</span>
+    </div>
+
+    <div class="flex-1">
+      <div class="flex justify-between">
+        <div>
+          <div class="font-semibold text-sm">${p.username}</div>
+          <div class="text-xs text-gray-500">@${p.username} · ${timeAgo(p.time?.toMillis?.()||Date.now())}</div>
+        </div>
+      </div>
+
+      <div class="mt-2 text-sm">${p.content}</div>
+
+      <!-- ACTION -->
+      <div class="flex gap-5 mt-4 text-sm text-gray-500">
+        <button onclick="toggleComment('${d.id}')" class="flex items-center gap-1">
+          <span class="material-icons-outlined text-base">chat_bubble_outline</span>
+        </button>
+
+        <button onclick="like('${d.id}',${liked},this)"
+          class="like-btn ${liked?'liked':''} flex items-center gap-1">
+          <span class="material-icons-outlined text-base">
+            ${liked?'favorite':'favorite_border'}
+          </span>
+          ${p.likes||0}
+        </button>
+      </div>
+
+      <!-- COMMENT BOX -->
+      <div id="c-${d.id}" class="hidden mt-3">
+        <input placeholder="Tulis komentar..."
+          onkeydown="if(event.key==='Enter')sendComment('${d.id}',this)"
+          class="w-full border rounded-xl px-3 py-2 text-sm outline-none">
+        <div id="cl-${d.id}" class="mt-2 space-y-2 text-sm"></div>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+    loadComments(d.id);
+  }
+}
+
+window.toggleComment=id=>{
+  document.getElementById("c-"+id).classList.toggle("hidden");
+};
+
+async function loadComments(id){
+  const list=document.getElementById("cl-"+id);
+  list.innerHTML="";
+  const q=query(collection(db,"posts",id,"comments"),orderBy("time"));
+  const snap=await getDocs(q);
+  snap.forEach(c=>{
+    const d=c.data();
+    list.innerHTML+=`
+<div>
+  <span class="font-semibold">${d.username}</span>
+  <span class="text-gray-600">${d.text}</span>
+</div>`;
+  });
+}
+
+window.sendComment=async(id,input)=>{
+  if(!input.value.trim())return;
+  await addDoc(collection(db,"posts",id,"comments"),{
+    uid:userId,
+    username:currentUser,
+    text:input.value,
+    time:serverTimestamp()
+  });
+  input.value="";
+  loadComments(id);
+};
+
+window.post=async()=>{
+  if(!content.value.trim())return;
+  await addDoc(collection(db,"posts"),{
+    uid:userId,username:currentUser,content:content.value,
+    likes:0,likedBy:[],time:serverTimestamp()
+  });
+  content.value="";
+  load();
+};
+
+window.like=async(id,liked,btn)=>{
+  btn.classList.toggle("liked");
+  await updateDoc(doc(db,"posts",id),{
+    likes:increment(liked?-1:1),
+    likedBy:liked?arrayRemove(userId):arrayUnion(userId)
+  });
+  load();
+};
+</script>
+</body>
+</html>
