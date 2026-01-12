@@ -1,450 +1,124 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GSXID - Registrasi OTP Gratis</title>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Varela Round', sans-serif;
-            background: linear-gradient(135deg, #6e8efb 0%, #a777e3 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            perspective: 1000px;
-        }
-        
-        .card {
-            width: 400px;
-            background: white;
-            border-radius: 20px;
-            padding: 40px 30px;
-            box-shadow: 
-                0 15px 35px rgba(0, 0, 0, 0.2),
-                0 5px 15px rgba(0, 0, 0, 0.1),
-                inset 0 0 1px rgba(255, 255, 255, 0.8);
-            transform-style: preserve-3d;
-            transition: transform 0.5s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .card:hover {
-            transform: translateY(-10px) rotateX(5deg);
-        }
-        
-        .card:before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
-            transform: rotate(45deg);
-            z-index: 1;
-            pointer-events: none;
-        }
-        
-        .brand {
-            text-align: center;
-            margin-bottom: 25px;
-            transform: translateZ(20px);
-        }
-        
-        .brand-name {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 2.5rem;
-            background: linear-gradient(45deg, #6e8efb, #a777e3);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-            letter-spacing: 1px;
-        }
-        
-        .brand-tagline {
-            font-size: 0.9rem;
-            color: #888;
-            margin-top: 5px;
-            letter-spacing: 2px;
-        }
-        
-        h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-        
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 0.95rem;
-        }
-        
-        .input-group {
-            margin-bottom: 20px;
-            transform: translateZ(15px);
-        }
-        
-        input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-family: 'Varela Round', sans-serif;
-            font-size: 1rem;
-            transition: all 0.3s;
-            background-color: #f9f9f9;
-        }
-        
-        input:focus {
-            outline: none;
-            border-color: #a777e3;
-            background-color: white;
-            box-shadow: 0 0 0 3px rgba(167, 119, 227, 0.2);
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-family: 'Varela Round', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s;
-            transform: translateZ(10px);
-            letter-spacing: 0.5px;
-        }
-        
-        .btn-send {
-            background: linear-gradient(45deg, #6e8efb, #a777e3);
-            color: white;
-            box-shadow: 0 5px 15px rgba(110, 142, 251, 0.4);
-        }
-        
-        .btn-send:hover {
-            transform: translateY(-3px) translateZ(10px);
-            box-shadow: 0 8px 20px rgba(110, 142, 251, 0.6);
-        }
-        
-        .btn-send:active {
-            transform: translateY(1px) translateZ(10px);
-        }
-        
-        .btn-verify {
-            background: linear-gradient(45deg, #4CAF50, #2E7D32);
-            color: white;
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
-            display: none;
-        }
-        
-        .btn-verify:hover {
-            transform: translateY(-3px) translateZ(10px);
-            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.6);
-        }
-        
-        #otp-section {
-            margin-top: 30px;
-            padding-top: 25px;
-            border-top: 1px solid #eee;
-            transform: translateZ(15px);
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .status {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            text-align: center;
-            transform: translateZ(10px);
-        }
-        
-        .success {
-            background-color: rgba(76, 175, 80, 0.1);
-            color: #2E7D32;
-            border-left: 4px solid #4CAF50;
-        }
-        
-        .error {
-            background-color: rgba(244, 67, 54, 0.1);
-            color: #D32F2F;
-            border-left: 4px solid #F44336;
-        }
-        
-        .info {
-            background-color: rgba(33, 150, 243, 0.1);
-            color: #1565C0;
-            border-left: 4px solid #2196F3;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px) translateZ(15px); }
-            to { opacity: 1; transform: translateY(0) translateZ(15px); }
-        }
-        
-        .card-footer {
-            margin-top: 25px;
-            text-align: center;
-            font-size: 0.8rem;
-            color: #999;
-            transform: translateZ(5px);
-        }
-        
-        .otp-digit {
-            display: inline-block;
-            width: 40px;
-            height: 50px;
-            margin: 0 5px;
-            text-align: center;
-            font-size: 1.5rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-        
-        /* Responsive */
-        @media (max-width: 480px) {
-            .card {
-                width: 100%;
-                padding: 30px 20px;
-            }
-            
-            .brand-name {
-                font-size: 2rem;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<title>EmailJS OTP</title>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #eee;
+    padding: 20px;
+}
+input, button {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0;
+    font-size: 16px;
+}
+button {
+    background: #2c7;
+    border: none;
+    cursor: pointer;
+}
+#log {
+    margin-top: 10px;
+    font-size: 14px;
+}
+</style>
 </head>
 <body>
 
-<div class="container">
-    <div class="card">
-        <div class="brand">
-            <div class="brand-name">GSXID</div>
-            <div class="brand-tagline">DIGITAL SOLUTIONS</div>
-        </div>
-        
-        <h2>Registrasi Akun</h2>
-        <p class="subtitle">Masukkan email untuk menerima kode OTP gratis</p>
-        
-        <div class="input-group">
-            <input type="email" id="email" placeholder="Email Gmail Anda">
-        </div>
-        
-        <button id="send-btn" class="btn btn-send" onclick="sendOTP()">Kirim Kode OTP</button>
+<h2>EmailJS OTP</h2>
 
-        <div id="otp-section">
-            <div class="input-group">
-                <input type="text" id="otp-input" placeholder="Masukkan 6 digit OTP" maxlength="6">
-            </div>
-            <button id="verify-btn" class="btn btn-verify" onclick="verifyOTP()">Verifikasi & Buat Akun</button>
-        </div>
+<h3>Konfigurasi EmailJS</h3>
+<input id="serviceId" placeholder="Service ID">
+<input id="templateId" placeholder="Template ID">
+<input id="publicKey" placeholder="Public Key">
+<button onclick="initEmailJS()">Simpan Konfigurasi</button>
 
-        <div class="status" id="status-msg"></div>
-        
-        <div class="card-footer">
-            © 2023 GSXID. Layanan OTP gratis untuk registrasi.
-        </div>
-    </div>
-</div>
+<hr>
+
+<h3>Kirim OTP</h3>
+<input id="email" placeholder="Email tujuan">
+<button onclick="kirimOTP()">Kirim OTP</button>
+
+<hr>
+
+<h3>Verifikasi OTP</h3>
+<input id="otpInput" placeholder="Masukkan OTP">
+<button onclick="cekOTP()">Verifikasi</button>
+
+<div id="log"></div>
 
 <script>
-    // --- KONFIGURASI EMAILJS (GANTI DENGAN MILIK ANDA) ---
-    const PUBLIC_KEY = "FJWcebfOpPpndqHqv";
-    const SERVICE_ID = "service_2ykzvt1";
-    const TEMPLATE_ID = "template_2jiyeiu";
+let OTP = null;
+let emailjsReady = false;
 
-    // Inisialisasi EmailJS
-    if (PUBLIC_KEY.includes("GANTI")) {
-        console.warn("Anda perlu mengkonfigurasi EmailJS dengan kredensial Anda sendiri.");
-    } else {
-        emailjs.init(PUBLIC_KEY);
+function log(msg) {
+    document.getElementById("log").innerText = msg;
+}
+
+function initEmailJS() {
+    const publicKey = document.getElementById("publicKey").value.trim();
+    if (!publicKey) {
+        log("Public Key kosong");
+        return;
+    }
+    emailjs.init(publicKey);
+    emailjsReady = true;
+    log("EmailJS siap");
+}
+
+function generateOTP() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function kirimOTP() {
+    if (!emailjsReady) {
+        log("Konfigurasi EmailJS belum disimpan");
+        return;
     }
 
-    let generatedOTP = "";
-    let userEmail = "";
+    const serviceId = document.getElementById("serviceId").value.trim();
+    const templateId = document.getElementById("templateId").value.trim();
+    const email = document.getElementById("email").value.trim();
 
-    async function sendOTP() {
-        userEmail = document.getElementById('email').value;
-        const statusMsg = document.getElementById('status-msg');
-        
-        // Validasi email
-        if (!userEmail) {
-            showStatus("Masukkan alamat email terlebih dahulu!", "error");
-            return;
-        }
-        
-        if (!isValidEmail(userEmail)) {
-            showStatus("Format email tidak valid!", "error");
-            return;
-        }
-
-        // Generate 6 digit angka
-        generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-
-        // Tampilkan status
-        showStatus("Sedang mengirim kode OTP ke email Anda...", "info");
-        
-        // Nonaktifkan tombol sementara
-        const sendBtn = document.getElementById('send-btn');
-        sendBtn.disabled = true;
-        sendBtn.innerHTML = "Mengirim...";
-        
-        try {
-            // Kirim email menggunakan EmailJS
-            if (!PUBLIC_KEY.includes("GANTI")) {
-                await emailjs.send(SERVICE_ID, TEMPLATE_ID, {
-                    to_email: userEmail,
-                    otp: generatedOTP,
-                    brand_name: "GSXID"
-                });
-            } else {
-                // Simulasi jika EmailJS belum dikonfigurasi
-                await simulateEmailSend();
-            }
-            
-            // Tampilkan status sukses
-            showStatus(`Kode OTP berhasil dikirim ke ${userEmail}. Periksa kotak masuk Anda.`, "success");
-            
-            // Tampilkan bagian OTP
-            document.getElementById('otp-section').style.display = "block";
-            
-            // Ubah teks tombol
-            sendBtn.innerHTML = "Kirim Ulang OTP";
-            
-            // Fokus ke input OTP
-            setTimeout(() => {
-                document.getElementById('otp-input').focus();
-            }, 300);
-            
-        } catch (error) {
-            console.error("Gagal mengirim OTP:", error);
-            showStatus("Gagal mengirim email. Periksa koneksi internet atau konfigurasi EmailJS.", "error");
-        } finally {
-            // Aktifkan kembali tombol
-            sendBtn.disabled = false;
-        }
+    if (!serviceId || !templateId || !email) {
+        log("Data belum lengkap");
+        return;
     }
 
-    function verifyOTP() {
-        const userInput = document.getElementById('otp-input').value.trim();
-        const statusMsg = document.getElementById('status-msg');
-        
-        if (!userInput) {
-            showStatus("Masukkan kode OTP terlebih dahulu!", "error");
-            return;
-        }
-        
-        if (userInput === generatedOTP) {
-            showStatus("✅ Verifikasi berhasil! Akun Anda sedang dibuat...", "success");
-            
-            // Simulasi proses pembuatan akun
-            setTimeout(() => {
-                showStatus("✅ Akun berhasil dibuat! Anda akan diarahkan ke dashboard...", "success");
-                
-                // Simulasi pengalihan setelah 2 detik
-                setTimeout(() => {
-                    alert("Selamat datang di GSXID! Akun Anda telah berhasil dibuat.");
-                    resetForm();
-                }, 2000);
-            }, 1500);
-        } else {
-            showStatus("❌ Kode OTP salah. Silakan coba lagi.", "error");
-            
-            // Animasi shake pada input OTP
-            const otpInput = document.getElementById('otp-input');
-            otpInput.style.borderColor = "#F44336";
-            otpInput.style.animation = "none";
-            setTimeout(() => {
-                otpInput.style.animation = "shake 0.5s";
-            }, 10);
-        }
-    }
+    OTP = generateOTP();
 
-    // Fungsi bantuan
-    function showStatus(message, type) {
-        const statusMsg = document.getElementById('status-msg');
-        statusMsg.textContent = message;
-        statusMsg.className = "status " + type;
-    }
-    
-    function isValidEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
-    }
-    
-    function resetForm() {
-        document.getElementById('email').value = "";
-        document.getElementById('otp-input').value = "";
-        document.getElementById('otp-section').style.display = "none";
-        document.getElementById('send-btn').innerHTML = "Kirim Kode OTP";
-        document.getElementById('status-msg').className = "status";
-        document.getElementById('status-msg').textContent = "";
-        generatedOTP = "";
-        userEmail = "";
-    }
-    
-    // Simulasi pengiriman email jika EmailJS belum dikonfigurasi
-    async function simulateEmailSend() {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                console.log(`Simulasi: OTP ${generatedOTP} dikirim ke ${userEmail}`);
-                resolve();
-            }, 1500);
+    const params = {
+        to_email: email,
+        otp: OTP
+    };
+
+    emailjs.send(serviceId, templateId, params)
+        .then(() => {
+            log("OTP berhasil dikirim");
+        })
+        .catch(err => {
+            log("Gagal kirim OTP: " + err.text);
         });
+}
+
+function cekOTP() {
+    const input = document.getElementById("otpInput").value.trim();
+    if (!OTP) {
+        log("OTP belum dikirim");
+        return;
     }
-    
-    // Tambahkan style untuk animasi shake
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // Auto-tab untuk input OTP (6 digit)
-    document.getElementById('otp-input').addEventListener('input', function(e) {
-        if (this.value.length === 6) {
-            document.getElementById('verify-btn').focus();
-        }
-    });
-    
-    // Submit dengan Enter
-    document.getElementById('email').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            sendOTP();
-        }
-    });
-    
-    document.getElementById('otp-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            verifyOTP();
-        }
-    });
+    if (input === OTP) {
+        log("OTP valid");
+        OTP = null;
+    } else {
+        log("OTP salah");
+    }
+}
 </script>
 
 </body>
