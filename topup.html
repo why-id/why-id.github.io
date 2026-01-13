@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXIS Bronet | Top Up</title>
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
+  body{
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-4 text-white">
+
+<div class="w-full max-w-md">
+  <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-6">
+
+    <!-- Header -->
+    <div class="text-center mb-6">
+      <h1 class="text-xl font-bold tracking-wide">AXIS BRONET</h1>
+      <p class="text-sm text-white/70">Top Up Data Internet Cepat</p>
+    </div>
+
+    <!-- Nomor -->
+    <label class="text-sm text-white/80">Nomor AXIS</label>
+    <input id="nomor" type="tel" placeholder="0838xxxxxxx"
+      class="w-full mt-1 mb-4 px-4 py-3 rounded-xl bg-white/20 outline-none focus:ring-2 focus:ring-cyan-300">
+
+    <!-- Paket -->
+    <label class="text-sm text-white/80">Pilih Paket</label>
+    <select id="paket"
+      class="w-full mt-1 mb-4 px-4 py-3 rounded-xl bg-white/20 outline-none focus:ring-2 focus:ring-cyan-300 text-black">
+      <option value="Bronet 1GB|15000">Bronet 1GB - Rp15.000</option>
+      <option value="Bronet 3GB|25000">Bronet 3GB - Rp25.000</option>
+      <option value="Bronet 5GB|35000">Bronet 5GB - Rp35.000</option>
+      <option value="Bronet 10GB|60000">Bronet 10GB - Rp60.000</option>
+    </select>
+
+    <!-- Total -->
+    <div class="flex justify-between items-center mb-5">
+      <span class="text-sm text-white/80">Total Bayar</span>
+      <span id="total" class="text-lg font-semibold text-cyan-300">Rp15.000</span>
+    </div>
+
+    <!-- DANA -->
+    <button onclick="bayarDana()"
+      class="w-full mb-3 flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-white font-semibold py-3 rounded-2xl transition active:scale-95">
+      <span class="material-icons">account_balance_wallet</span>
+      Bayar via DANA
+    </button>
+
+    <!-- WhatsApp -->
+    <button onclick="kirimWA()"
+      class="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-black font-semibold py-3 rounded-2xl transition active:scale-95">
+      <span class="material-icons">chat</span>
+      Konfirmasi WhatsApp
+    </button>
+
+    <p class="text-center text-xs text-white/60 mt-4">
+      © 2026 AXIS Bronet • Auto WhatsApp
+    </p>
+
+  </div>
+</div>
+
+<script>
+const paket = document.getElementById("paket");
+const total = document.getElementById("total");
+
+paket.addEventListener("change", () => {
+  const harga = paket.value.split("|")[1];
+  total.textContent = "Rp" + Number(harga).toLocaleString("id-ID");
+});
+
+function bayarDana(){
+  const harga = paket.value.split("|")[1];
+  window.location.href = `dana://pay?amount=${harga}&phone=083856124021`;
+}
+
+function kirimWA(){
+  const nomor = document.getElementById("nomor").value;
+  if(!nomor){
+    alert("Masukkan nomor AXIS");
+    return;
+  }
+
+  const [paketNama, harga] = paket.value.split("|");
+
+  const pesan =
+`Halo Admin,
+
+Saya ingin top up AXIS:
+📱 Nomor: ${nomor}
+📦 Paket: ${paketNama}
+💰 Harga: Rp${Number(harga).toLocaleString("id-ID")}
+
+Pembayaran via DANA.
+Terima kasih.`;
+
+  window.open(
+    `https://wa.me/6283856124021?text=${encodeURIComponent(pesan)}`,
+    "_blank"
+  );
+}
+</script>
+
+</body>
+</html>
