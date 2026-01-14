@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Code Editor</title>
+
+<!-- Font -->
+<link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<!-- CodeMirror -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+
+<style>
+* {
+  box-sizing: border-box;
+  font-family: "Varela Round", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #020617;
+  color: #e5e7eb;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  height: 56px;
+  background: #020617;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid #1e293b;
+}
+
+header button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  background: #1e293b;
+  color: #e5e7eb;
+}
+
+header button.active {
+  background: #38bdf8;
+  color: #020617;
+}
+
+header .material-icons {
+  font-size: 18px;
+}
+
+/* Main */
+main {
+  flex: 1;
+  position: relative;
+}
+
+/* Editor */
+#editorBox {
+  height: 100%;
+  display: none;
+}
+
+.CodeMirror {
+  height: 100%;
+  font-size: 14px;
+}
+
+/* Preview */
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: white;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <button id="btnPreview" class="active" onclick="showPreview()">
+    <span class="material-icons">play_arrow</span> Preview
+  </button>
+  <button id="btnEdit" onclick="showEditor()">
+    <span class="material-icons">code</span> Edit
+  </button>
+</header>
+
+<main>
+  <div id="editorBox">
+    <textarea id="code"></textarea>
+  </div>
+  <iframe id="preview"></iframe>
+</main>
+
+<!-- CodeMirror -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+
+<script>
+const editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+  mode: "htmlmixed",
+  theme: "material-darker",
+  lineNumbers: true,
+  tabSize: 2,
+  lineWrapping: true
+});
+
+const defaultCode = `<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      background: #0f172a;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+      padding-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hello World 🚀</h1>
+  <p>Editor Web Android</p>
+</body>
+</html>`;
+
+editor.setValue(localStorage.getItem("code") || defaultCode);
+
+// Auto save
+editor.on("change", () => {
+  localStorage.setItem("code", editor.getValue());
+});
+
+// Functions
+function showPreview() {
+  document.getElementById("preview").srcdoc = editor.getValue();
+  document.getElementById("editorBox").style.display = "none";
+
+  setActive("btnPreview");
+}
+
+function showEditor() {
+  document.getElementById("editorBox").style.display = "block";
+  setActive("btnEdit");
+}
+
+function setActive(id) {
+  document.getElementById("btnPreview").classList.remove("active");
+  document.getElementById("btnEdit").classList.remove("active");
+  document.getElementById(id).classList.add("active");
+}
+
+// Load preview on start
+showPreview();
+</script>
+
+</body>
+</html>
