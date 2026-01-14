@@ -2,123 +2,176 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>EmailJS OTP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GresiXploit | Official Registration</title>
+
+<!-- Bootstrap Dark -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Rubik+Dirt&display=swap" rel="stylesheet">
+
+<!-- Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+<!-- EmailJS -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #111;
-    color: #eee;
-    padding: 20px;
-}
-input, button {
-    width: 100%;
-    padding: 10px;
-    margin: 6px 0;
-    font-size: 16px;
-}
-button {
-    background: #2c7;
+  body {
+    font-family: 'Varela Round', system-ui, sans-serif;
+    background: #0d1117;
+  }
+  .card {
+    background: #161b22;
     border: none;
-    cursor: pointer;
-}
-#log {
-    margin-top: 10px;
-    font-size: 14px;
-}
+    border-radius: 1.2rem;
+  }
+  .graffiti {
+    font-family: 'Rubik Dirt', cursive;
+    letter-spacing: 2px;
+    color: #58a6ff;
+  }
 </style>
 </head>
-<body>
 
-<h2>EmailJS OTP</h2>
+<body class="d-flex align-items-center justify-content-center min-vh-100 p-3">
 
-<h3>Konfigurasi EmailJS</h3>
-<input id="serviceId" placeholder="Service ID">
-<input id="templateId" placeholder="Template ID">
-<input id="publicKey" placeholder="Public Key">
-<button onclick="initEmailJS()">Simpan Konfigurasi</button>
+<div id="card" class="card shadow-lg p-4 w-100" style="max-width:420px">
 
-<hr>
+  <!-- HEADER -->
+  <div class="text-center mb-4">
+    <h3 class="text-light fw-semibold">GresiXploit</h3>
+    <small class="text-secondary">Official Community Registration</small>
+  </div>
 
-<h3>Kirim OTP</h3>
-<input id="email" placeholder="Email tujuan">
-<button onclick="kirimOTP()">Kirim OTP</button>
+  <!-- FORM EMAIL -->
+  <form id="email-form" class="mb-3">
+    <label class="text-secondary mb-1">Email</label>
+    <div class="input-group">
+      <span class="input-group-text bg-dark text-secondary border-secondary">
+        <i class="bi bi-envelope"></i>
+      </span>
+      <input type="email" name="to_email" class="form-control bg-dark text-light border-secondary"
+        placeholder="email@example.com" required>
+    </div>
 
-<hr>
+    <input type="hidden" name="otp" id="otp-field">
 
-<h3>Verifikasi OTP</h3>
-<input id="otpInput" placeholder="Masukkan OTP">
-<button onclick="cekOTP()">Verifikasi</button>
+    <button class="btn btn-primary w-100 mt-3">
+      Kirim OTP
+    </button>
+  </form>
 
-<div id="log"></div>
+  <!-- FORM OTP -->
+  <form id="otp-form" class="d-none">
+    <label class="text-secondary mb-1">Kode OTP</label>
+    <div class="input-group">
+      <span class="input-group-text bg-dark text-secondary border-secondary">
+        <i class="bi bi-shield-lock"></i>
+      </span>
+      <input type="text" id="otp-input" class="form-control bg-dark text-light border-secondary"
+        placeholder="6 digit kode" required>
+    </div>
+
+    <small id="timer" class="text-secondary d-block mt-1"></small>
+
+    <button class="btn btn-success w-100 mt-3">
+      Verifikasi OTP
+    </button>
+  </form>
+
+</div>
 
 <script>
-let OTP = null;
-let emailjsReady = false;
+/* ================= EMAILJS CONFIG ================= */
+emailjs.init('FJWcebfOpPpndqHqv');
+const serviceID = 'service_2ykzvt1';
+const templateID = 'template_2jiyeiu';
 
-function log(msg) {
-    document.getElementById("log").innerText = msg;
-}
+/* ================= LOGIC OTP ================= */
+let generatedOTP = null;
+let expiryTime = null;
+let timerInterval = null;
 
-function initEmailJS() {
-    const publicKey = document.getElementById("publicKey").value.trim();
-    if (!publicKey) {
-        log("Public Key kosong");
-        return;
-    }
-    emailjs.init(publicKey);
-    emailjsReady = true;
-    log("EmailJS siap");
-}
+const Toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true
+});
 
 function generateOTP() {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-function kirimOTP() {
-    if (!emailjsReady) {
-        log("Konfigurasi EmailJS belum disimpan");
-        return;
+function startTimer() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    const remain = expiryTime - Date.now();
+    if (remain <= 0) {
+      clearInterval(timerInterval);
+      generatedOTP = null;
+      document.getElementById('timer').textContent = 'OTP expired';
+      Toast.fire({ icon: 'error', title: 'OTP telah kedaluwarsa' });
+      return;
     }
-
-    const serviceId = document.getElementById("serviceId").value.trim();
-    const templateId = document.getElementById("templateId").value.trim();
-    const email = document.getElementById("email").value.trim();
-
-    if (!serviceId || !templateId || !email) {
-        log("Data belum lengkap");
-        return;
-    }
-
-    OTP = generateOTP();
-
-    const params = {
-        to_email: email,
-        otp: OTP
-    };
-
-    emailjs.send(serviceId, templateId, params)
-        .then(() => {
-            log("OTP berhasil dikirim");
-        })
-        .catch(err => {
-            log("Gagal kirim OTP: " + err.text);
-        });
+    const m = Math.floor(remain / 60000);
+    const s = Math.floor((remain % 60000) / 1000);
+    document.getElementById('timer').textContent =
+      `Berlaku ${m}:${s.toString().padStart(2,'0')}`;
+  }, 1000);
 }
 
-function cekOTP() {
-    const input = document.getElementById("otpInput").value.trim();
-    if (!OTP) {
-        log("OTP belum dikirim");
-        return;
-    }
-    if (input === OTP) {
-        log("OTP valid");
-        OTP = null;
-    } else {
-        log("OTP salah");
-    }
-}
+/* ================= SEND OTP ================= */
+document.getElementById('email-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  generatedOTP = generateOTP();
+  expiryTime = Date.now() + 5 * 60 * 1000;
+  document.getElementById('otp-field').value = generatedOTP;
+
+  emailjs.sendForm(serviceID, templateID, this)
+    .then(() => {
+      Toast.fire({ icon: 'success', title: 'OTP berhasil dikirim' });
+      document.getElementById('otp-form').classList.remove('d-none');
+      startTimer();
+    })
+    .catch(() => {
+      Toast.fire({ icon: 'error', title: 'Gagal mengirim OTP' });
+    });
+});
+
+/* ================= VERIFY OTP ================= */
+document.getElementById('otp-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  if (!generatedOTP || Date.now() > expiryTime) {
+    Toast.fire({ icon: 'error', title: 'OTP sudah tidak berlaku' });
+    return;
+  }
+
+  if (document.getElementById('otp-input').value === generatedOTP) {
+    clearInterval(timerInterval);
+    document.getElementById('card').innerHTML = `
+      <div class="text-center">
+        <i class="bi bi-patch-check-fill text-success display-3"></i>
+        <h4 class="text-light mt-3">Selamat 🎉</h4>
+        <p class="text-secondary">
+          Anda telah menjadi anggota resmi
+        </p>
+        <h2 class="graffiti mt-2">GRESIXPLOIT OFFICIAL</h2>
+      </div>
+    `;
+    Toast.fire({ icon: 'success', title: 'Verifikasi berhasil' });
+  } else {
+    Toast.fire({ icon: 'error', title: 'OTP salah' });
+  }
+});
 </script>
 
 </body>
