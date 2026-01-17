@@ -109,7 +109,7 @@ body {
         <textarea
             id="output"
             readonly
-            style="resize:none" class="w-full h-64 p-4 rounded-2xl bg-black/40 border border-borderGlass resize-y"
+            style="resize:none" class="w-full h-64 p-4 rounded-2xl bg-black/40 border border-borderGlass focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-y"
         ></textarea>
 
 <div class="flex flex-wrap justify-center gap-3 mt-5">
@@ -163,7 +163,7 @@ async function runEncryption() {
     const rawSource = document.getElementById('sourceInput').value;
 
     if (!rawSource.trim()) {
-        Swal.fire('Warning', 'Source masih kosong!', 'warning');
+        Swal.fire('Warning', 'Kode masih kosong!', 'warning');
         return;
     }
 
