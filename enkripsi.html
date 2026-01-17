@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Encryptor</title>
+
+<!-- Font -->
+<link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+tailwind.config = {
+    theme: {
+        extend: {
+            fontFamily: {
+                varela: ['Varela Round', 'sans-serif']
+            },
+            colors: {
+                glass: 'rgba(255,255,255,0.08)',
+                borderGlass: 'rgba(255,255,255,0.15)'
+            }
+        }
+    }
+}
+</script>
+
+<style>
+body {
+    background: radial-gradient(circle at top, #1f2937, #020617);
+}
+.glass {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+.mode-option input:checked + div {
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    box-shadow: 0 12px 28px rgba(99,102,241,.35);
+}
+</style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center text-white font-varela text-[13px]">
+
+<div class="w-full max-w-4xl p-6 rounded-3xl glass bg-glass border border-borderGlass shadow-2xl">
+
+    <h1 class="text-l text-center mb-5">HTML Encryptor by @why.id</h1>
+
+    <!-- SOURCE -->
+    <textarea
+        id="sourceInput" style="resize:none"
+        class="w-full h-60 p-4 rounded-2xl bg-black/30 border border-borderGlass
+        focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-y"
+        placeholder="Paste source HTML kamu di sini..."
+    ></textarea>
+
+    <!-- MODE OPTIONS -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-5">
+
+        <label class="mode-option cursor-pointer">
+            <input type="radio" name="mode" checked hidden onclick="setEncMode('NORMAL')">
+            <div class="p-4 rounded-2xl bg-black/30 border border-borderGlass glass transition">
+                <p class="font-semibold">Enkripsi Normal</p>
+                <p class="opacity-60 text-xs mt-1">Mode base64 normal</p>
+            </div>
+        </label>
+
+        <label class="mode-option cursor-pointer">
+            <input type="radio" name="mode" hidden onclick="setEncMode('INVISH')">
+            <div class="p-4 rounded-2xl bg-black/30 border border-borderGlass glass transition">
+                <p class="font-semibold">Enkripsi Invisible</p>
+                <p class="opacity-60 text-xs mt-1">Mode tak terlihat</p>
+            </div>
+        </label>
+
+        <label class="mode-option cursor-pointer">
+            <input type="radio" name="mode" hidden onclick="setEncMode('HARD')">
+            <div class="p-4 rounded-2xl bg-black/30 border border-borderGlass glass transition">
+                <p class="font-semibold">Enkripsi Kombo</p>
+                <p class="opacity-60 text-xs mt-1">Mode kombinasi base64+</p>
+            </div>
+        </label>
+
+    </div>
+
+    <!-- ACTION -->
+    <div class="mt-6 flex justify-center">
+        <button
+            onclick="runEncryption()"
+            class="px-6 py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500
+            shadow-lg hover:scale-105 transition"
+        >
+            Encrypt
+        </button>
+    </div>
+</div>
+
+<!-- RESULT MODAL -->
+<div id="resultModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4">
+    <div class="w-full max-w-4xl p-5 rounded-3xl glass bg-glass border border-borderGlass">
+
+        <h2 class="mb-3 text-sm font-semibold">Hasil Enkripsi</h2>
+
+        <textarea
+            id="output"
+            readonly
+            style="resize:none" class="w-full h-64 p-4 rounded-2xl bg-black/40 border border-borderGlass resize-y"
+        ></textarea>
+
+<div class="flex flex-wrap justify-center gap-3 mt-5">
+
+    <button
+        onclick="copyResult()"
+        class="px-6 py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500
+        shadow-lg hover:scale-105 transition"
+    >
+        Salin
+    </button>
+
+    <button
+        onclick="downloadResult()"
+        class="px-6 py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500
+        shadow-lg hover:scale-105 transition"
+    >
+        Download
+    </button>
+
+    <button
+        onclick="closeModal()"
+        class="px-6 py-2.5 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500
+        shadow-lg hover:scale-105 transition"
+    >
+        Tutup
+    </button>
+
+</div>
+
+    </div>
+</div>
+
+<script>
+/* =========================
+   STATE
+========================= */
+let selectedEncMode = "NORMAL";
+
+/* =========================
+   MODE
+========================= */
+function setEncMode(mode) {
+    selectedEncMode = mode;
+}
+
+/* =========================
+   ENCRYPT (ASLI, TIDAK DIUBAH)
+========================= */
+async function runEncryption() {
+    const rawSource = document.getElementById('sourceInput').value;
+
+    if (!rawSource.trim()) {
+        Swal.fire('Warning', 'Source masih kosong!', 'warning');
+        return;
+    }
+
+    let result = "";
+
+    if (selectedEncMode === 'NORMAL') {
+        const encoded = btoa(unescape(encodeURIComponent(rawSource)));
+        result = `<script>document.write(decodeURIComponent(escape(atob("${encoded}"))));<\/script>`;
+    }
+
+    else if (selectedEncMode === 'INVISH') {
+        const b64 = btoa(unescape(encodeURIComponent(rawSource)));
+        const hidden = b64.split('').map(c => {
+            const bin = c.charCodeAt(0).toString(2).padStart(8, '0');
+            return bin.split('').map(b => b === '0' ? '\u200c' : '\u200d').join('');
+        }).join('\u200b');
+
+        result = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>
+<script>
+(function(){
+const h="${hidden}";
+const d=h.split("\\u200b").map(c=>{
+return String.fromCharCode(parseInt(
+c.split('').map(b=>b==="\\u200c"?"0":"1").join('')
+,2));
+}).join('');
+document.write(decodeURIComponent(escape(atob(d))));
+})();
+<\/script>
+</body></html>`;
+    }
+
+    else if (selectedEncMode === 'HARD') {
+        result = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<script>
+const enc="${btoa(rawSource)}";
+document.write(atob(enc));
+<\/script>
+</head><body></body></html>`;
+    }
+
+    document.getElementById('output').value = result;
+    document.getElementById('resultModal').classList.remove('hidden');
+    document.getElementById('resultModal').classList.add('flex');
+}
+
+/* =========================
+   UTIL
+========================= */
+function closeModal() {
+    document.getElementById('resultModal').classList.add('hidden');
+    document.getElementById('resultModal').classList.remove('flex');
+}
+
+function copyResult() {
+    const o = document.getElementById('output');
+    o.select();
+    document.execCommand('copy');
+    Swal.fire('OK', 'Hasil disalin', 'success');
+}
+
+function downloadResult() {
+    const data = document.getElementById('output').value;
+    const blob = new Blob([data], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'encrypted.html';
+    a.click();
+}
+</script>
+
+</body>
+</html>
