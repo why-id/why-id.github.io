@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Speed Test 180° Arc</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+tailwind.config={
+  theme:{extend:{
+    fontFamily:{main:['"Varela Round"','sans-serif']},
+    colors:{bg:'#0b0b0b',card:'#141414',accent:'#ff9800'}
+  }}
+}
+</script>
+
+<style>
+body{background:#0b0b0b;color:#fff;font-family:'Varela Round'}
+.tick{stroke:#2e2e2e;stroke-width:2}
+.tick.major{stroke-width:3}
+.tick.active{stroke:#ff9800}
+</style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center">
+
+<div class="bg-card border border-neutral-700 rounded-xl p-8 w-full max-w-2xl space-y-6">
+
+<h1 class="text-2xl font-bold text-center flex justify-center gap-2">
+<span class="material-icons text-accent">speed</span> Internet Speed Test
+</h1>
+
+<!-- METER -->
+<div class="flex justify-center">
+<svg width="360" height="200" viewBox="0 0 360 200">
+  <g id="ticks"></g>
+  <text x="180" y="165" text-anchor="middle" font-size="30" fill="#fff">
+    <tspan id="speed">0</tspan>
+    <tspan font-size="14"> Mbps</tspan>
+  </text>
+</svg>
+</div>
+
+<div id="status" class="text-center text-neutral-400">project by @why.id</div>
+
+<div class="grid grid-cols-3 gap-4 text-center text-sm">
+<div><span class="material-icons text-accent">network_ping</span><div id="ping">-</div>Ping</div>
+<div><span class="material-icons text-accent">timeline</span><div id="jitter">-</div>Jitter</div>
+<div><span class="material-icons text-accent">timer</span><div id="duration">0.0 s</div>Durasi</div>
+</div>
+
+<button onclick="startTest()" class="w-full bg-accent text-black font-bold py-3 rounded-lg">
+GASCOKK
+</button>
+
+<hr class="border-neutral-700">
+
+<div class="space-y-2 text-sm">
+<div class="flex gap-2"><span class="material-icons text-accent">public</span>IP: <span id="ip">-</span></div>
+<div class="flex gap-2"><span class="material-icons text-accent">router</span>ISP: <span id="isp">-</span></div>
+<div class="flex gap-2"><span class="material-icons text-accent">language</span>Negara: <span id="country">-</span></div>
+<div class="flex gap-2"><span class="material-icons text-accent">download</span>Download: <span id="dl">-</span> Mbps</div>
+<div class="flex gap-2"><span class="material-icons text-accent">upload</span>Upload: <span id="ul">-</span> Mbps</div>
+</div>
+
+</div>
+
+<script>
+/* ===== METER ===== */
+const ticksGroup=document.getElementById("ticks");
+const max=100;
+const cx=180, cy=150;
+const rOuter=120, rMinor=105, rMajor=95;
+
+for(let i=0;i<=max;i++){
+  const angle=(-180+(i/max)*180)*Math.PI/180;
+  const isMajor=i%10===0;
+  const r2=isMajor?rMajor:rMinor;
+
+  const x1=cx+Math.cos(angle)*rOuter;
+  const y1=cy+Math.sin(angle)*rOuter;
+  const x2=cx+Math.cos(angle)*r2;
+  const y2=cy+Math.sin(angle)*r2;
+
+  const l=document.createElementNS("http://www.w3.org/2000/svg","line");
+  l.setAttribute("x1",x1);
+  l.setAttribute("y1",y1);
+  l.setAttribute("x2",x2);
+  l.setAttribute("y2",y2);
+  l.classList.add("tick");
+  if(isMajor) l.classList.add("major");
+  ticksGroup.appendChild(l);
+}
+
+function updateMeter(mbps){
+  const v=Math.min(mbps,max);
+  speed.textContent=v.toFixed(1);
+  [...ticksGroup.children].forEach((t,i)=>{
+    t.classList.toggle("active",i<=v);
+  });
+}
+function resetMeter(){updateMeter(0);}
+
+/* ===== TIMER ===== */
+let startTime,timer;
+function startDuration(){
+  startTime=performance.now();
+  timer=setInterval(()=>{
+    duration.textContent=((performance.now()-startTime)/1000).toFixed(1)+" s";
+  },100);
+}
+function stopDuration(){clearInterval(timer);}
+
+/* ===== IP INFO ===== */
+async function getIPInfo(){
+  const d=await (await fetch("https://ipinfo.io/json")).json();
+  ip.textContent=d.ip;
+  isp.textContent=d.org;
+  country.textContent=d.country;
+}
+
+/* ===== PING ===== */
+async function pingTest(){
+  let t=[];
+  for(let i=0;i<5;i++){
+    const s=performance.now();
+    await fetch("https://cloudflare.com/cdn-cgi/trace",{cache:"no-store"});
+    t.push(performance.now()-s);
+  }
+  const avg=t.reduce((a,b)=>a+b)/t.length;
+  const jit=Math.sqrt(t.map(x=>(x-avg)**2).reduce((a,b)=>a+b)/t.length);
+  ping.textContent=avg.toFixed(1)+" ms";
+  jitter.textContent=jit.toFixed(1)+" ms";
+}
+
+/* ===== DOWNLOAD ===== */
+async function downloadTest(){
+  status.textContent="Testing download...";
+  let bytes=0,start=performance.now();
+  const ctrl=new AbortController();
+  setTimeout(()=>ctrl.abort(),7000);
+
+  try{
+    const r=await fetch("https://speed.cloudflare.com/__down?bytes=40000000",{signal:ctrl.signal});
+    const reader=r.body.getReader();
+    while(true){
+      const {done,value}=await reader.read();
+      if(done)break;
+      bytes+=value.length;
+      updateMeter((bytes*8/1e6)/((performance.now()-start)/1000));
+    }
+  }catch{}
+
+  const mbps=(bytes*8/1e6)/((performance.now()-start)/1000);
+  dl.textContent=mbps.toFixed(1);
+  status.textContent="Download selesai";
+  return mbps;
+}
+
+/* ===== UPLOAD SIZE (5–100 MB) ===== */
+function getUploadSize(downloadMbps){
+  if(downloadMbps<10) return 5;
+  if(downloadMbps<25) return 10;
+  if(downloadMbps<50) return 20;
+  if(downloadMbps<100) return 40;
+  return 100;
+}
+
+/* ===== UPLOAD ===== */
+async function uploadTest(downloadMbps){
+  status.textContent="Testing upload...";
+  const sizeMB=getUploadSize(downloadMbps);
+  const size=sizeMB*1024*1024;
+  const data=new Uint8Array(size);
+
+  const start=performance.now();
+  await fetch("https://httpbin.io/post",{method:"POST",body:data});
+  const mbps=(size*8/1e6)/((performance.now()-start)/1000);
+
+  ul.textContent=mbps.toFixed(1);
+  updateMeter(mbps);
+}
+
+/* ===== START ===== */
+async function startTest(){
+  resetMeter();
+  startDuration();
+
+  await getIPInfo();
+  await pingTest();
+
+  const dlSpeed=await downloadTest();
+
+  resetMeter();
+  status.textContent="Persiapan upload...";
+  await new Promise(r=>setTimeout(r,500));
+
+  await uploadTest(dlSpeed);
+
+  stopDuration();
+  status.textContent="Selesai";
+}
+</script>
+
+</body>
+</html>
