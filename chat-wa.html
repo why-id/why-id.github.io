@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+
+<title>WhatsApp by DexSkieee
+</title>
+
+<script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      background-color: #111;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      height: 100dvh;
+      overflow: hidden;
+    }
+    .app-layout {
+      width: 100%;
+      max-width: 600px;
+      height: 100%;
+      background-color: #E5DDD5;
+      background-image: url("https://i.pinimg.com/originals/97/c0/02/97c0027d8d987606346b7d519d5c4146.png");
+      background-blend-mode: overlay;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .chat-header {
+      width: 100%;
+      background-color: #008069; 
+      padding: 10px 10px;
+      display: flex;
+      align-items: center;
+      color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      z-index: 10;
+      flex-shrink: 0;
+    }
+
+    .back-btn { margin-right: 5px; font-size: 24px; cursor: pointer; display: flex; }
+    
+    .profile-pic {
+      width: 38px; height: 38px; /* Sedikit diperkecil */
+      border-radius: 50%; overflow: hidden; margin-right: 10px; background: #ccc; flex-shrink: 0;
+    }
+    .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
+
+    .user-info { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; margin-right: 5px; }
+    .user-name { font-weight: 600; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-status { font-size: 12px; opacity: 0.8; margin-top: 1px; }
+
+    .header-icons { display: flex; gap: 18px; font-size: 22px; flex-shrink: 0; }
+
+    /* --- CHAT AREA --- */
+    #chat-container {
+      flex: 1;
+      overflow-y: auto; /* Menggunakan auto lebih aman daripada scroll */
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      scroll-behavior: smooth;
+      background-image: url("https://f.top4top.io/p_36213xuu30.png");
+    background-repeat: repeat; 
+    background-blend-mode: multiply; /* Membantu transparansi dan perpaduan warna */
+    opacity: 0.9; /* Tingkat transparansi, sesuaikan jika perlu */
+    }
+#chat-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* Gambar dan Transparansi */
+    background-image: url("https://f.top4top.io/p_36213xuu30.png");
+    background-repeat: repeat;
+    background-color: #E5DDD5; 
+    background-blend-mode: multiply;
+    
+    opacity: 0.7; /* TINGKAT TRANSPARANSI (Hanya pada lapisan ini) */
+    z-index: -1; /* Posisikan di BAWAH SEMUA bubble chat */
+}
+    /* --- INPUT AREA (FIXED LAYOUT) --- */
+    .input-area {
+      width: 100%;
+      background: transparent;
+      padding: 6px 6px 6px 6px; /* Padding sisi dikurangi agar area lebih luas */
+      display: flex;
+      align-items: flex-end; /* Tombol & Input rata bawah */
+      gap: 6px; /* Jarak antara input putih dan tombol hijau */
+      z-index: 20;
+    }
+
+    .input-wrapper {
+      flex: 1; /* Mengisi sisa ruang yang ada */
+      min-width: 0; /* PENTING: Mencegah input mendorong container melebar */
+      background: white;
+      border-radius: 25px;
+      display: flex;
+      align-items: center;
+      padding: 8px 10px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      min-height: 48px;
+    }
+
+    .input-wrapper ion-icon {
+      font-size: 24px; color: #8696a0; margin: 0 4px; cursor: pointer; flex-shrink: 0;
+    }
+    
+    .input-wrapper input {
+      flex: 1; /* Input teks mengisi ruang di dalam bubble putih */
+      min-width: 0; /* Mencegah overflow teks */
+      border: none; outline: none; font-size: 16px;
+      margin: 0 8px; padding: 4px 0; background: transparent;
+      font-family: inherit;
+    }
+
+    /* TOMBOL KIRIM (Anti-Gepeng) */
+    .send-btn {
+      width: 48px;
+      height: 48px;
+      background: #008069;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 22px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      cursor: pointer;
+      flex-shrink: 0; /* PENTING: Tombol tidak boleh mengecil/terjepit */
+      transition: transform 0.1s;
+    }
+    .send-btn:active { transform: scale(0.9); }
+
+    /* --- BUBBLE CHAT --- */
+    .date-label {
+      align-self: center; background: #DCE8F2; color: #555; font-size: 12px;
+      padding: 6px 12px; border-radius: 8px; margin: 10px 0 16px 0; font-weight: 500;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+    }
+    
+    .msg { display: flex; flex-direction: column; width: 100%; margin-bottom: 3px;
+z-index: 1;     }
+    
+    .bubble {
+      max-width: 82%; /* Lebar bubble chat */
+      position: relative; padding: 6px 8px 8px 9px; border-radius: 12px;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.1); font-size: 15px; line-height: 20px; color: #111b21;
+    }
+
+    .msg.outgoing { align-items: flex-end; }
+    .msg.outgoing .bubble { background: #E7FFDB; border-top-right-radius: 0; margin-right: 5px; }
+    .msg.outgoing .bubble::before {
+      content: ""; position: absolute; right: -8px; top: 0; width: 0; height: 0;
+      border-top: 10px solid #E7FFDB; border-right: 10px solid transparent;
+    }
+
+    .msg.incoming { align-items: flex-start; margin-bottom: 4px;}
+    .msg.incoming .bubble { background: #ffffff; border-top-left-radius: 0; margin-left: 5px; }
+    .msg.incoming .bubble::before {
+      content: ""; position: absolute; left: -8px; top: 0; width: 0; height: 0;
+      border-top: 10px solid #ffffff; border-left: 10px solid transparent;
+    }
+
+    .metadata {
+      float: right; margin-top: 2px; margin-left: 12px; font-size: 11px; color: #667781;
+      display: flex; align-items: flex-end; gap: 3px; position: relative; top: 4px;
+    }
+    .checks { font-size: 16px; color: #53bdeb; }
+</style>
+</head>
+
+<body>
+
+<div class="app-layout">
+  <div class="chat-header">
+    <div class="back-btn"><ion-icon name="arrow-back"></ion-icon></div>
+    <div class="profile-pic"><img src="https://d.top4top.io/p_3621bx5ck0.jpg" alt="User"></div>
+    <div class="user-info">
+      <div class="user-name">GresiXploit</div>
+      <div class="user-status">Online</div>
+    </div>
+    <div class="header-icons">
+      <ion-icon name="videocam"></ion-icon>
+      <ion-icon name="call"></ion-icon>
+      <ion-icon name="ellipsis-vertical"></ion-icon>
+    </div>
+  </div>
+
+  <div id="chat-container">
+    <div class="date-label">HARI INI</div>
+    <div class="msg incoming">
+      <div class="bubble">
+         Selamat datang di chat pribadi saya.
+         <div class="metadata"><span class="time">19:30</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <div class="input-wrapper">
+      <ion-icon name="happy-outline"></ion-icon>
+      <input type="text" id="messageInput" placeholder="Ketik pesan" autocomplete="off">
+      <ion-icon name="attach-outline" style="transform: rotate(45deg);"></ion-icon>
+      <ion-icon name="camera-outline" id="cam-icon"></ion-icon>
+    </div>
+    
+    <div class="send-btn" id="sendButton">
+      <ion-icon name="mic" id="action-icon"></ion-icon>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.scaledrone.com/scaledrone.min.js"></script>
+<script>
+    const CLIENT_ID = "GNsD0FaYbkCRmfBs";
+    const USER_ID = Math.random().toString(36).substr(2, 9);
+    const drone = new Scaledrone(CLIENT_ID, { data: { id: USER_ID } });
+
+    drone.on("open", error => {
+        if (error) return console.error(error);
+        const room = drone.subscribe("observable-room");
+        room.on("data", (message, member) => {
+            const isMe = member.clientData.id === USER_ID;
+            addMessageToUI(message, isMe);
+        });
+    });
+
+    const input = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendButton");
+    const chatContainer = document.getElementById("chat-container");
+    const actionIcon = document.getElementById("action-icon");
+    const camIcon = document.getElementById("cam-icon");
+
+    input.addEventListener("input", function() {
+        if(this.value.trim().length > 0) {
+            actionIcon.setAttribute("name", "send");
+            camIcon.style.display = "none";
+        } else {
+            actionIcon.setAttribute("name", "mic");
+            camIcon.style.display = "block";
+        }
+    });
+
+    sendBtn.onclick = () => sendMsg();
+    input.addEventListener("keypress", e => { if (e.key === "Enter") sendMsg(); });
+
+    function sendMsg() {
+        const text = input.value.trim();
+        if (!text) return;
+        drone.publish({ room: "observable-room", message: text });
+        input.value = "";
+        actionIcon.setAttribute("name", "mic");
+        camIcon.style.display = "block";
+        input.focus();
+    }
+
+    function getTime() {
+        const d = new Date();
+        return d.getHours().toString().padStart(2, "0") + ":" + d.getMinutes().toString().padStart(2, "0");
+    }
+
+    function addMessageToUI(text, isMe) {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = isMe ? "msg outgoing" : "msg incoming";
+        const checkMarkHTML = isMe ? `<span class="checks"><ion-icon name="checkmark-done"></ion-icon></span>` : ``;
+
+        msgDiv.innerHTML = `<div class="bubble">${text}<div class="metadata"><span class="time">${getTime()}</span>${checkMarkHTML}</div></div>`;
+        chatContainer.appendChild(msgDiv);
+        chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
