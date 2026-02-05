@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>QRIS Generator by @why.id</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Abel&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=BBH+Bogle&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700;900&display=swap" rel="stylesheet">
+
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<!-- QR Library -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+<style>
+:root {
+  --bg: #0b1220;
+  --card: rgba(15, 23, 42, 0.75);
+  --border: rgba(148, 163, 184, 0.15);
+  --accent: #22c55e;
+  --text-muted: #94a3b8;
+}
+
+* {
+  font-family: "Kumbh Sans", system-ui, sans-serif;
+}
+h1{
+  font-family: "Pixelify Sans", sans-serif;
+}
+body {
+  background: linear-gradient(180deg, #0b1220, #020617);
+  color: white;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Title */
+.text2 {
+  font-family: "BBH Bogle", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--accent);
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+/* Card */
+.search-card {
+  background: var(--card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.55);
+  max-width: 520px;
+  margin: auto;
+}
+
+/* Input Row */
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+/* Circle Icon */
+.icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(34,197,94,.12);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* Input */
+.form-control {
+  flex: 1;
+  border-radius: 14px;
+  padding: 14px;
+  background: #020617;
+  border-color: var(--border);
+  color: white;
+  font-size: 14px;
+}
+
+.form-control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(34,197,94,.15);
+  background: #020617;
+  color: white;
+}
+
+/* File Upload */
+.file-box {
+  width: 100%;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: .25s ease;
+  background: rgba(2,6,23,.6);
+  margin-bottom: 12px;
+}
+
+.file-box:hover {
+  border-color: var(--accent);
+  background: rgba(34,197,94,.08);
+}
+
+.file-box span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Button */
+.btn-success {
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 12px;
+  border-color: var(--accent);
+  background: rgba(34,197,94,.12);
+}
+.btn-success:hover {
+  background: rgba(34,197,94,.18);
+}
+
+/* Canvas */
+canvas {
+  display: block;
+  margin: 20px auto;
+  border-radius: 16px;
+  max-width: 100%;
+  background: transparent;
+}
+
+/* ALERT SUCCESS */
+.alert-box {
+  background: rgba(34,197,94,.15);
+  border: 1px solid rgba(34,197,94,.4);
+  color: #22c55e;
+  padding: 12px 16px;
+  border-radius: 14px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  max-width: 520px;
+  margin: 10px auto;
+  font-weight: 00;
+  backdrop-filter: blur(12px);
+  animation: fadeSlide .3s ease;
+}
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="search-card">
+
+  <div class="text2 qris mb-3"><h1>QRIS GENERATOR</h1></div>
+
+  <!-- ALERT SUCCESS -->
+  <div id="alertSuccess" class="alert-box">
+    <span class="material-icons">check_circle</span>
+    <span>QRIS berhasil dibuat!</span>
+  </div>
+
+  <!-- Upload -->
+  <label class="file-box">
+    <input type="file" id="bgUpload" accept="image" hidden>
+    <strong class="text-success">Upload Background</strong><br>
+    <span id="fileName">Background QRIS</span>
+  </label>
+
+  <!-- Nama -->
+  <div class="input-row">
+    <div class="icon-circle">
+      <span class="material-icons">person</span>
+    </div>
+    <input id="nama" class="form-control" placeholder="Nama Toko / Nama Anda">
+  </div>
+
+  <!-- QR Link -->
+  <div class="input-row">
+    <div class="icon-circle">
+      <span class="material-icons">link</span>
+    </div>
+    <input id="qrlink" class="form-control" placeholder="Link Donate / Lainnya">
+  </div>
+
+  <button onclick="render()" class="btn btn-success w-100 mb-2">
+    Generate QRIS
+  </button>
+
+  <button onclick="download()" class="btn btn-success w-100 mb-2">
+    Download QRIS
+  </button>
+
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+let bgImage = new Image();
+let autoNMID = "ID" + Math.floor(Math.random() * 999999999999);
+
+// Upload File
+document.getElementById("bgUpload").addEventListener("change", function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  document.getElementById("fileName").textContent = file.name;
+
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    bgImage.src = event.target.result;
+    bgImage.onload = function() {
+      canvas.width = bgImage.width;
+      canvas.height = bgImage.height;
+      render();
+    }
+  }
+  reader.readAsDataURL(file);
+});
+
+function showSuccessAlert() {
+  const alert = document.getElementById("alertSuccess");
+  alert.style.display = "flex";
+
+  setTimeout(() => {
+    alert.style.display = "none";
+  }, 3000);
+}
+
+function render() {
+  let nama = document.getElementById("nama").value || "TOKO WAHYU";
+  let qrdata = document.getElementById("qrlink").value || "https://tokowahyu.com/donate?=50000000&via=dana.id&&loginpage";
+
+  if (bgImage.src) {
+    canvas.width = bgImage.width;
+    canvas.height = bgImage.height;
+    ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+  } else {
+    canvas.width = 1080;
+    canvas.height = 1920;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#000";
+
+  // Nama Toko
+  ctx.font = "850 " + (canvas.width * 0.078) + "px 'Roboto Condensed'";
+  ctx.fillText(nama.toUpperCase(), canvas.width / 2, canvas.height * 0.22);
+
+  // NMID AUTO
+  ctx.font = "450 " + (canvas.width * 0.034) + "px 'Roboto Condensed'";
+  ctx.fillText("NMID : " + autoNMID, canvas.width / 2, canvas.height * 0.27);
+
+  // A01
+  ctx.font = "400 " + (canvas.width * 0.030) + "px 'Roboto Condensed'";
+  ctx.fillText("A01", canvas.width / 2, canvas.height * 0.31);
+
+  // QR Transparent
+  const qrSize = canvas.width * 0.64;
+  const qrX = (canvas.width - qrSize) / 2;
+  const qrY = canvas.height * 0.35;
+
+  QRCode.toDataURL(qrdata, {
+    width: qrSize,
+    margin: 0,
+    color: {
+      dark: "#000000",
+      light: "#00000000"
+    }
+  }, function(err, url) {
+    if (err) return console.error(err);
+
+    const qrImg = new Image();
+    qrImg.onload = function() {
+      ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+
+      // SHOW SUCCESS ALERT
+      showSuccessAlert();
+    }
+    qrImg.src = url;
+  });
+}
+
+function download() {
+  const link = document.createElement("a");
+  link.download = "qris_result.png";
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+}
+</script>
+
+</body>
+</html>
