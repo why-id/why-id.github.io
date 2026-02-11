@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html amp lang="id">
+<head>
+<meta charset="utf-8">
+<title>.</title>
+<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/565/565547.png">
+<meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+<script async src="https://cdn.ampproject.org/v0.js"></script>
+
+<style amp-boilerplate>
+body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}
+@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}
+</style>
+<noscript><style amp-boilerplate>body{animation:none}</style></noscript>
+
+<style amp-custom>
+
+*{
+box-sizing:border-box;
+-webkit-user-select:none;
+user-select:none;
+-webkit-touch-callout:none;
+}
+
+body{
+margin:0;
+background:#000;
+color:#fff;
+font-family:monospace;
+overflow:hidden;
+position:relative;
+}
+
+/* Scanline */
+body:before{
+content:"";
+position:fixed;
+width:100%;
+height:100%;
+background:repeating-linear-gradient(
+0deg,
+rgba(255,255,255,0.03) 0px,
+rgba(255,255,255,0.03) 1px,
+transparent 1px,
+transparent 7px
+);
+pointer-events:none;
+animation:flicker .12s infinite;
+}
+
+/* Random dark flicker */
+body:after{
+content:"";
+position:fixed;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.15);
+mix-blend-mode:overlay;
+pointer-events:none;
+animation:screenGlitch 1.5s infinite;
+}
+
+@keyframes flicker{
+0%{opacity:.92}
+50%{opacity:1}
+100%{opacity:.9}
+}
+
+@keyframes screenGlitch{
+0%{opacity:.1}
+10%{opacity:.3}
+20%{opacity:.05}
+30%{opacity:.4}
+40%{opacity:.1}
+100%{opacity:.2}
+}
+
+/* Glitch Bars */
+.glitch-bar{
+position:absolute;
+width:100%;
+height:3px;
+background:red;
+opacity:.15;
+animation:barMove 2s infinite;
+}
+
+@keyframes barMove{
+0%{top:0}
+50%{top:100%}
+100%{top:0}
+}
+
+/* Container */
+.container{
+max-width:400px;
+height:100vh;
+margin:0 auto;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+padding:20px;
+text-align:center; /* TENGAH */
+}
+
+/* Logo glitch */
+.logo-wrapper{
+position:relative;
+margin-bottom:25px;
+}
+
+.logo-wrapper amp-img{
+max-width:170px;
+pointer-events:none;
+}
+
+.logo-wrapper:before,
+.logo-wrapper:after{
+content:"";
+position:absolute;
+top:0;left:0;right:0;bottom:0;
+background:url('https://raw.githubusercontent.com/why-id/why-id.github.io/refs/heads/main/file_00000000552071fab90c7d1b5da9c62b.png') center/contain no-repeat;
+opacity:.4;
+mix-blend-mode:screen;
+}
+
+.logo-wrapper:before{
+transform:translate(3px,0);
+filter:hue-rotate(90deg);
+animation:rgb1 .2s infinite;
+}
+
+.logo-wrapper:after{
+transform:translate(-3px,0);
+filter:hue-rotate(200deg);
+animation:rgb2 .15s infinite;
+}
+
+@keyframes rgb1{
+0%{transform:translate(3px,0)}
+50%{transform:translate(-3px,1px)}
+100%{transform:translate(3px,0)}
+}
+
+@keyframes rgb2{
+0%{transform:translate(-3px,0)}
+50%{transform:translate(3px,-1px)}
+100%{transform:translate(-3px,0)}
+}
+
+/* Terminal */
+.terminal{
+width:100%;
+font-size:10px;
+line-height:1.8;
+text-align:center; /* TENGAH */
+}
+
+.line{
+overflow:hidden;
+white-space:nowrap;
+width:0;
+margin:0 auto;
+}
+
+/* HANYA animasi ketik, TANPA cursor */
+.typing{
+animation:type 4s steps(60,end) forwards;
+}
+
+@keyframes type{
+from{width:0}
+to{width:100%}
+}
+
+/* Heavy text glitch */
+.glitch{
+animation:textGlitch .15s infinite;
+}
+
+@keyframes textGlitch{
+0%{text-shadow:-2px 0 red,2px 0 cyan}
+50%{text-shadow:2px 0 red,-2px 0 cyan}
+100%{text-shadow:-2px 0 red,2px 0 cyan}
+}
+
+</style>
+</head>
+
+<body oncontextmenu="return false">
+
+<div class="glitch-bar"></div>
+
+<div class="container">
+
+<div class="logo-wrapper">
+<amp-img 
+src="https://raw.githubusercontent.com/why-id/why-id.github.io/refs/heads/main/file_00000000552071fab90c7d1b5da9c62b.png"
+width="600"
+height="600"
+layout="intrinsic">
+</amp-img>
+</div>
+
+<div class="terminal glitch">
+
+<div class="line typing" style="animation:type 4s steps(60,end) 0s forwards;">
+"Dan janganlah kamu memakan harta di antara
+</div>
+
+<div class="line typing" style="animation:type 4s steps(60,end) 5s forwards;">
+kamu dengan jalan yang batil dan (janganlah) kamu
+</div>
+
+<div class="line typing" style="animation:type 4s steps(60,end) 10s forwards;">
+menyuap dengan harta itu kepada para hakim, supaya
+</div>
+
+<div class="line typing" style="animation:type 4s steps(60,end) 15s forwards;">
+kamu dapat memakan sebagian harta orang lain itu
+</div>
+
+<div class="line typing" style="animation:type 5s steps(70,end) 20s forwards;">
+dengan jalan dosa, padahal kamu mengetahui."
+</div>
+
+<div class="line typing" style="animation:type 6s steps(80,end) 26s forwards;">
+QS. Al-Baqarah: 188
+</div>
+
+</div>
+</div>
+
+<script>
+history.pushState(null,null,location.href);
+window.onpopstate=function(){history.go(1);}
+</script>
+
+</body>
+</html>
