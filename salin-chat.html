@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>GresiXploit Tools</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Varela+Round&display=swap" rel="stylesheet"/>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+body{font-family:'JetBrains Mono',monospace}
+pre{margin:0}
+code{background:transparent!important}
+.title-font{font-family:'Varela Round',sans-serif}
+</style>
+</head>
+
+<body class="bg-black text-white flex flex-col min-h-screen">
+
+<!-- TITLE -->
+
+
+<main class="flex-1 overflow-y-auto p-4 space-y-6 w-full max-w-md mx-auto">
+
+<div class="w-full" style="aspect-ratio:550/850;">
+    <div id="captureTarget"
+         class="bg-black border border-white/10 rounded-2xl w-full h-full flex items-start justify-start">
+
+        <div class="w-full h-full p-12 overflow-hidden">
+
+            <pre class="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words">
+<code id="code-content" class="block w-full"></code>
+            </pre>
+
+        </div>
+    </div>
+</div>
+
+<textarea id="editor"
+class="w-full h-40 p-3 rounded-lg bg-[#111] text-white text-xs resize-none border border-white/10"
+placeholder="Tempel chat WhatsApp di sini..."></textarea>
+
+</main>
+
+<div class="p-4 flex gap-3 border-t border-white/10 bg-black">
+<button id="copyBtn" class="flex-1 bg-gray-800 py-3 rounded-lg text-sm">
+Salin
+</button>
+
+<button id="exportBtn" class="flex-1 bg-white text-black py-3 rounded-lg text-sm font-semibold">
+Export PNG
+</button>
+</div>
+
+<script>
+const editor = document.getElementById("editor");
+const codeContent = document.getElementById("code-content");
+
+const MAX_CHAR = 921;
+const MAX_LINES = 22;
+
+const monthsFull = [
+"Januari","Februari","Maret","April","Mei","Juni",
+"Juli","Agustus","September","Oktober","November","Desember"
+];
+
+const nameColors = ["#FFC107", "#E53935"];
+let nameMap = {};
+let colorIndex = 0;
+
+editor.value = `[17/2/2023, 19.58] indah: Iku aku dikirim i selingkuh ane`;
+
+function enforceLimits(text){
+if(text.length > MAX_CHAR){
+text = text.substring(0, MAX_CHAR);
+}
+
+let lines = text.split("\n");
+if(lines.length > MAX_LINES){
+lines = lines.slice(0, MAX_LINES);
+}
+
+return lines.join("\n");
+}
+
+function capitalizeName(name){
+return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+function getNameColor(name){
+if(!nameMap[name]){
+nameMap[name] = nameColors[colorIndex % nameColors.length];
+colorIndex++;
+}
+return nameMap[name];
+}
+
+function formatWhatsApp(text){
+
+let lines = text.split("\n");
+let result = "";
+nameMap = {};
+colorIndex = 0;
+
+lines.forEach(line=>{
+
+let match = line.match(/\[(\d+)\/(\d+)\/?(\d+)?,\s*(\d+\.\d+)\]\s*(.*?):\s*(.*)/);
+
+if(match){
+
+let day = match[1];
+let month = monthsFull[parseInt(match[2]) - 1];
+let year = match[3] ? match[3] : new Date().getFullYear();
+let time = match[4];
+let name = capitalizeName(match[5]);
+let message = match[6];
+
+let nameColor = getNameColor(name);
+
+result += `<span style="color:#FFD700"><i class="bi bi-calendar-event"></i> ${day} ${month} ${year}</span>\n`;
+result += `<span style="color:#FFD700"><i class="bi bi-clock"></i> ${time}</span>\n`;
+result += `<span style="color:#FFD700"><i class="bi bi-person-circle"></i></span> <span style="color:${nameColor}">${name}</span> : <span style="color:#FFFFFF">${message}</span>\n\n`;
+
+}else{
+result += `<span style="color:#FFFFFF">${line}</span>\n`;
+}
+
+});
+
+return result;
+}
+
+function updatePreview(){
+let safeText = enforceLimits(editor.value);
+if(safeText !== editor.value){
+editor.value = safeText;
+}
+codeContent.innerHTML = formatWhatsApp(safeText);
+}
+
+editor.addEventListener("input",updatePreview);
+
+document.getElementById("exportBtn").onclick = async()=>{
+
+const original = document.getElementById("captureTarget");
+const clone = original.cloneNode(true);
+clone.style.width = "550px";
+clone.style.height = "850px";
+clone.style.position = "absolute";
+clone.style.left = "-9999px";
+
+document.body.appendChild(clone);
+
+const canvas = await html2canvas(clone,{
+width:550,
+height:850,
+scale:2,
+backgroundColor:"#000"
+});
+
+document.body.removeChild(clone);
+
+const link=document.createElement("a");
+link.download="gresixploit.png";
+link.href=canvas.toDataURL();
+link.click();
+};
+
+document.getElementById("copyBtn").onclick = async()=>{
+
+const original = document.getElementById("captureTarget");
+const clone = original.cloneNode(true);
+clone.style.width="550px";
+clone.style.height="850px";
+clone.style.position="absolute";
+clone.style.left="-9999px";
+
+document.body.appendChild(clone);
+
+const canvas = await html2canvas(clone,{
+width:550,
+height:850,
+scale:2,
+backgroundColor:"#000"
+});
+
+document.body.removeChild(clone);
+
+canvas.toBlob(blob=>{
+navigator.clipboard.write([
+new ClipboardItem({"image/png":blob})
+]);
+});
+};
+
+updatePreview();
+</script>
+
+</body>
+</html>
