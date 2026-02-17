@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GresiXploit</title>
+    <style>
+        body {
+            background-color: #050505;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        /* Animasi utama untuk efek "Sinyal Rusak" */
+        @keyframes tv-glitch {
+            0% { 
+                color: #00ff41; 
+                text-shadow: 2px 0 #ff0000, -2px 0 #0000ff;
+                transform: translate(0);
+            }
+            20% { 
+                color: #ff00ff; 
+                text-shadow: -3px 0 #00ffff, 3px 0 #ff0000;
+                transform: translate(-1px, 1px);
+            }
+            40% { 
+                color: #ffff00; 
+                text-shadow: 2px -2px #ff00ff, -2px 2px #00ff00;
+                transform: translate(1px, -1px);
+            }
+            60% { 
+                color: #00ffff; 
+                text-shadow: -2px 0 #ff0000, 2px 0 #0000ff;
+                transform: translate(-2px, 0);
+            }
+            80% { 
+                color: #ffffff; 
+                text-shadow: 3px 0 #ff00ff, -3px 0 #00ff00;
+                transform: translate(2px, 1px);
+            }
+            100% { 
+                color: #00ff41; 
+                text-shadow: 2px 0 #ff0000, -2px 0 #0000ff;
+                transform: translate(0);
+            }
+        }
+
+        pre {
+            font-size: 8px; 
+            line-height: 1.1;
+            user-select: none;
+            /* Memanggil animasi glitch */
+            animation: tv-glitch 0.2s infinite; 
+            
+            transform: rotateX(10deg) rotateY(-10deg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            filter: contrast(150%) brightness(120%);
+        }
+
+        pre:hover {
+            animation: tv-glitch 0.05s infinite; /* Lebih cepat saat dihover */
+            transform: scale(1.1);
+        }
+
+        .hidden-text {
+            color: #fff;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Overlay garis-garis scanline TV tua */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        /* Efek Vignette */
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.9) 100%);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<pre>
+                        :,                           
+                    voMMMMWWMkf                      
+                  lMMMWWWWWWWWWMkI                   
+                 iMMMWWWWWWWWWWWWWL                  
+                 CMWWWWaQoWWMqznvJq;                 
+                .MMWWW<span class="hidden-text">G</span>Mn!MWd  ,dMp,                 
+                !MMMM<span class="hidden-text">r</span>hhxXMWMT;oMakj                 
+                fMMM<span class="hidden-text">e</span>WWWMWWWWMWWMoY:                 
+                tWW<span class="hidden-text">s</span>WWWWWWWWJfWWWWWf.               
+                .oW<span class="hidden-text">i</span>WWWWWWWWWk tMWWM:.               
+                 zM<span class="hidden-text">X</span>WWWWWWWWWk  TMMu                 
+                  C<span class="hidden-text">p</span>WWWWWWWon....,,                  
+                   I<span class="hidden-text">l</span>WWWWWWMMMb.                     
+                      ,<span class="hidden-text">o</span>mppwY!                       
+                      z<span class="hidden-text">i</span>hkwJXzzi                     
+                     IM<span class="hidden-text">t</span>WujuT                        
+                     .pMWMaX,                        
+                       laWWMWC                       
+                          ,:
+</pre>
+
+</body>
+</html>
