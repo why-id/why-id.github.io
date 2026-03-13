@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GresiXploit AnonChat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #131314;
+            --surface-dark: #1e1f20;
+            --input-bg: #28292a;
+            --accent-blue: #8ab4f8;
+            --text-main: #e3e3e3;
+            --text-dim: #9aa0a6;
+            --sys-msg-bg: #303132;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Google Sans', 'Roboto', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            /* Mencegah scroll pada body di mobile */
+            overflow: hidden; 
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Header */
+        .app-header {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(19, 19, 20, 0.95);
+            border-bottom: 1px solid #333;
+            z-index: 10;
+        }
+
+        .brand-info h2 { font-size: 1.2rem; font-weight: 500; letter-spacing: 0.5px; }
+        .developer-tag { font-size: 0.75rem; color: var(--text-dim); }
+
+        .status-container { display: flex; flex-direction: column; align-items: flex-end; }
+        .status-indicator { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 500; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #5f6368; transition: 0.3s; }
+        .status-dot.active { background-color: #34a853; box-shadow: 0 0 8px rgba(52, 168, 83, 0.6); }
+        .status-dot.searching { background-color: #fbbc04; box-shadow: 0 0 8px rgba(251, 188, 4, 0.6); }
+        .online-count { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px; }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            scroll-behavior: smooth;
+        }
+
+        /* Bubble Chat & System */
+        .system-message {
+            align-self: center;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            background: var(--sys-msg-bg);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin: 8px 0;
+            text-align: center;
+            max-width: 90%;
+            word-wrap: break-word;
+        }
+
+        .system-message.highlight {
+            background: rgba(138, 180, 248, 0.15);
+            color: var(--accent-blue);
+            border: 1px solid rgba(138, 180, 248, 0.3);
+        }
+
+        .system-message.error {
+            background: rgba(234, 67, 53, 0.15);
+            color: #ea4335;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .message.sent {
+            background-color: var(--surface-dark);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.received {
+            background-color: #303132;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Controls Panel */
+        .controls-panel {
+            display: flex;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--bg-dark);
+        }
+
+        .control-btn {
+            flex: 1;
+            background: var(--surface-dark);
+            border: 1px solid #444746;
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover:not(:disabled) { background: #333537; }
+        .control-btn:active:not(:disabled) { transform: scale(0.98); }
+        .control-btn:disabled { opacity: 0.4; cursor: not-allowed; border-color: transparent; }
+        .control-btn .material-symbols-outlined { font-size: 20px; }
+
+        /* Input Area */
+        .input-container {
+            padding: 10px 20px 20px;
+            background: var(--bg-dark);
+        }
+
+        .gemini-input-wrapper {
+            background-color: var(--input-bg);
+            border-radius: 24px;
+            padding: 8px 12px 8px 20px;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .gemini-input-wrapper:focus-within { border-color: #5f6368; background-color: #303132; }
+        .gemini-input-wrapper.disabled { opacity: 0.5; background-color: #1a1a1b; }
+
+        #message-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            padding: 8px 0;
+            outline: none;
+            resize: none;
+            max-height: 120px;
+            min-height: 24px;
+        }
+
+        #message-input::placeholder { color: #80868b; }
+        #message-input:disabled { cursor: not-allowed; }
+
+        #btn-send {
+            background: var(--surface-dark);
+            border: none;
+            color: var(--text-main);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        #btn-send.active-send { background: var(--text-main); color: var(--bg-dark); }
+        #btn-send:hover:not(:disabled) { opacity: 0.8; }
+        #btn-send:disabled { color: #5f6368; background: transparent; cursor: not-allowed; }
+
+        /* Scrollbar */
+        .chat-area::-webkit-scrollbar { width: 4px; }
+        .chat-area::-webkit-scrollbar-thumb { background: #5f6368; border-radius: 10px; }
+
+        /* Animasi Loading */
+        .loading-dots::after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); }
+            40% { color: var(--text-dim); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); }
+            60% { text-shadow: .25em 0 0 var(--text-dim), .5em 0 0 rgba(0,0,0,0); }
+            80%, 100% { text-shadow: .25em 0 0 var(--text-dim), .5em 0 0 var(--text-dim); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="brand-info">
+                <h2>AnonChat</h2>
+                <span class="developer-tag">GresiXploit | Wahyudii</span>
+            </div>
+            <div class="status-container">
+                <div class="status-indicator">
+                    <span id="status-text">Offline</span>
+                    <div class="status-dot" id="status-dot"></div>
+                </div>
+                <div class="online-count">Online: <span id="user-count">0</span></div>
+            </div>
+        </header>
+
+        <main class="chat-area" id="chat-box">
+            </main>
+
+        <div class="controls-panel">
+            <button id="btn-search" class="control-btn">
+                <span class="material-symbols-outlined">person_search</span>
+                <span>Search</span>
+            </button>
+            <button id="btn-skip" class="control-btn" disabled>
+                <span class="material-symbols-outlined">skip_next</span>
+                <span>Skip</span>
+            </button>
+            <button id="btn-stop" class="control-btn" disabled>
+                <span class="material-symbols-outlined">close</span>
+                <span>Stop</span>
+            </button>
+        </div>
+
+        <footer class="input-container">
+            <div class="gemini-input-wrapper disabled" id="input-wrapper">
+                <textarea id="message-input" rows="1" placeholder="Cari partner dulu untuk mengetik..." disabled></textarea>
+                <button id="btn-send" disabled>
+                    <span class="material-symbols-outlined">send</span>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // CONFIG FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyCwaJgM26_Hetvp-gWsn-xQbfhUTxL0CqQ",
+            authDomain: "sangkuriang-5252d.firebaseapp.com",
+            projectId: "sangkuriang-5252d",
+            storageBucket: "sangkuriang-5252d.firebasestorage.app",
+            messagingSenderId: "604585104198",
+            appId: "1:604585104198:web:1cb7cd529dc2d460098b47"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // Elemen DOM
+        const chatBox = document.getElementById('chat-box');
+        const messageInput = document.getElementById('message-input');
+        const btnSend = document.getElementById('btn-send');
+        const inputWrapper = document.getElementById('input-wrapper');
+        const statusText = document.getElementById('status-text');
+        const statusDot = document.getElementById('status-dot');
+        const userCountEl = document.getElementById('user-count');
+        
+        const btnSearch = document.getElementById('btn-search');
+        const btnSkip = document.getElementById('btn-skip');
+        const btnStop = document.getElementById('btn-stop');
+
+        // State Variabel
+        let myUid = null;
+        let currentChatId = null;
+        let isSearching = false;
+        let searchMsgId = null;
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if (this.value.trim().length > 0) {
+                btnSend.classList.add('active-send');
+            } else {
+                btnSend.classList.remove('active-send');
+            }
+        });
+
+        // 1. Inisialisasi Auth & Kehadiran (Presence)
+        auth.signInAnonymously().then(res => {
+            myUid = res.user.uid;
+            setupPresence();
+            listenForMatch();
+            
+            chatBox.innerHTML = '';
+            addSystemMessage("Selamat datang! Klik 'Search' untuk mencari teman ngobrol.");
+            updateStatus('Ready', 'idle');
+        }).catch(err => {
+            addSystemMessage("Gagal terhubung ke server.", "error");
+        });
+
+        function setupPresence() {
+            const connectedRef = db.ref(".info/connected");
+            connectedRef.on("value", (snap) => {
+                if (snap.val() === true) {
+                    const myPresenceRef = db.ref(`online_users/${myUid}`);
+                    myPresenceRef.set(true);
+                    myPresenceRef.onDisconnect().remove(); // Otomatis hapus jika user keluar/tutup tab
+                    
+                    // Bersihkan antrian dan chat jika DC mendadak
+                    db.ref(`queue/${myUid}`).onDisconnect().remove();
+                    db.ref(`users/${myUid}`).onDisconnect().remove();
+                }
+            });
+
+            // Hitung jumlah user online
+            db.ref('online_users').on('value', snap => {
+                userCountEl.innerText = snap.numChildren() || 0;
+            });
+        }
+
+        // 2. Fungsi UI
+        function updateStatus(txt, cls) {
+            statusText.innerText = txt;
+            statusDot.className = `status-dot ${cls}`;
+        }
+
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function addSystemMessage(text, type = "normal", isLoading = false) {
+            const div = document.createElement('div');
+            div.className = `system-message ${type}`;
+            
+            if(isLoading) {
+                div.innerHTML = `${text} <span class="loading-dots"></span>`;
+                searchMsgId = `sys-${Date.now()}`;
+                div.id = searchMsgId;
+            } else {
+                div.innerText = text;
+            }
+            
+            chatBox.appendChild(div);
+            scrollToBottom();
+            return div.id;
+        }
+
+        function removeElement(id) {
+            const el = document.getElementById(id);
+            if(el) el.remove();
+        }
+
+        function addMessage(text, type) {
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.innerText = text;
+            chatBox.appendChild(div);
+            scrollToBottom();
+        }
+
+        function toggleInput(enabled) {
+            messageInput.disabled = !enabled;
+            btnSend.disabled = !enabled;
+            if (enabled) {
+                inputWrapper.classList.remove('disabled');
+                messageInput.placeholder = "Ketik pesan di sini...";
+                messageInput.focus();
+            } else {
+                inputWrapper.classList.add('disabled');
+                messageInput.placeholder = "Cari partner dulu untuk mengetik...";
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                btnSend.classList.remove('active-send');
+            }
+        }
+
+        // 3. Logika Pencarian Partner
+        function searchPartner() {
+            if (isSearching) return;
+            
+            // Reset UI
+            chatBox.innerHTML = '';
+            toggleInput(false);
+            btnSearch.disabled = true;
+            btnSkip.disabled = true;
+            btnStop.disabled = false;
+            isSearching = true;
+
+            updateStatus('Searching', 'searching');
+            addSystemMessage("Mencari partner", "normal", true);
+
+            // Cek antrian (queue)
+            db.ref('queue').once('value', snap => {
+                const queue = snap.val();
+                let foundPartner = false;
+
+                if(queue) {
+                    for(let uid in queue) {
+                        if(uid !== myUid) {
+                            // Ditemukan partner!
+                            foundPartner = true;
+                            const newChatId = db.ref('chats').push().key; // Buat ID Chat Unik
+                            
+                            // Hapus partner dari antrian
+                            db.ref(`queue/${uid}`).remove();
+                            db.ref(`queue/${myUid}`).remove();
+                            
+                            // Setel Chat ID untuk kedua pengguna
+                            db.ref(`users/${uid}/chatId`).set(newChatId);
+                            db.ref(`users/${myUid}/chatId`).set(newChatId);
+                            
+                            // Buat room chat
+                            db.ref(`chats/${newChatId}/status`).set('active');
+                            break;
+                        }
+                    }
+                }
+
+                // Jika tidak ada partner, masuk ke antrian dan tunggu
+                if(!foundPartner) {
+                    db.ref(`queue/${myUid}`).set(true);
+                }
+            });
+        }
+
+        // 4. Listener saat mendapatkan pasangan
+        function listenForMatch() {
+            db.ref(`users/${myUid}/chatId`).on('value', snap => {
+                const cid = snap.val();
+                if(cid) {
+                    // Berhasil terhubung
+                    if (isSearching) {
+                        removeElement(searchMsgId);
+                        isSearching = false;
+                    }
+                    currentChatId = cid;
+                    startChat(cid);
+                } else if(currentChatId) {
+                    // Jika chatId tiba-tiba hilang (partner skip/stop)
+                    handlePartnerLeft();
+                }
+            });
+        }
+
+        // 5. Masuk ke ruang Obrolan
+        function startChat(cid) {
+            updateStatus('Connected', 'active');
+            toggleInput(true);
+            btnSearch.disabled = true;
+            btnSkip.disabled = false;
+            btnStop.disabled = false;
+
+            addSystemMessage("Anda telah terhubung dengan partner! Sapa mereka sekarang.", "highlight");
+
+            // Listener pesan baru
+            db.ref(`chats/${cid}/messages`).on('child_added', snap => {
+                const data = snap.val();
+                if(data.sender !== myUid) {
+                    addMessage(data.text, 'received');
+                }
+            });
+
+            // Listener jika ruang obrolan dihapus (partner disconnect)
+            db.ref(`chats/${cid}/status`).on('value', snap => {
+                if(!snap.exists() && currentChatId === cid) {
+                    handlePartnerLeft();
+                }
+            });
+        }
+
+        // 6. Logika Mengirim Pesan
+        function sendMessage() {
+            const txt = messageInput.value.trim();
+            if(txt && currentChatId) {
+                // Tampilkan pesan sendiri
+                addMessage(txt, 'sent');
+                
+                // Kirim ke server
+                db.ref(`chats/${currentChatId}/messages`).push({
+                    sender: myUid,
+                    text: txt,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                // Reset textarea
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                btnSend.classList.remove('active-send');
+                messageInput.focus();
+            }
+        }
+
+        btnSend.onclick = sendMessage;
+
+        // Mendukung Shift+Enter untuk baris baru, Enter untuk kirim
+        messageInput.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // 7. Kontrol Obrolan (Skip, Stop, Partner Keluar)
+        function leaveChat() {
+            if(currentChatId) {
+                // Hapus ruang obrolan (Akan memicu disconnect untuk partner)
+                db.ref(`chats/${currentChatId}`).remove();
+                // Hapus Chat ID sendiri
+                db.ref(`users/${myUid}/chatId`).remove();
+                currentChatId = null;
+            }
+        }
+
+        function cancelSearch() {
+            if(isSearching) {
+                db.ref(`queue/${myUid}`).remove();
+                isSearching = false;
+                removeElement(searchMsgId);
+            }
+        }
+
+        function resetUI() {
+            updateStatus('Ready', 'idle');
+            toggleInput(false);
+            btnSearch.disabled = false;
+            btnSkip.disabled = true;
+            btnStop.disabled = true;
+        }
+
+        function handlePartnerLeft() {
+            if (currentChatId) {
+                currentChatId = null;
+                addSystemMessage("Partner telah meninggalkan obrolan.", "error");
+                resetUI();
+            }
+        }
+
+        btnSearch.onclick = searchPartner;
+
+        btnStop.onclick = () => {
+            cancelSearch();
+            leaveChat();
+            resetUI();
+            addSystemMessage("Pencarian/obrolan dihentikan.");
+        };
+
+        btnSkip.onclick = () => {
+            leaveChat();
+            addSystemMessage("Anda melewati obrolan.");
+            // Langsung cari lagi
+            setTimeout(() => {
+                searchPartner();
+            }, 500);
+        };
+
+        // Menangani jika user menutup browser/tab saat sedang mencari atau chat
+        window.addEventListener('beforeunload', () => {
+            cancelSearch();
+            leaveChat();
+            if (myUid) {
+                db.ref(`online_users/${myUid}`).remove();
+            }
+        });
+
+    </script>
+</body>
+</html>
