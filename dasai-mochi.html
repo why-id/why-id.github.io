@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<style>
+  :root {
+    /* Warna OLED Mochi - Putih dengan pendaran Cyan/Biru muda tipis khas layar */
+    --oled-core: #ffffff;
+    --oled-glow: rgba(0, 255, 255, 0.4);
+    --glow-effect: 0 0 10px var(--oled-core), 0 0 3px var(--oled-glow), 0 0 10px var(--oled-glow);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: #000000; /* Hitam pekat (True Black) untuk efek OLED */
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: sans-serif;
+    cursor: pointer; /* Memberi tahu user bisa di-klik */
+  }
+
+  
+
+  .mochi-container {
+    /* Animasi mengambang (floating) diisolasi di luar */
+    animation: float 5s ease-in-out infinite, breathe 4s ease-in-out infinite;
+  }
+
+  .face {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    /* Pergerakan mata mengikuti kursor/gyro menggunakan CSS variables */
+    transform: translate(var(--look-x, 0px), var(--look-y, 0px));
+    transition: transform 0.1s linear; 
+  }
+
+  .eyes {
+    display: flex;
+    gap: 70px; /* Jarak proporsional Dasai Mochi */
+  }
+
+  /* Wrapper untuk mengatur posisi & rotasi ekspresi (Angry/Happy) */
+  .eye-wrapper {
+    width: 60px;
+    height: 90px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  /* Bentuk mata asli yang dianimasikan saat blink */
+  .eye-inner {
+    width: 55px;
+    height: 85px;
+    background: var(--oled-core);
+    border-radius: 40px;
+    
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+  }
+
+  .mouth {
+    width: 65px;
+    height: 20px;
+    background: var(--oled-core);
+    border-radius: 10px;
+    
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  /* ==========================
+     ANIMASI DASAR
+     ========================== */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(12px); }
+  }
+
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); } /* Mochi terlihat bernapas */
+  }
+
+  /* Blink animation dipicu via JS dengan class */
+  .is-blinking .eye-inner {
+    transform: scaleY(0.05); /* Menutup mata nyaris rata */
+    transition: transform 0.08s ease-in-out;
+  }
+
+  /* ==========================
+     EKSPRESI (PERFECT MATCH)
+     ========================== */
+  
+ 
+
+</style>
+</head>
+
+<body>
+
+<div class="mochi-container">
+  <div class="face" id="face">
+    <div class="eyes">
+      <div class="eye-wrapper left"><div class="eye-inner"></div></div>
+      <div class="eye-wrapper right"><div class="eye-inner"></div></div>
+    </div>
+    <div class="mouth"></div>
+  </div>
+</div>
+
+<script>
+const face = document.getElementById("face");
+
+// ==========================
+// BLINK LOGIC (Smooth & Natural)
+// ==========================
+function blinkRandom() {
+  // Waktu acak antara 2 hingga 6 detik
+  const time = Math.random() * 4000 + 2000;
+
+  setTimeout(() => {
+    // Tambahkan class blinking
+    face.classList.add("is-blinking");
+    
+    // Hapus class setelah 120ms (kecepatan kedipan natural manusia/animasi)
+    setTimeout(() => {
+      face.classList.remove("is-blinking");
+    }, 120);
+
+    // Loop rekursif
+    blinkRandom();
+  }, time);
+}
+// Mulai animasi blink
+blinkRandom();
+
+// ==========================
+// INTERAKSI: FOLLOW CURSOR / TOUCH / GYRO
+// ==========================
+const maxMove = 25; // Maksimal pixel pergeseran wajah
+
+// Desktop Mouse Move
+window.addEventListener("mousemove", (e) => {
+  const x = (e.clientX / window.innerWidth - 0.5) * maxMove * 2;
+  const y = (e.clientY / window.innerHeight - 0.5) * maxMove * 2;
+  updateLook(x, y);
+});
+
+
+
+// Mobile Gyroscope
+if (window.DeviceOrientationEvent) {
+  window.addEventListener("deviceorientation", (e) => {
+    // Membatasi nilai rotasi agar tidak terlalu liar
+    let tiltX = Math.max(-45, Math.min(45, e.gamma || 0)); 
+    let tiltY = Math.max(-45, Math.min(45, e.beta || 0)); 
+    
+    let x = (tiltX / 45) * maxMove;
+    let y = (tiltY / 45) * maxMove;
+    
+    updateLook(x, y);
+  });
+}
+
+// Fungsi untuk update CSS Variables, mengontrol pergeseran wajah tanpa merusak animasi lain
+function updateLook(x, y) {
+  face.style.setProperty('--look-x', `${x}px`);
+  face.style.setProperty('--look-y', `${y}px`);
+}
+
+// ==========================
+// TAP / CLICK = CHANGE EXPRESSION
+// ==========================
+let mode = 0;
+// Menambahkan ekspresi "surprised" untuk variasi Mochi Dasai
+const modes = ["", "happy", "angry", "sleepy", "surprised"];
+
+
+
+// ==========================
+// AUTO IDLE EXPRESSION (Opsional: Mati jika sedang berinteraksi)
+// ==========================
+let idleTimer;
+function resetIdleTimer() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    // Kembali ke muka normal atau ngantuk jika dibiarkan 10 detik
+    if (Math.random() > 0.5) {
+      face.className = "face";
+      mode = 0;
+    } else {
+      face.className = "face sleepy";
+      mode = 3;
+    }
+  }, 10000);
+}
+
+// Reset idle timer setiap kali diklik atau digerakkan
+window.addEventListener("mousemove", resetIdleTimer);
+
+resetIdleTimer();
+
+</script>
+</body>
+</html>
