@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AnonChat</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.scaledrone.com/scaledrone.min.js"></script>
+
+    <style>
+        /* Desain Dark iOS & Glassmorphism */
+        :root {
+            --ios-bg: #000000;
+            --ios-glass: rgba(28, 28, 30, 0.65);
+            --ios-border: rgba(255, 255, 255, 0.1);
+            --ios-text: #f2f2f7;
+            --ios-blue: #0a84ff;
+            --ios-red: #ff453a;
+            --ios-orange: #ff9f0a;
+            --ios-gray: #8e8e93;
+            --ios-green: #30d158;
+            
+            /* Quote Colors */
+            --x-quote-me-bg: rgba(255, 255, 255, 0.2);
+            --x-quote-partner-bg: rgba(255, 255, 255, 0.05);
+            --x-quote-me-color: #ffffff;
+            --x-quote-partner-color: var(--ios-blue);
+        }
+
+        * {
+            margin: 0; padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body { 
+            font-family: 'Averia Libre', system-ui; 
+            background-color: var(--ios-bg); 
+            color: var(--ios-text); 
+            font-size: 15px;
+            background-image: radial-gradient(circle at 15% 50%, rgba(10, 132, 255, 0.15), transparent 25%),
+                              radial-gradient(circle at 85% 30%, rgba(255, 69, 58, 0.1), transparent 25%);
+            background-attachment: fixed;
+            height: 100dvh; 
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Modern Overlays & Modals with Glassmorphism */
+        .overlay {
+            position: fixed; inset: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal-box {
+            background: rgba(28, 28, 30, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--ios-border);
+            padding: 25px; border-radius: 16px;
+            width: 100%; max-width: 320px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            text-align: center;
+            display: flex; flex-direction: column; gap: 12px;
+            color: var(--ios-text);
+        }
+
+        .modal-box h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 2px; }
+        .modal-box p { color: var(--ios-gray); font-size: 0.9rem; line-height: 1.4; }
+
+        .gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+
+        .gender-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--ios-border);
+            border-radius: 14px;
+            padding: 15px 10px;
+            cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .gender-card:hover { background: rgba(10, 132, 255, 0.15); border-color: var(--ios-blue); }
+        .gender-card i { font-size: 2rem; color: var(--ios-blue); }
+        .gender-card span { font-size: 0.9rem; font-weight: 700; }
+
+        .loading-container {
+            width: 100%; height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px; overflow: hidden;
+            margin: 15px 0; position: relative;
+        }
+        .loading-bar {
+            width: 40%; height: 100%; background: var(--ios-blue);
+            border-radius: 4px; position: absolute;
+            animation: slideLoading 1.2s infinite ease-in-out alternate;
+        }
+        @keyframes slideLoading { 0% { left: -40%; } 100% { left: 100%; } }
+
+        .btn-modern {
+            background: var(--ios-blue); color: #fff;
+            border: none; padding: 10px; border-radius: 12px;
+            font-size: 0.9rem; font-weight: 700; cursor: pointer;
+            transition: opacity 0.2s; width: 100%; margin-top: 5px;
+            font-family: 'Averia Libre', system-ui;
+        }
+        .btn-modern:hover { opacity: 0.9; }
+        .btn-cancel { background: rgba(255,255,255,0.1); color: var(--ios-text); border: 1px solid var(--ios-border); }
+        .btn-cancel:hover { background: rgba(255,255,255,0.2); }
+        .btn-danger { background: rgba(255, 69, 58, 0.15); color: var(--ios-red); border: 1px solid rgba(255, 69, 58, 0.3); }
+        .btn-danger:hover { background: var(--ios-red); color: white; }
+
+        select {
+            width: 100%; background: rgba(0,0,0,0.5);
+            border: 1px solid var(--ios-border); border-radius: 12px;
+            color: var(--ios-text); padding: 10px;
+            outline: none; font-size: 0.9rem; appearance: none;
+            font-family: 'Averia Libre', system-ui;
+        }
+
+        /* Header Glass */
+        .header {
+            position: absolute; top: 0; width: 100%;
+            background: var(--ios-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--ios-border);
+            padding: 10px 16px;
+            display: flex; align-items: center; justify-content: space-between;
+            z-index: 100;
+        }
+
+        .profile-area { display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; overflow: hidden;}
+        .avatar-container { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--ios-border); overflow: hidden; flex-shrink: 0; background: var(--ios-glass);}
+        .avatar-container img { width: 100%; height: 100%; object-fit: cover; }
+
+        .user-info { display: flex; flex-direction: column; overflow: hidden; white-space: nowrap; justify-content: center;}
+        .user-info .name { font-weight: 700; font-size: 1rem; color: var(--ios-text); text-overflow: ellipsis; overflow: hidden;}
+        .user-info .status { font-size: 0.8rem; color: var(--ios-gray); text-overflow: ellipsis; overflow: hidden;}
+
+        /* Chat Area */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto; overflow-x: hidden;
+            padding: 75px 5% 90px 5%; 
+            display: flex; flex-direction: column; gap: 8px;
+            /* Scrollbar styling */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.2) transparent;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+        .system-msg {
+            background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3);
+            color: var(--ios-green); font-size: 0.8rem; border-radius: 12px; backdrop-filter: blur(10px);
+            margin: 10px 0; padding: 6px 12px; align-self: center;
+            text-align: center; max-width: 90%; font-weight: 700;
+        }
+
+        .system-msg.danger {
+            background: rgba(255, 69, 58, 0.15); border-color: rgba(255, 69, 58, 0.3);
+            color: var(--ios-red);
+        }
+
+        .swipe-wrapper { display: flex; align-items: center; width: 100%; position: relative; margin-bottom: 2px; }
+        
+        .reply-icon-bg {
+            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+            background: rgba(255,255,255,0.1); border-radius: 50%; width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.2s; z-index: 0; border: 1px solid var(--ios-border);
+        }
+        .reply-icon-bg i { color: var(--ios-text); font-size: 0.9rem; }
+
+        .message-row { display: flex; flex-direction: column; width: 100%; z-index: 1;}
+        .message-row.right { align-items: flex-end; }
+        .message-row.left { align-items: flex-start; }
+
+        .bubble {
+            max-width: 80%; min-width: 60px;
+            padding: 10px 14px;
+            border-radius: 18px; 
+            font-size: 0.95rem; line-height: 1.4;
+            position: relative;
+            word-wrap: break-word;
+            will-change: transform;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .message-row.left .bubble { 
+            background: rgba(40, 40, 42, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--ios-border);
+            color: var(--ios-text); 
+            border-bottom-left-radius: 4px; 
+        }
+        
+        .message-row.right .bubble { 
+            background-color: var(--ios-blue); 
+            color: #fff; 
+            border-bottom-right-radius: 4px; 
+            box-shadow: 0 4px 15px rgba(10, 132, 255, 0.25);
+        }
+
+        .quote-block {
+            padding: 6px 10px; border-radius: 8px;
+            font-size: 0.85rem; margin-bottom: 6px;
+            cursor: pointer; display: flex; flex-direction: column;
+            background: var(--x-quote-partner-bg); 
+            border-left: 3px solid var(--x-quote-partner-color);
+        }
+        .message-row.right .quote-block { background: var(--x-quote-me-bg); border-left-color: var(--x-quote-me-color); }
+        .quote-author { font-weight: 700; font-size: 0.8rem; margin-bottom: 2px; color: var(--x-quote-partner-color);}
+        .message-row.right .quote-author { color: var(--x-quote-me-color); }
+        .quote-text { color: inherit; opacity: 0.85; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.85rem;}
+
+        .msg-content { display: inline-block; padding-right: 40px; }
+
+        .meta-data {
+            position: absolute; bottom: 4px; right: 12px;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .meta-time { font-size: 0.7rem; opacity: 0.7; }
+        
+        /* Footer Glass */
+        .footer-area {
+            position: absolute; bottom: 0; width: 100%;
+            background: var(--ios-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--ios-border);
+            padding: 10px 12px 20px 12px;
+            display: flex; flex-direction: column; z-index: 100;
+        }
+
+        .reply-indicator {
+            background-color: transparent;
+            margin: 0 4px 8px 4px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        
+        .reply-content-box {
+            background: rgba(0,0,0,0.5);
+            border-radius: 12px; flex: 1; padding: 8px 12px;
+            display: flex; flex-direction: column; overflow: hidden;
+            border-left: 3px solid var(--ios-blue);
+            border-top: 1px solid var(--ios-border);
+            border-right: 1px solid var(--ios-border);
+            border-bottom: 1px solid var(--ios-border);
+        }
+
+        .reply-content-box strong { font-size: 0.85rem; font-weight: 700; margin-bottom: 2px; color: var(--ios-blue);}
+        .reply-content-box span { color: var(--ios-gray); font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .close-reply { font-size: 1.5rem; color: var(--ios-gray); cursor: pointer; padding: 0 10px;}
+
+        .input-row { display: flex; align-items: flex-end; gap: 8px; width: 100%; position: relative;}
+
+        /* Menu Floating */
+        .floating-menu {
+            position: absolute;
+            bottom: 50px;
+            left: 0;
+            background: var(--ios-glass);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--ios-border);
+            border-radius: 12px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 200;
+            min-width: 160px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        
+        .floating-menu.hidden {
+            display: none !important;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .menu-item {
+            display: flex; align-items: center; gap: 12px; cursor: pointer;
+            color: var(--ios-text); padding: 8px 10px; border-radius: 8px;
+            transition: background 0.2s; font-size: 0.95rem; font-weight: bold;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.1); }
+
+        .input-wrapper {
+            flex: 1; background: rgba(0,0,0,0.5);
+            border-radius: 24px; border: 1px solid var(--ios-border);
+            display: flex; align-items: center;
+            padding: 4px 14px; min-height: 44px;
+        }
+
+        .icon-btn { font-size: 1.2rem; color: var(--ios-gray); cursor: pointer; padding: 4px; transition: color 0.2s; }
+        .icon-btn:hover { color: var(--ios-blue); }
+        .icon-btn.active { color: var(--ios-blue); }
+        
+        .input-wrapper input {
+            flex: 1; background: transparent; border: none;
+            color: var(--ios-text); font-size: 1rem;
+            outline: none !important; padding: 8px 10px; width: 100%; min-width: 0;
+            font-family: 'Averia Libre', system-ui;
+        }
+        .input-wrapper input::placeholder { color: var(--ios-gray); }
+
+        .send-btn-container {
+            width: 44px; height: 44px; border-radius: 50%;
+            background-color: var(--ios-blue);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(10, 132, 255, 0.3);
+            transition: transform 0.1s;
+        }
+        .send-btn-container:active { transform: scale(0.95); }
+        .send-btn-container i { color: #fff; font-size: 1.2rem; margin-left: 2px;}
+
+        .hidden { display: none !important; }
+        
+        .typing-dots span {
+            display: inline-block; width: 4px; height: 4px;
+            background-color: var(--ios-gray); border-radius: 50%;
+            margin-left: 2px; animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+    <div id="setup-modal" class="overlay">
+        <div class="modal-box">
+            <h2>Pilih Identitas</h2>
+            <p>Sistem anonim terenkripsi.</p>
+            <div class="gender-grid">
+                <div class="gender-card" onclick="initScaledrone('male')">
+                    <i class="bi bi-gender-male"></i>
+                    <span>Laki-Laki</span>
+                </div>
+                <div class="gender-card" onclick="initScaledrone('female')">
+                    <i class="bi bi-gender-female"></i>
+                    <span>Perempuan</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading-screen" class="overlay hidden">
+        <div class="modal-box" style="padding: 35px 25px;">
+            <h2>Mencari Partner...</h2>
+            <div class="loading-container"><div class="loading-bar"></div></div>
+            <button class="btn-modern btn-cancel" onclick="cancelSearch()">Batalkan</button>
+        </div>
+    </div>
+
+    <div id="report-modal" class="overlay hidden">
+        <div class="modal-box">
+            <h2>Lapor Pengguna</h2>
+            <select id="report-reason">
+                <option value="Spam">Spam & Promosi</option>
+                <option value="Vulgar">Konten Vulgar</option>
+                <option value="Toxic">Ujaran Kebencian</option>
+            </select>
+            <div style="display: flex; gap: 8px; margin-top: 5px;">
+                <button class="btn-modern btn-cancel" onclick="closeReportModal()">Batal</button>
+                <button class="btn-modern btn-danger" onclick="submitReport()">Laporkan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-ui" class="hidden" style="display: flex; flex-direction: column; height: 100%; width: 100%;">
+        <div class="header">
+            <div class="profile-area">
+                <div class="avatar-container">
+                    <img id="partner-avatar" src="https://ui-avatars.com/api/?name=AC&background=1c1c1e&color=f2f2f7" alt="Avatar">
+                </div>
+                <div class="user-info">
+                    <span class="name" id="partner-name">Anonymous Chat</span>
+                    <span class="status" id="partner-status">menunggu...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-container" id="chat-box">
+            <div class="system-msg">Enkripsi end-to-end aktif.</div>
+        </div>
+
+        <div class="footer-area">
+            <div class="reply-indicator hidden" id="reply-indicator">
+                <div class="reply-content-box">
+                    <strong id="reply-author">Anda</strong>
+                    <span id="reply-text">Teks...</span>
+                </div>
+                <i class="bi bi-x close-reply" onclick="cancelReply()"></i>
+            </div>
+
+            <div class="input-row">
+                
+                <div id="floating-menu" class="floating-menu hidden">
+                    <div class="menu-item" onclick="findNewPartner(); toggleMenu();">
+                        <i class="bi bi-broadcast" style="color: var(--ios-blue);"></i> Cari Partner
+                    </div>
+                    <div class="menu-item" onclick="endSession(); toggleMenu();">
+                        <i class="bi bi-skip-forward" style="color: var(--ios-blue);"></i> Skip Partner
+                    </div>
+                    <div class="menu-item" onclick="openReportModal(); toggleMenu();">
+                        <i class="bi bi-flag" style="color: var(--ios-red);"></i> Laporkan
+                    </div>
+                </div>
+
+                <div class="input-wrapper">
+                    <i class="bi bi-grid icon-btn" id="menu-trigger" onclick="toggleMenu()"></i>
+                    <input type="text" id="message-input" placeholder="Ketik pesan..." autocomplete="off" disabled>
+                </div>
+                
+                <div class="send-btn-container" onclick="triggerTextSend()">
+                    <i class="bi bi-arrow-right" id="action-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CHANNEL_ID = 'd1RTbJpeN03nuSZh'; 
+        let drone;
+        let myGender, targetGender;
+        let queueRoom, searchRoom, chatRoom;
+        let currentRoomId = null;
+        let isTypingTimeout;
+        
+        let appState = 'IDLE'; 
+        let quotedText = null;
+        let quoteIsMe = false; 
+
+        const setupModal = document.getElementById('setup-modal');
+        const loadingScreen = document.getElementById('loading-screen');
+        const appUi = document.getElementById('app-ui');
+        const chatBox = document.getElementById('chat-box');
+        const messageInput = document.getElementById('message-input');
+        const partnerStatus = document.getElementById('partner-status');
+        const replyIndicator = document.getElementById('reply-indicator');
+        const replyText = document.getElementById('reply-text');
+        const replyAuthor = document.getElementById('reply-author');
+        const floatingMenu = document.getElementById('floating-menu');
+        const menuTrigger = document.getElementById('menu-trigger');
+
+        // Toggle Floating Menu
+        function toggleMenu() {
+            floatingMenu.classList.toggle('hidden');
+            menuTrigger.classList.toggle('active');
+        }
+
+        // Close menu if clicked outside
+        document.addEventListener('click', function(event) {
+            const isClickInside = floatingMenu.contains(event.target) || menuTrigger.contains(event.target);
+            if (!isClickInside && !floatingMenu.classList.contains('hidden')) {
+                floatingMenu.classList.add('hidden');
+                menuTrigger.classList.remove('active');
+            }
+        });
+
+        function setReply(text, isMe) {
+            quotedText = text; quoteIsMe = isMe;
+            replyAuthor.innerText = isMe ? 'Anda' : 'Partner';
+            replyText.innerText = text;
+            replyIndicator.classList.remove('hidden');
+            messageInput.focus();
+        }
+
+        function cancelReply() { quotedText = null; replyIndicator.classList.add('hidden'); }
+
+        function attachSwipeToReply(wrapperElement, text, isMe) {
+            const bubble = wrapperElement.querySelector('.bubble');
+            const iconBg = wrapperElement.querySelector('.reply-icon-bg');
+            let startX = 0, currentX = 0, isSwiping = false;
+
+            wrapperElement.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX; isSwiping = true;
+                bubble.style.transition = 'none'; iconBg.style.transition = 'opacity 0.2s';
+            }, {passive: true});
+
+            wrapperElement.addEventListener('touchmove', (e) => {
+                if (!isSwiping) return;
+                currentX = e.touches[0].clientX; let deltaX = currentX - startX;
+                if (deltaX > 0 && deltaX < 80) {
+                    bubble.style.transform = `translateX(${deltaX}px)`;
+                    iconBg.style.opacity = Math.min(deltaX / 50, 1); 
+                }
+            }, {passive: true});
+
+            wrapperElement.addEventListener('touchend', () => {
+                isSwiping = false;
+                bubble.style.transition = 'transform 0.25s'; bubble.style.transform = 'translateX(0px)';
+                iconBg.style.opacity = '0';
+                if ((currentX - startX) > 45 && currentX !== 0) setReply(text, isMe);
+                currentX = 0;
+            });
+        }
+
+        function initScaledrone(gender) {
+            myGender = gender; targetGender = (gender === 'male') ? 'female' : 'male';
+            setupModal.classList.add('hidden');
+            if (!drone) {
+                drone = new window.Scaledrone(CHANNEL_ID, { data: { gender: myGender } });
+                drone.on('open', err => { if(err) alert('Gagal terhubung.'); else startMatchmaking(); });
+            } else startMatchmaking();
+        }
+
+        function startMatchmaking() {
+            if (appState === 'SEARCHING') return; 
+            if (appState === 'CHATTING') endSession(); 
+            
+            appState = 'SEARCHING';
+            loadingScreen.classList.remove('hidden'); appUi.classList.add('hidden');
+            chatBox.innerHTML = ''; 
+            messageInput.disabled = true; messageInput.value = '';
+            cancelReply();
+
+            queueRoom = drone.subscribe(`observable-queue-${myGender}`);
+            queueRoom.on('message', msg => {
+                if (appState === 'SEARCHING' && msg.data.action === 'invite' && msg.data.targetId === drone.clientId) {
+                    cleanUpQueues(); joinChatRoom(msg.data.roomId);
+                }
+            });
+
+            searchRoom = drone.subscribe(`observable-queue-${targetGender}`);
+            searchRoom.on('members', members => {
+                if (appState !== 'SEARCHING') return;
+                const partners = members.filter(m => m.id !== drone.clientId);
+                if (partners.length > 0) {
+                    const partner = partners[Math.floor(Math.random() * partners.length)];
+                    const newRoomId = 'chat-' + Math.random().toString(36).substr(2, 9);
+                    drone.publish({ room: `observable-queue-${targetGender}`, message: { action: 'invite', targetId: partner.id, roomId: newRoomId } });
+                    cleanUpQueues(); joinChatRoom(newRoomId);
+                }
+            });
+        }
+
+        function cleanUpQueues() {
+            if (queueRoom) { queueRoom.unsubscribe(); queueRoom = null; }
+            if (searchRoom) { searchRoom.unsubscribe(); searchRoom = null; }
+        }
+
+        function cancelSearch() { appState = 'IDLE'; cleanUpQueues(); loadingScreen.classList.add('hidden'); setupModal.classList.remove('hidden'); }
+
+        function joinChatRoom(roomId) {
+            currentRoomId = `observable-${roomId}`; appState = 'CHATTING';
+            loadingScreen.classList.add('hidden'); appUi.classList.remove('hidden'); messageInput.disabled = false;
+            setOnlineStatus('Terhubung dengan partner.');
+
+            chatRoom = drone.subscribe(currentRoomId);
+            chatRoom.on('message', msg => {
+                if (msg.clientId === drone.clientId) return;
+                const data = msg.data;
+                if (data.action === 'msg') {
+                    renderMessage(data.text, false, data.time, data.quote, data.quote ? !data.qIsSender : null);
+                    setOnlineStatus('Terhubung dengan partner.');
+                } else if (data.action === 'typing') {
+                    if (currentRoomId && appState === 'CHATTING') setOnlineStatus(data.isTyping ? 'typing' : 'Terhubung dengan partner.');
+                } else if (data.action === 'end') handlePartnerLeft();
+            });
+        }
+
+        function triggerTextSend() {
+            if (messageInput.value.trim() === '') return;
+            const text = messageInput.value.trim(); const time = getFormattedTime();
+            drone.publish({ room: currentRoomId, message: { action: 'msg', text: text, time: time, quote: quotedText, qIsSender: quoteIsMe } });
+            renderMessage(text, true, time, quotedText, quoteIsMe);
+            messageInput.value = ''; cancelReply();
+            drone.publish({ room: currentRoomId, message: { action: 'typing', isTyping: false }});
+        }
+
+        messageInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') triggerTextSend(); });
+        messageInput.addEventListener('input', () => {
+            if (!currentRoomId) return;
+            drone.publish({ room: currentRoomId, message: { action: 'typing', isTyping: true }});
+            clearTimeout(isTypingTimeout);
+            isTypingTimeout = setTimeout(() => { drone.publish({ room: currentRoomId, message: { action: 'typing', isTyping: false }}); }, 1200);
+        });
+
+        function renderMessage(text, isMe, time, qText = null, targetIsMe = null) {
+            const wrapper = document.createElement('div'); wrapper.className = 'swipe-wrapper';
+            const row = document.createElement('div'); row.className = `message-row ${isMe ? 'right' : 'left'}`;
+            
+            let quoteHTML = '';
+            if (qText !== null && targetIsMe !== null) {
+                quoteHTML = `<div class="quote-block"><div class="quote-author">${targetIsMe ? 'Anda' : 'Partner'}</div><div class="quote-text">${escapeHTML(qText)}</div></div>`;
+            }
+
+            row.innerHTML = `<div class="bubble">${quoteHTML}<span class="msg-content">${escapeHTML(text)}</span><div class="meta-data"><span class="meta-time">${time}</span></div></div>`;
+            wrapper.innerHTML = `<div class="reply-icon-bg"><i class="bi bi-reply-fill"></i></div>`;
+            wrapper.appendChild(row); attachSwipeToReply(wrapper, text, isMe);
+            chatBox.appendChild(wrapper); scrollToBottom();
+        }
+
+        function scrollToBottom() { chatBox.scrollTop = chatBox.scrollHeight; }
+        
+        function endSession() {
+            if (appState !== 'CHATTING' || !currentRoomId) return;
+            drone.publish({ room: currentRoomId, message: { action: 'end' } });
+            disconnectRoom(); 
+            pushSystemMessage("Anda telah meninggalkan partner.", true); // Set ke merah (danger)
+        }
+        
+        function handlePartnerLeft() { 
+            disconnectRoom(); 
+            pushSystemMessage("Partner telah meninggalkan Anda.", true); // Set ke merah (danger)
+        }
+        
+        function disconnectRoom() {
+            if (chatRoom) { chatRoom.unsubscribe(); chatRoom = null; }
+            currentRoomId = null; appState = 'IDLE'; messageInput.disabled = true; cancelReply(); setOnlineStatus('offline');
+        }
+        
+        // Fungsi pesan sistem dengan opsi isDanger (merah)
+        function pushSystemMessage(msg, isDanger = false) {
+            const div = document.createElement('div'); 
+            div.className = 'system-msg' + (isDanger ? ' danger' : ''); 
+            div.innerText = msg;
+            chatBox.appendChild(div); scrollToBottom();
+        }
+        
+        function findNewPartner() { startMatchmaking(); }
+        
+        function setOnlineStatus(status) { 
+            if (status === 'Terhubung dengan partner.') { partnerStatus.innerHTML = 'Terhubung dengan partner.'; partnerStatus.style.color = 'var(--ios-blue)'; }
+            else if (status === 'typing') partnerStatus.innerHTML = `<span style="color: var(--ios-blue);">mengetik<span class="typing-dots"><span></span><span></span></span></span>`;
+            else { partnerStatus.innerText = 'Belum terhubung ke partner. Klik Cari Partner!'; partnerStatus.style.color = 'var(--ios-red)'; }
+        }
+        
+        function openReportModal() { document.getElementById('report-modal').classList.remove('hidden'); }
+        function closeReportModal() { document.getElementById('report-modal').classList.add('hidden'); }
+        function submitReport() { closeReportModal(); endSession(); pushSystemMessage("Terimakasih atas feedbacknya. Dadahhh"); }
+        function getFormattedTime() { const d = new Date(); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+        function escapeHTML(str) { return str.replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t])); }
+    </script>
+</body>
+</html>
