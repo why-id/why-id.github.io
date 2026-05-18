@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>GresiXploit - JSO Creator</title>
+
+    <!-- Bootstrap 5 CSS (Dark Mode via Data Attribute) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Datatype:wght@100..900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SweetAlert -->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <style>
+        /* Mengatur semua elemen ke 12px */
+        * {
+            font-size: 12px !important;
+        }
+
+        body {
+            background-color: #121212; /* Warna latar belakang gelap */
+            font-family: "Datatype", monospace;
+            color: #e0e0e0;
+        }
+
+        textarea {
+            resize: none; 
+            font-family: "Datatype", monospace;
+            background-color: #1e1e1e !important;
+            /* Warna teks hijau khas terminal */
+            
+        }
+
+        .card {
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+        }
+
+        .card-header {
+            background-color: #1e1e1e !important;
+            border-bottom: 1px solid #333 !important;
+        }
+
+        .navbar {
+            background-color: #1e1e1e !important;
+            border-bottom: 1px solid #333 !important;
+        }
+
+        .navbar-brand, .card-title {
+            color: #ffffff !important;
+        }
+
+        .text-muted {
+            color: #888 !important;
+        }
+
+        .bg-light {
+            background-color: #1e1e1e !important;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100" data-bs-theme="dark">
+
+    <!-- Navbar / Header -->
+    
+
+    <!-- Main Content / Dashboard -->
+    <main class="flex-grow-1 container py-4 py-md-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                
+                <!-- Card Container -->
+                <div class="card shadow-sm rounded-3">
+                    <div class="card-header border-bottom-0 pt-4 pb-2 px-4">
+                        <h4 class="card-title fw-bold mb-1">
+                            <i class="fa-solid fa-code text-primary"></i> Script Obfuscator
+                        </h4>
+                        <p class="text-muted mb-0">Convert raw HTML/JS code into a secure Javascript Object (JSO) payload.</p>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        
+                        <!-- Input Area -->
+                        <div class="mb-3">
+                            <label for="inputCode" class="form-label fw-semibold text-secondary">
+                                <i class="fa-regular fa-file-code me-1"></i> Raw Input (HTML/JS)
+                            </label>
+                            <textarea id="inputCode" class="form-control" rows="6" placeholder="Paste your HTML or Script here..." spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <button onclick="runCharCodeAt()" class="btn btn-outline-primary fw-semibold">
+                                <i class="fa-solid fa-arrow-down-1-9 me-1"></i> Ubah Ke JSO
+                            </button>
+                        </div>
+
+                        <!-- Output Area (Char Codes) -->
+                        <div class="mb-3">
+                            <label for="outputCode" class="form-label fw-semibold text-secondary">
+                                <i class="fa-solid fa-microchip me-1"></i> JSO CharCodes
+                            </label>
+                            <textarea id="outputCode" class="form-control" rows="6" placeholder="Hasil CharCode akan muncul di sini..." spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" readonly></textarea>
+                        </div>
+
+                        <div class="mb-4 border-bottom pb-4 border-secondary">
+                            <button onclick="generatePayload()" class="btn btn-primary fw-bold w-100 py-2 shadow-sm">
+                                <i class="fa-solid fa-bolt me-1"></i> Auto Jadi Payload
+                            </button>
+                        </div>
+
+                        <!-- Final Result Area (Hidden by default) -->
+                        <div id="resultContainer" class="d-none">
+                            <div class="p-3 bg-dark border border-success border-opacity-25 rounded">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label mb-0 fw-bold text-success">
+                                        <i class="fa-solid fa-check-circle me-1"></i> Final Script Tag
+                                    </label>
+                                    <button onclick="copyFinalText()" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fa-regular fa-copy me-1"></i> Salin
+                                    </button>
+                                </div>
+                                <textarea id="finalResult" class="form-control text-success" rows="3" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" readonly></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-3 border-top text-center border-secondary">
+        <div class="container">
+            <span class="text-muted">&copy; 2026 GresiXploit. All engines operational.</span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Logic Script -->
+    <script>
+        function runCharCodeAt() {
+            const input = document.getElementById('inputCode').value;
+            if (!input.trim()) {
+                swal("Akses Ditolak", "Input kode tidak boleh kosong!", "error");
+                return;
+            }
+            
+            let output = [];
+            for (let i = 0; i < input.length; i++) {
+                output.push(input.charCodeAt(i));
+            }
+            
+            document.getElementById('outputCode').value = output.join(', ');
+            swal("Berhasil", "Kode berhasil diconvert ke JSO!", "success");
+        }
+
+        function generatePayload() {
+            const charCodes = document.getElementById('outputCode').value;
+            if (!charCodes.trim()) {
+                swal("Akses Ditolak", "Convert ke JSO terlebih dahulu!", "error");
+                return;
+            }
+
+            const payload = `<script type="text/javascript">document.documentElement.innerHTML=String.fromCharCode(${charCodes});<\/script>`;
+            const resultBox = document.getElementById('finalResult');
+            resultBox.value = payload;
+            
+            document.getElementById('resultContainer').classList.remove('d-none');
+            swal("Ok Done", "Payload berhasil dirakit. Silakan copas hasilnya!", "success");
+        }
+
+        function copyFinalText() {
+            const finalOutput = document.getElementById('finalResult');
+            if(!finalOutput.value) return;
+            
+            finalOutput.select();
+            finalOutput.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            
+            swal("Tersalin!", "Script JSO Berhasil Disalin ke Clipboard!", "success");
+        }
+    </script>
+</body>
+</html>
