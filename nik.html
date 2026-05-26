@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cek Data NIK - LoelzSec</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+        body {
+            background: #0a0a0a;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+        }
+        .dark-card {
+            background: #111;
+            border: 1px solid #e53935;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(229,57,53,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #1a0000, #0a0000);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #e53935;
+        }
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(229,57,53,0.1);
+            padding: 6px 16px;
+            border-radius: 40px;
+            margin-bottom: 12px;
+        }
+        .logo i {
+            color: #e53935;
+            font-size: 20px;
+        }
+        .logo span {
+            color: #e53935;
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        .header h1 {
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .header p {
+            color: #666;
+            font-size: 11px;
+        }
+        .search-box {
+            padding: 24px;
+        }
+        .input-group {
+            display: flex;
+            gap: 12px;
+        }
+        .dark-input {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: white;
+            font-size: 14px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        .dark-input:focus {
+            outline: none;
+            border-color: #e53935;
+            box-shadow: 0 0 0 2px rgba(229,57,53,0.2);
+        }
+        .dark-input::placeholder {
+            color: #555;
+        }
+        .btn-red {
+            background: #e53935;
+            border: none;
+            border-radius: 12px;
+            padding: 0 24px;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-red:hover {
+            background: #c62828;
+            transform: scale(1.02);
+        }
+        
+        /* Modern JSON Display */
+        .json-container {
+            background: #1a1a1a;
+            border-radius: 12px;
+            margin: 0 24px 24px 24px;
+            border: 1px solid #333;
+            overflow: hidden;
+        }
+        
+        .json-header {
+            background: #222;
+            padding: 12px 16px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .json-header i {
+            color: #e53935;
+            font-size: 14px;
+        }
+        
+        .json-header span {
+            color: #888;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .json-content {
+            padding: 16px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+        
+        .json-key {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+        
+        .json-string {
+            color: #69db7e;
+        }
+        
+        .json-number {
+            color: #ffd93d;
+        }
+        
+        .json-boolean {
+            color: #4dabf7;
+        }
+        
+        .json-null {
+            color: #ff8787;
+        }
+        
+        .json-bracket {
+            color: #adb5bd;
+        }
+        
+        .json-indent-1 {
+            margin-left: 20px;
+        }
+        
+        .json-indent-2 {
+            margin-left: 40px;
+        }
+        
+        .json-line {
+            margin-bottom: 4px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .json-card {
+            background: #0f0f0f;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 8px;
+            border-left: 3px solid #e53935;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .status-success {
+            background: rgba(46, 213, 115, 0.2);
+            color: #2ed573;
+            border: 1px solid #2ed573;
+        }
+        
+        .status-error {
+            background: rgba(229, 57, 53, 0.2);
+            color: #e53935;
+            border: 1px solid #e53935;
+        }
+        
+        .info-row {
+            display: flex;
+            padding: 8px 0;
+            border-bottom: 1px solid #222;
+            font-size: 13px;
+        }
+        
+        .info-label {
+            width: 100px;
+            color: #888;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            flex: 1;
+            color: #e0e0e0;
+        }
+        
+        .sub-section {
+            background: #0a0a0a;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+        
+        .sub-title {
+            color: #e53935;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .note {
+            padding: 0 24px 24px 24px;
+        }
+        
+        footer a {
+            color: #e53935;
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 500px) {
+            .input-group {
+                flex-direction: column;
+            }
+            .btn-red {
+                justify-content: center;
+                padding: 14px;
+            }
+            .json-container {
+                margin: 0 16px 16px 16px;
+            }
+            .search-box {
+                padding: 20px;
+            }
+            .note {
+                padding: 0 20px 20px 20px;
+            }
+            .info-label {
+                width: 80px;
+            }
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="dark-card">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-fingerprint"></i>
+                <span>LOELZSEC CHECKER</span>
+            </div>
+            <h1>CEK DATA NIK</h1>
+            <p>Validasi Nomor Induk Kependudukan</p>
+        </div>
+
+        <div class="search-box">
+            <div class="input-group">
+                <input type="text" id="nik" class="dark-input" placeholder="Masukkan 16 digit NIK" maxlength="16">
+                <button class="btn-red" onclick="parseData()">
+                    <i class="fas fa-search"></i> CEK
+                </button>
+            </div>
+        </div>
+
+        <div id="resultContainer" class="json-container hidden">
+            <div class="json-header">
+                <i class="fas fa-database"></i>
+                <span>HASIL PEMERIKSAAN</span>
+            </div>
+            <div class="json-content" id="result">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+
+        <div class="note">
+            <p class="text-gray-custom text-xs text-center">
+               
+            </p>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center text-gray-custom text-xs mt-4">
+    
+</footer>
+
+<script src="https://kit.fontawesome.com/a5f8c5b4e6.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cek-nik-data.vercel.app/parse_nik.js"></script>
+<script>
+    function parseData() {
+        var nik = document.getElementById("nik").value.trim();
+        var resultDiv = document.getElementById("result");
+        var resultContainer = document.getElementById("resultContainer");
+        
+        if (!nik || nik.length !== 16 || !/^\d+$/.test(nik)) {
+            showError('Jumlah NIK Harus 16 Digit Angka');
+            return;
+        }
+        
+        showLoading();
+        
+        if (typeof nikParse !== 'undefined') {
+            nikParse(nik, function (result) {
+                displayPrettyJSON(result);
+            });
+        } else {
+            showError('Service sedang sibuk, coba lagi nanti');
+        }
+    }
+    
+    function showLoading() {
+        var resultContainer = document.getElementById("resultContainer");
+        var resultDiv = document.getElementById("result");
+        resultContainer.classList.remove("hidden");
+        resultDiv.innerHTML = `
+            <div class="text-center py-8">
+                <i class="fas fa-spinner fa-spin text-red-500 text-2xl mb-3"></i>
+                <div class="text-gray-400 text-sm">Memproses data NIK...</div>
+            </div>
+        `;
+    }
+    
+    function showError(message) {
+        var resultContainer = document.getElementById("resultContainer");
+        var resultDiv = document.getElementById("result");
+        resultContainer.classList.remove("hidden");
+        resultDiv.innerHTML = `
+            <div class="text-center py-6">
+                <i class="fas fa-exclamation-triangle text-red-500 text-2xl mb-3"></i>
+                <div class="text-red-400 text-sm">${message}</div>
+            </div>
+        `;
+    }
+    
+    function displayPrettyJSON(data) {
+        var resultDiv = document.getElementById("result");
+        var resultContainer = document.getElementById("resultContainer");
+        
+        if (!data || data.status === "error") {
+            showError('NIK tidak ditemukan atau tidak valid');
+            return;
+        }
+        
+        resultContainer.classList.remove("hidden");
+        
+        // Format data dengan tampilan yang lebih rapi
+        var html = '';
+        
+        // Status section
+        var statusColor = data.status === 'success' ? 'status-success' : 'status-error';
+        html += `
+            <div class="info-row">
+                <div class="info-label"></div>
+                <div class="info-value">
+                    <span class="status-badge ${statusColor}">
+                        <i class="fas fa-${data.status === 'success' ? 'check-circle' : 'times-circle'}"></i> ${data.status.toUpperCase()}
+                    </span>
+                </div>
+            </div>
+            
+        `;
+        
+        if (data.data) {
+            var d = data.data;
+            html += `
+                <div class="sub-section">
+                    <div class="sub-title">
+                        <i class="fas fa-id-card"></i> DATA KEPENDUDUKAN
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">NIK </div>
+                        <div class="info-value"><span class="json-number">${escapeHtml(d.nik || '-')}</span></div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Jenis Kelamin </div>
+                        <div class="info-value">${escapeHtml(d.kelamin || '-')}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Tanggal Lahir </div>
+                        <div class="info-value">${escapeHtml(d.lahir || '-')}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Provinsi </div>
+                        <div class="info-value">${escapeHtml(d.provinsi || '-')}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Kabupaten </div>
+                        <div class="info-value">${escapeHtml(d.kotakab || '-')}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Kecamatan </div>
+                        <div class="info-value">${escapeHtml(d.kecamatan || '-')}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Kode Unik </div>
+                        <div class="info-value">${escapeHtml(d.uniqcode || '-')}</div>
+                    </div>
+                </div>
+            `;
+            
+            // Tambahan info section
+            if (d.tambahan) {
+                var t = d.tambahan;
+                html += `
+                    <div class="sub-section">
+                        <div class="sub-title">
+                            <i class="fas fa-chart-line"></i> INFORMASI TAMBAHAN
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Kode Pos  </div>
+                            <div class="info-value">${escapeHtml(t.kodepos || '-')}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Weton </div>
+                            <div class="info-value">${escapeHtml(t.pasaran || '-')}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Umur </div>
+                            <div class="info-value"><span class="json-number">${escapeHtml(t.usia || '-')}</span></div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Ulang Tahun  </div>
+                            <div class="info-value">${escapeHtml(t.ultah || '-')}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Zodiak </div>
+                            <div class="info-value">${escapeHtml(t.zodiak || '-')}</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Tambahkan raw JSON viewer yang bisa di-toggle
+        html += `
+            <div style="margin-top: 16px; border-top: 1px solid #333; padding-top: 12px;">
+                <div onclick="toggleRawJSON()" style="cursor: pointer; color: #888; font-size: 11px; display: flex; align-items: center; gap: 6px;">
+                    
+                </div>
+                <div id="rawJSON" style="display: none; margin-top: 12px; background: #0a0a0a; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 11px; overflow-x: auto;">
+                    <pre style="margin: 0; color: #888;">${escapeHtml(JSON.stringify(data, null, 2))}</pre>
+                </div>
+            </div>
+        `;
+        
+        resultDiv.innerHTML = html;
+    }
+    
+    function toggleRawJSON() {
+        var rawDiv = document.getElementById('rawJSON');
+        var icon = document.getElementById('rawIcon');
+        var text = document.getElementById('rawText');
+        
+        if (rawDiv.style.display === 'none') {
+            rawDiv.style.display = 'block';
+            icon.className = 'fas fa-code';
+            text.innerHTML = 'Sembunyikan JSON Mentah';
+        } else {
+            rawDiv.style.display = 'none';
+            icon.className = 'fas fa-code';
+            text.innerHTML = 'Lihat JSON Mentah';
+        }
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '-';
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    document.getElementById('nik').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            parseData();
+        }
+    });
+</script>
+
+</body>
+</html>
