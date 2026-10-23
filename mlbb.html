@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a84ff">
+<meta name="description" content="Berapa match yang harus kamu menangkan untuk mencapai target winrate kamu?">
+<meta name="keywords" content="cara menghitung wr, penghitung wr, mobile legends, hitung wr, mlbb">
+<title>Penghitung WR Mobile Legends</title>
+<link rel="shortcut icon" href="https://milkshake-production-user-images.imgix.net/f6f69399-5fbd-4109-86e3-3fcd502b84e0?auto=format&w=828" type="image/x-icon">
+<style>
+:root{
+  --bg1:#e8f0ff; --bg2:#f6e9ff;
+  --blob1:#5ac8fa; --blob2:#bf5af2; --blob3:#ff9f0a;
+  --glass:rgba(255,255,255,.62); --glass-border:rgba(255,255,255,.75);
+  --field:rgba(120,120,128,.12);
+  --text:#1c1c1e; --muted:#6c6c70; --sep:rgba(60,60,67,.18);
+  --blue:#0a84ff; --green:#30b050; --red:#ff3b30; --orange:#ff9500;
+  --shadow:0 10px 40px rgba(31,38,135,.15);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg1:#0b0b14; --bg2:#14101f;
+    --blob1:#0a64c8; --blob2:#7b2fd0; --blob3:#c06a00;
+    --glass:rgba(44,44,48,.55); --glass-border:rgba(255,255,255,.12);
+    --field:rgba(118,118,128,.24);
+    --text:#f5f5f7; --muted:#9a9aa0; --sep:rgba(255,255,255,.14);
+    --shadow:0 10px 40px rgba(0,0,0,.45);
+    --green:#32d74b; --red:#ff453a; --orange:#ff9f0a;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{
+  margin:0;min-height:100%;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color:var(--text);
+  background:linear-gradient(160deg,var(--bg1),var(--bg2)) fixed;
+  padding:max(20px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(28px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  position:relative;overflow-x:hidden;
+}
+.blob{position:fixed;border-radius:50%;filter:blur(70px);opacity:.75;z-index:0;pointer-events:none}
+.b1{width:300px;height:300px;background:var(--blob1);top:-80px;left:-90px}
+.b2{width:320px;height:320px;background:var(--blob2);top:35%;right:-140px}
+.b3{width:260px;height:260px;background:var(--blob3);bottom:-90px;left:-60px;opacity:.55}
+main{position:relative;z-index:1;max-width:460px;margin:0 auto}
+.glass{
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(28px) saturate(180%);
+  backdrop-filter:blur(28px) saturate(180%);
+  border:1px solid var(--glass-border);
+  border-radius:22px;box-shadow:var(--shadow);
+}
+.welcome{
+  display:block;width:max-content;max-width:100%;margin:0 auto 18px;padding:6px 14px;
+  border-radius:999px;font-size:13px;color:var(--muted);text-align:center;
+}
+header{text-align:left;margin:6px 4px 18px}
+h1{font-size:34px;line-height:1.1;letter-spacing:-.8px;margin:0 0 6px;font-weight:800}
+header p{margin:0;color:var(--muted);font-size:15px;line-height:1.4}
+.group{padding:0;overflow:hidden}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;min-height:56px}
+.row + .row{border-top:1px solid var(--sep)}
+.row label{font-size:16px;flex:1;line-height:1.25}
+.row small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.row input{
+  width:42%;min-width:96px;text-align:right;border:0;outline:0;background:var(--field);
+  color:var(--text);font:inherit;font-size:17px;font-weight:600;padding:10px 12px;border-radius:12px;
+  transition:box-shadow .15s;
+}
+.row input::placeholder{color:var(--muted);font-weight:400}
+.row input:focus{box-shadow:0 0 0 2px var(--blue)}
+input[type=number]{-moz-appearance:textfield}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+button{
+  width:100%;margin-top:16px;padding:16px;border:0;border-radius:16px;cursor:pointer;
+  background:var(--blue);color:#fff;font:inherit;font-size:17px;font-weight:600;
+  box-shadow:0 8px 20px rgba(10,132,255,.35);
+  transition:transform .12s,filter .12s;
+}
+button:active{transform:scale(.97);filter:brightness(.92)}
+button:focus-visible{outline:3px solid rgba(10,132,255,.5);outline-offset:3px}
+#result{margin-top:16px;padding:20px 18px;text-align:center;display:none}
+#result.show{display:block;animation:pop .28s ease-out}
+#result .num{font-size:52px;font-weight:800;letter-spacing:-1.5px;line-height:1}
+#result .unit{font-size:17px;font-weight:600;margin-top:4px}
+#result .desc{color:var(--muted);font-size:14px;margin-top:10px;line-height:1.45}
+#result.win .num,#result.win .unit{color:var(--green)}
+#result.lose .num,#result.lose .unit{color:var(--red)}
+#result.info .num{font-size:36px;color:var(--orange)}
+#result.err .num{font-size:30px;color:var(--orange)}
+@keyframes pop{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#result.show{animation:none}button{transition:none}}
+footer{margin-top:28px;text-align:center;color:var(--muted);font-size:12px}
+footer .links{display:flex;justify-content:center;gap:18px;margin-bottom:8px;flex-wrap:wrap}
+footer a{color:var(--blue);text-decoration:none;font-size:13px}
+@media (max-width:360px){h1{font-size:28px}.row{flex-wrap:wrap}.row input{width:100%}}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<main>
+  <span class="welcome glass">GresiXploit Tools</span>
+
+  <header>
+    <h1>Penghitung WR</h1>
+    <p>Mobile Legends — cari tahu berapa match yang kamu butuhkan untuk mencapai target winrate.</p>
+  </header>
+
+  <form class="glass group" id="form" novalidate>
+    <div class="row">
+      <label for="tMatch">Total match</label>
+      <input type="number" id="tMatch" inputmode="numeric" placeholder="259" autocomplete="off" min="0">
+    </div>
+    <div class="row">
+      <label for="tWr">WR saat ini<small>dalam persen</small></label>
+      <input type="number" id="tWr" inputmode="decimal" step="any" placeholder="76.4" autocomplete="off" min="0" max="100">
+    </div>
+    <div class="row">
+      <label for="wrReq">WR target<small>dalam persen</small></label>
+      <input type="number" id="wrReq" inputmode="decimal" step="any" placeholder="80" autocomplete="off" min="0" max="100">
+    </div>
+  </form>
+
+  <button type="button" id="hasil">Hitung</button>
+
+  <section id="result" class="glass" aria-live="polite"></section>
+
+  <footer>
+    <div class="links">
+      <a href="https://www.tiktok.com/@sixtwosix" target="_blank" rel="noopener">TikTok</a>
+      <a href="https://github.com/why-id" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://wa.me/6283856124021" target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+    Copyright &copy; 2026 Second Choice.
+  </footer>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const box = $("#result");
+
+function show(kind, num, unit, desc){
+  box.className = "glass show " + kind;
+  box.innerHTML =
+    `<div class="num">${num}</div>` +
+    (unit ? `<div class="unit">${unit}</div>` : "") +
+    (desc ? `<div class="desc">${desc}</div>` : "");
+}
+
+// Win beruntun (tanpa lose) yang dibutuhkan
+function rumus(tMatch, tWr, wrReq){
+  const tWin  = tMatch * (tWr / 100);
+  const tLose = tMatch - tWin;
+  return Math.ceil(tLose / (1 - wrReq / 100) - tMatch);
+}
+
+// Lose beruntun (tanpa win) sampai WR turun ke target
+function rumusLose(tMatch, tWr, wrReq){
+  const tWin = (tMatch * tWr) / 100;
+  return Math.floor(tWin / (wrReq / 100) - tMatch);
+}
+
+function hitung(){
+  const tMatch = parseFloat($("#tMatch").value);
+  const tWr    = parseFloat($("#tWr").value);
+  const wrReq  = parseFloat($("#wrReq").value);
+
+  if (isNaN(tMatch) || isNaN(tWr) || isNaN(wrReq))
+    return show("err", "Isi semua field", "", "Semua kolom harus diisi dulu bro.");
+  if (tMatch < 0 || tWr < 0 || wrReq < 0)
+    return show("err", "Nilai tidak valid", "", "Field tidak boleh lebih kecil dari 0.");
+  if (tMatch % 1 !== 0)
+    return show("err", "Bilangan bulat", "", "Total match harus bilangan bulat.");
+  if (wrReq > 100 || tWr > 100)
+    return show("err", "Maks. 100%", "", "WR tidak boleh lebih dari 100%.");
+  if (tWr === 100 && wrReq === 100)
+    return show("win", "0", "win", `Kamu sudah di <b>${wrReq}%</b>, tidak perlu tambahan win.`);
+  if (tMatch === 0 && wrReq === 100)
+    return show("win", "1", "win tanpa lose", `untuk mendapatkan win rate <b>${wrReq}%</b>`);
+  if (wrReq === 100)
+    return show("info", "Tidak bisa", "", "yo ndak bisa, yang bisa cuman Moonton");
+  if (tWr > wrReq){
+    if (wrReq === 0)
+      return show("info", "Tidak mungkin", "", "WR 0% tidak bisa dicapai kalau kamu sudah pernah menang.");
+    const n = rumusLose(tMatch, tWr, wrReq);
+    return show("lose", n.toLocaleString("id-ID"), "lose tanpa win", `untuk mendapatkan win rate <b>${wrReq}%</b>`);
+  }
+  const n = rumus(tMatch, tWr, wrReq);
+  if (n >= 100000)
+    return show("win", "&gt; 100.000", "win tanpa lose", `untuk mendapatkan win rate <b>${wrReq}%</b>`);
+  show("win", n.toLocaleString("id-ID"), "win tanpa lose", `untuk mendapatkan win rate <b>${wrReq}%</b>`);
+}
+
+$("#hasil").addEventListener("click", hitung);
+$("#form").addEventListener("submit", e => { e.preventDefault(); hitung(); });
+["#tMatch","#tWr","#wrReq"].forEach(s =>
+  $(s).addEventListener("keydown", e => { if (e.key === "Enter") hitung(); })
+);
+</script>
+</body>
+</html>
